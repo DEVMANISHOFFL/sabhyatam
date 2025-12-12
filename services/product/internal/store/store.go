@@ -205,3 +205,101 @@ func (s *Store) GetSimilarProducts(ctx context.Context, product *model.Product, 
 	}
 	return out, nil
 }
+
+func (s *Store) CreateProduct(ctx context.Context, p *model.Product) (string, error) {
+	var id string
+	attrs, _ := json.Marshal(p.Attributes)
+
+	err := s.db.QueryRow(ctx, `
+		INSERT INTO products 
+		(slug, title, short_desc, long_desc, category, subcategory, attributes, tags, published)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		RETURNING id
+	`, p.Slug, p.Title, p.ShortDesc, p.LongDesc, p.Category, p.Subcat, attrs, p.Tags, p.Published).Scan(&id)
+
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}
+
+func (s *Store) UpdateProduct(ctx context.Context, id string, p *model.Product) error {
+	attrs, _ := json.Marshal(p.Attributes)
+
+	_, err := s.db.Exec(ctx, `
+		UPDATE products SET
+			slug = $1,
+			title = $2,
+			short_desc = $3,
+			long_desc = $4,
+			category = $5,
+			subcategory = $6,
+			attributes = $7,
+			tags = $8,
+			published = $9,
+			updated_at = now()
+		WHERE id = $10
+	`, p.Slug, p.Title, p.ShortDesc, p.LongDesc, p.Category,
+		p.Subcat, attrs, p.Tags, p.Published, id)
+
+	return err
+}
+
+func (s *Store) DeleteProduct(ctx context.Context, id string) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM products WHERE id=$1`, id)
+	return err
+}
+
+func (s *Store) CreateVariant(ctx context.Context, productID string, v *model.Variant) (string, error) {
+	attrs, _ := json.Marshal(v.Attributes)
+
+	var id string
+	err := s.db.QueryRow(ctx, `
+		INSERT INTO product_variants (product_id, sku, price, mrp, stock, attributes)
+		VALUES ($1,$2,$3,$4,$5,$6)
+		RETURNING id
+	`, productID, v.SKU, v.Price, v.MRP, v.Stock, attrs).Scan(&id)
+
+	return id, err
+}
+
+func (s *Store) UpdateVariant(ctx context.Context, id string, v *model.Variant) error {
+	attrs, _ := json.Marshal(v.Attributes)
+
+	_, err := s.db.Exec(ctx, `
+		UPDATE product_variants
+		SET sku=$1, price=$2, mrp=$3, stock=$4, attributes=$5, updated_at=now()
+		WHERE id=$6
+	`, v.SKU, v.Price, v.MRP, v.Stock, attrs, id)
+
+	return err
+}
+
+func (s *Store) DeleteVariant(ctx context.Context, id string) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM product_variants WHERE id=$1`, id)
+	return err
+}
+
+func (s *Store) CreateMedia(ctx context.Context, productID string, m *model.Media) (string, error) {
+	metaBytes, _ := json.Marshal(m.Meta)
+
+	var id string
+	err := s.db.QueryRow(ctx, `
+		INSERT INTO product_media (product_id, url, media_type, meta)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id
+	`,
+		productID,
+		m.URL,
+		m.MediaType,
+		metaBytes,
+	).Scan(&id)
+
+	return id, err
+}
+
+func (s *Store) DeleteMedia(ctx context.Context, id string) error {
+	_, err := s.db.Exec(ctx, `DELETE FROM product_media WHERE id=$1`, id)
+	return err
+}

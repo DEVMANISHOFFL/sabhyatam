@@ -10,16 +10,16 @@ import (
 func (s *Store) GetMediaByProductID(ctx context.Context, productID string) ([]model.Media, error) {
 	rows, err := s.db.Query(ctx, `
         SELECT 
-            id, 
-            product_id, 
-            sku,              -- scan this even if it's empty
-            url, 
-            type, 
-            attributes,
+            id,
+            product_id,
+            variant_id,
+            url,
+            media_type,
+            meta,
             created_at
         FROM product_media
         WHERE product_id = $1
-        ORDER BY (attributes->>'order')::int ASC
+        ORDER BY (meta->>'order')::int ASC
     `, productID)
 
 	if err != nil {
@@ -31,30 +31,29 @@ func (s *Store) GetMediaByProductID(ctx context.Context, productID string) ([]mo
 
 	for rows.Next() {
 		var (
-			m     model.Media
-			attrs []byte
-			sku   *string // placeholder for sku column; ignore its value
+			m         model.Media
+			metaBytes []byte
 		)
 
 		if err := rows.Scan(
 			&m.ID,
 			&m.ProductID,
-			&sku, // sku column
+			&m.VariantID,
 			&m.URL,
-			&m.Type,
-			&attrs,
+			&m.MediaType,
+			&metaBytes,
 			&m.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
 
-		// parse JSON attributes
-		if len(attrs) > 0 {
+		// parse JSON meta field
+		if len(metaBytes) > 0 {
 			var meta map[string]any
-			_ = json.Unmarshal(attrs, &meta)
-			m.Attributes = meta
+			_ = json.Unmarshal(metaBytes, &meta)
+			m.Meta = meta
 		} else {
-			m.Attributes = map[string]any{}
+			m.Meta = map[string]any{}
 		}
 
 		out = append(out, m)

@@ -16,7 +16,23 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 		r.Get("/products", listProductsHandler(s))
 		r.Get("/products/{id}", getProductDetailHandler(s))
 
+		r.Route("/admin", func(r chi.Router) {
+			r.Use(AdminOnly)
+
+			r.Post("/products", createProductHandler(s))
+			r.Put("/products/{id}", updateProductHandler(s))
+			r.Delete("/products/{id}", deleteProductHandler(s))
+
+			r.Post("/products/{id}/variants", createVariantHandler(s))
+			r.Put("/variants/{variant_id}", updateVariantHandler(s))
+			r.Delete("/variants/{variant_id}", deleteVariantHandler(s))
+
+			r.Post("/products/{id}/media", createMediaHandler(s))
+			r.Delete("/media/{media_id}", deleteMediaHandler(s))
+		})
+
 	})
+
 }
 
 func listProductsHandler(s *store.Store) http.HandlerFunc {
@@ -114,5 +130,151 @@ func getProductDetailHandler(s *store.Store) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
+	}
+}
+
+func createProductHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req model.Product
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		id, err := s.CreateProduct(r.Context(), &req)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(201)
+		_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
+	}
+}
+
+func updateProductHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
+		var req model.Product
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		err := s.UpdateProduct(r.Context(), id, &req)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(200)
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
+	}
+}
+
+func deleteProductHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+
+		err := s.DeleteProduct(r.Context(), id)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(200)
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+	}
+}
+
+func createVariantHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		productID := chi.URLParam(r, "id")
+
+		var req model.Variant
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		id, err := s.CreateVariant(r.Context(), productID, &req)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(201)
+		_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
+	}
+}
+
+func updateVariantHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "variant_id")
+
+		var req model.Variant
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		err := s.UpdateVariant(r.Context(), id, &req)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(200)
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
+	}
+}
+
+func deleteVariantHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "variant_id")
+
+		err := s.DeleteVariant(r.Context(), id)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+	}
+}
+
+func createMediaHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		productID := chi.URLParam(r, "id")
+
+		var req model.Media
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		id, err := s.CreateMedia(r.Context(), productID, &req)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		w.WriteHeader(201)
+		_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
+	}
+}
+
+func deleteMediaHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "media_id")
+
+		err := s.DeleteMedia(r.Context(), id)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 	}
 }

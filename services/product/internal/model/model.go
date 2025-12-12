@@ -7,6 +7,7 @@ type Product struct {
 	Slug       string                 `json:"slug"`
 	Title      string                 `json:"title"`
 	ShortDesc  string                 `json:"short_desc"`
+	LongDesc   string                 `json:"long_desc"`
 	Category   string                 `json:"category"`
 	Subcat     string                 `json:"subcategory"`
 	Attributes map[string]interface{} `json:"attributes"`
@@ -27,10 +28,11 @@ type Variant struct {
 }
 
 type Media struct {
-	ID         string         `json:"id"`
-	ProductID  string         `json:"product_id"`
-	URL        string         `json:"url"`
-	Type       string         `json:"type"`
-	Attributes map[string]any `json:"attributes"`
-	CreatedAt  time.Time      `json:"created_at"`
+	ID        string                 `json:"id"`
+	ProductID string                 `json:"product_id"`
+	VariantID *string                `json:"variant_id,omitempty"`
+	URL       string                 `json:"url"`
+	MediaType string                 `json:"media_type"`
+	Meta      map[string]interface{} `json:"meta"`
+	CreatedAt time.Time              `json:"created_at"`
 }

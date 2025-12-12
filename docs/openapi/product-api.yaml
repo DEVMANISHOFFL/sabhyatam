@@ -1,0 +1,164 @@
+openapi: 3.0.1
+info:
+  title: Sabhyatam Product API
+  version: "1.0.0"
+servers:
+  - url: https://api.sabhyatam.com/v1
+
+paths:
+  /products:
+    get:
+      summary: List products with filters and pagination
+      parameters:
+        - name: q
+          in: query
+          description: free-text search
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: subcategory
+          in: query
+          schema: { type: string }
+        - name: color
+          in: query
+          schema: { type: string }
+        - name: fabric
+          in: query
+          schema: { type: string }
+        - name: tags
+          in: query
+          description: comma separated tags
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: paginated product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer }
+                  page: { type: integer }
+                  size: { type: integer }
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProductListItem"
+
+    post:
+      summary: Create product (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCreate"
+      responses:
+        "201":
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      summary: Get product by id or slug
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: product detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+components:
+  schemas:
+    ProductListItem:
+      type: object
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        title: { type: string }
+        short_desc: { type: string }
+        price_min: { type: number } # lowest variant price
+        price_max: { type: number } # highest variant price
+        hero_image: { type: string }
+        tags: { type: array, items: { type: string } }
+
+    ProductCreate:
+      type: object
+      required: [title, slug, category, attributes, variants]
+      properties:
+        title: { type: string }
+        slug: { type: string }
+        short_desc: { type: string }
+        long_desc: { type: string }
+        category: { type: string }
+        subcategory: { type: string }
+        attributes:
+          type: object
+          additionalProperties: true
+        tags: { type: array, items: { type: string } }
+        vendor_id: { type: string }
+        published: { type: boolean, default: false }
+        variants:
+          type: array
+          items:
+            type: object
+            required: [sku, price, stock]
+            properties:
+              sku: { type: string }
+              price: { type: number }
+              mrp: { type: number }
+              stock: { type: integer }
+              attributes: { type: object, additionalProperties: true }
+        media:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              media_type: { type: string, enum: ["image", "video"] }
+              meta: { type: object, additionalProperties: true }
+
+    Product:
+      allOf:
+        - $ref: "#/components/schemas/ProductCreate"
+        - type: object
+          properties:
+            id: { type: string }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+            variants:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string }
+                  sku: { type: string }
+                  price: { type: number }
+                  mrp: { type: number }
+                  stock: { type: integer }
+                  attributes: { type: object }
+            media:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string }
+                  url: { type: string }
+                  media_type: { type: string }
+                  meta: { type: object }
