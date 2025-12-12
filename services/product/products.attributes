@@ -1,0 +1,15 @@
+{
+  "fabric": "silk",               // string; e.g., "silk","cotton","georgette"
+  "weave": "kanjivaram",          // string; one of your weave list
+  "origin": "Tamil Nadu",         // string; region
+  "color": "maroon",              // string
+  "occasion": ["bridal","wedding"], // array of strings
+  "blouse_included": true,        // boolean
+  "length_meters": 5.5,           // number
+  "care": "dry clean only",       // string
+  "weight": "medium",             // string (light/medium/heavy) OR numeric grams in variant
+  "border_style": "temple",       // string
+  "pattern": "zari",              // string
+  "handloom_certified": false,    // boolean
+  "artisan": {"name":"S. Lakshmi","place":"Kanchipuram"} // optional nested metadata
+}
