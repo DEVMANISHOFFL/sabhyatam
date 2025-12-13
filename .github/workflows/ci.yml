@@ -63,7 +63,7 @@ jobs:
 
       - name: Run Full E2E Checkout Flow
         run: |
-          go run ./tools/e2e_checkout/full_flow.go
+          go run ./tools/e2e_checkout
 
       - name: Dump logs on failure
         if: failure()
