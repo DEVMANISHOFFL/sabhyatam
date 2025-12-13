@@ -14,25 +14,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 🔧 REQUIRED: Go for E2E runner
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: "1.20"
 
-      # 🔧 REQUIRED: create .env files from .env.example
-      - name: Prepare env files for CI
+      - name: Create env files for CI
         run: |
-          cp services/product/.env.example services/product/.env
-          cp services/cart/.env.example services/cart/.env
-          cp services/orders/.env.example services/orders/.env
+          mkdir -p services/product services/cart services/orders
 
-      # 🚀 Start full stack
+          cat > services/product/.env <<EOF
+          DATABASE_URL=postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+          ADMIN_KEY=sabhyatam-secret
+          EOF
+
+          cat > services/cart/.env <<EOF
+          REDIS_ADDR=redis:6379
+          PRODUCT_SVC_BASE=http://product:8080
+          EOF
+
+          cat > services/orders/.env <<EOF
+          DATABASE_URL=postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+          PRODUCT_SVC_BASE=http://product:8080
+          CART_SVC_BASE=http://cart:8081
+          INTERNAL_SERVICE_KEY=sabhyatam-internal-2025
+          EOF
+
       - name: Build and start services
         run: |
           docker compose up -d --build
 
-      # ⏳ Wait until all services are ready
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for services..."
@@ -50,18 +61,15 @@ jobs:
           docker compose logs
           exit 1
 
-      # 🧪 Full end-to-end checkout test
       - name: Run Full E2E Checkout Flow
         run: |
           go run ./tools/e2e_checkout/full_flow.go
 
-      # 🪵 Debug aid
       - name: Dump logs on failure
         if: failure()
         run: |
           docker compose logs
 
-      # 🧹 Always cleanup
       - name: Shutdown services
         if: always()
         run: |
