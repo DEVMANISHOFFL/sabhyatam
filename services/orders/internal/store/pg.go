@@ -58,7 +58,7 @@ func (s *PGStore) CreateDraftOrder(
 		RETURNING id
 	`,
 		userID,
-		model.StatusDraft,
+		model.StatusPending,
 		"INR",
 		totalCents,
 	).Scan(&orderID)

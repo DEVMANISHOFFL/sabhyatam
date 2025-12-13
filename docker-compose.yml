@@ -60,6 +60,22 @@ services:
       "
     restart: "no"
 
+  payments-migrate:
+    image: postgres:15
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./services/payments/migration:/migrations
+    entrypoint: >
+      sh -c "
+      until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done &&
+      psql postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+      -f /migrations/001_create_payments.sql
+      "
+    restart: "no"
+
+
   product:
     build: ./services/product
     container_name: product
@@ -98,6 +114,25 @@ services:
         condition: service_started
     ports:
       - "8082:8082"
+    environment:
+      - INTERNAL_SERVICE_KEY=sabhyatam-internal-2025
+
+  payments:
+    build: ./services/payments
+    container_name: payments
+    depends_on:
+      payments-migrate:
+        condition: service_completed_successfully
+      orders:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+      INTERNAL_SERVICE_KEY: sabhyatam-internal-2025
+      ORDERS_SVC_BASE: http://orders:8082
+    ports:
+      - "8083:8083"
+
+
 
 volumes:
   pgdata:

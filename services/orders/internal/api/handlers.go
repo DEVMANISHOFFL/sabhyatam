@@ -9,12 +9,18 @@ import (
 	"github.com/devmanishoffl/sabhyatam-orders/internal/model"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
 	store      *store.PGStore
 	pclient    *client.ProductClient
 	cartClient *client.CartClient
+}
+
+func isValidUUID(id string) bool {
+	_, err := uuid.Parse(id)
+	return err == nil
 }
 
 func NewHandler(s *store.PGStore, pc *client.ProductClient, cc *client.CartClient) *Handler {
@@ -108,6 +114,13 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, it := range orderItems {
+		if err := h.pclient.ReserveStock(ctx, it.VariantID, it.Quantity); err != nil {
+			http.Error(w, "stock reservation failed", http.StatusConflict)
+			return
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"order_id":     orderID,
@@ -163,6 +176,12 @@ func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 // called ONLY by payments service
 func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
+
+	if !isValidUUID(orderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
+		return
+	}
+
 	if orderID == "" {
 		http.Error(w, "order id required", http.StatusBadRequest)
 		return
@@ -189,7 +208,7 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 
 	// deduct stock
 	for _, it := range order.Items {
-		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
+		if err := h.pclient.DeductReservedStock(ctx, it.VariantID, it.Quantity); err != nil {
 			http.Error(w, "stock deduction failed", http.StatusBadGateway)
 			return
 		}
@@ -201,4 +220,30 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+	if orderID == "" {
+		http.Error(w, "order id required", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	order, err := h.store.GetOrder(r.Context(), orderID)
+	if err != nil {
+		http.Error(w, "order not found", http.StatusNotFound)
+		return
+	}
+
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"order_id":     order.ID,
+		"status":       order.Status,
+		"amount_cents": order.TotalAmountCents,
+		"currency":     order.Currency,
+	})
 }

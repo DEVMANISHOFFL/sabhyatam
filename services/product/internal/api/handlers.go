@@ -32,7 +32,7 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 			r.Post("/products/{id}/variants", createVariantHandler(s))
 			r.Put("/variants/{variant_id}", updateVariantHandler(s))
 			r.Delete("/variants/{variant_id}", deleteVariantHandler(s))
-
+			
 			r.Post("/products/{id}/media", createMediaHandler(s))
 			r.Delete("/media/{media_id}", deleteMediaHandler(s))
 		})

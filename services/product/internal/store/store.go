@@ -309,9 +309,15 @@ func (s *Store) ReserveVariantStock(ctx context.Context, variantID string, qty i
 	if qty <= 0 {
 		return fmt.Errorf("invalid quantity")
 	}
-	res, err := s.db.Exec(ctx,
-		`UPDATE product_variants SET stock = stock - $1 WHERE id = $2 AND stock >= $1`,
-		qty, variantID)
+
+	res, err := s.db.Exec(ctx, `
+		UPDATE product_variants
+		SET stock = stock - $1,
+		    stock_reserved = stock_reserved + $1
+		WHERE id = $2
+		  AND stock >= $1
+	`, qty, variantID)
+
 	if err != nil {
 		return err
 	}
@@ -326,10 +332,22 @@ func (s *Store) ReleaseVariantStock(ctx context.Context, variantID string, qty i
 	if qty <= 0 {
 		return fmt.Errorf("invalid quantity")
 	}
-	_, err := s.db.Exec(ctx,
-		`UPDATE product_variants SET stock = stock + $1 WHERE id = $2`,
-		qty, variantID)
-	return err
+
+	res, err := s.db.Exec(ctx, `
+		UPDATE product_variants
+		SET stock = stock + $1,
+		    stock_reserved = stock_reserved - $1
+		WHERE id = $2
+		  AND stock_reserved >= $1
+	`, qty, variantID)
+
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("invalid reserved stock")
+	}
+	return nil
 }
 
 // DeductVariantStock permanently deducts stock (same as reserve->commit)
@@ -337,14 +355,19 @@ func (s *Store) DeductVariantStock(ctx context.Context, variantID string, qty in
 	if qty <= 0 {
 		return fmt.Errorf("invalid quantity")
 	}
-	res, err := s.db.Exec(ctx,
-		`UPDATE product_variants SET stock = stock - $1 WHERE id = $2 AND stock >= $1`,
-		qty, variantID)
+
+	res, err := s.db.Exec(ctx, `
+		UPDATE product_variants
+		SET stock_reserved = stock_reserved - $1
+		WHERE id = $2
+		  AND stock_reserved >= $1
+	`, qty, variantID)
+
 	if err != nil {
 		return err
 	}
 	if res.RowsAffected() == 0 {
-		return fmt.Errorf("insufficient stock")
+		return fmt.Errorf("insufficient reserved stock")
 	}
 	return nil
 }

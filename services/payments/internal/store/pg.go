@@ -72,22 +72,64 @@ func (s *PGStore) CreateInitiatedPayment(
 	return &p, nil
 }
 
-func (s *PGStore) MarkPaymentCaptured(
+func (s *PGStore) AttachGatewayOrder(
 	ctx context.Context,
 	paymentID string,
-	gatewayPaymentID string,
+	gatewayOrderID string,
 ) error {
 
 	_, err := s.db.Exec(ctx, `
 		UPDATE payments
-		SET status='captured',
-		    gateway_payment_id=$1,
-		    updated_at=now()
-		WHERE id=$2
+		SET gateway_order_id = $1,
+		    updated_at = now()
+		WHERE id = $2
 	`,
-		gatewayPaymentID,
+		gatewayOrderID,
 		paymentID,
 	)
 
 	return err
+}
+
+func (s *PGStore) MarkCapturedByGatewayOrder(
+	ctx context.Context,
+	gatewayOrderID string,
+	gatewayPaymentID string,
+) (string, error) {
+
+	var paymentID string
+
+	err := s.db.QueryRow(ctx, `
+		UPDATE payments
+		SET status = 'captured',
+		    gateway_payment_id = $1,
+		    updated_at = now()
+		WHERE gateway_order_id = $2
+		  AND status != 'captured'
+		RETURNING id
+	`,
+		gatewayPaymentID,
+		gatewayOrderID,
+	).Scan(&paymentID)
+
+	if err != nil {
+		return "", err
+	}
+
+	return paymentID, nil
+}
+
+func (s *PGStore) GetPaymentAmountByGatewayOrder(
+	ctx context.Context,
+	gatewayOrderID string,
+) (int64, error) {
+
+	var amt int64
+	err := s.db.QueryRow(ctx, `
+		SELECT amount_cents
+		FROM payments
+		WHERE gateway_order_id = $1
+	`, gatewayOrderID).Scan(&amt)
+
+	return amt, err
 }

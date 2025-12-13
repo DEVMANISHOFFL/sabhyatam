@@ -69,3 +69,6 @@ FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_product_media_url_unique
 ON product_media (url);
+
+ALTER TABLE product_variants
+ADD COLUMN IF NOT EXISTS stock_reserved INT NOT NULL DEFAULT 0;

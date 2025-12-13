@@ -100,3 +100,35 @@ func (p *ProductClient) ReserveStock(ctx context.Context, variantID string, quan
 	}
 	return nil
 }
+
+func (p *ProductClient) DeductReservedStock(
+	ctx context.Context,
+	variantID string,
+	quantity int,
+) error {
+
+	url := fmt.Sprintf("%s/v1/admin/variants/%s/deduct", p.base, variantID)
+
+	body := map[string]any{
+		"quantity": quantity,
+	}
+	b, _ := json.Marshal(body)
+
+	req, _ := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(b))
+	req.Header.Set("Content-Type", "application/json")
+
+	// INTERNAL AUTH
+	req.Header.Set("X-ADMIN-KEY", p.adminKey)
+
+	resp, err := p.c.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("deduct reserved stock failed: %d", resp.StatusCode)
+	}
+
+	return nil
+}

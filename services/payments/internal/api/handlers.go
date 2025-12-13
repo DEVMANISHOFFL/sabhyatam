@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/devmanishoffl/sabhyatam-payments/internal/client"
 	"github.com/devmanishoffl/sabhyatam-payments/internal/gateway"
 	"github.com/devmanishoffl/sabhyatam-payments/internal/store"
 )
@@ -13,19 +14,38 @@ import (
 type Handler struct {
 	store   *store.PGStore
 	gateway gateway.Gateway
+	orders  *client.OrdersClient
 }
 
-func NewHandler(s *store.PGStore, g gateway.Gateway) *Handler {
-	return &Handler{store: s, gateway: g}
+func NewHandler(
+	s *store.PGStore,
+	g gateway.Gateway,
+	o *client.OrdersClient,
+) *Handler {
+	return &Handler{store: s, gateway: g, orders: o}
 }
 
 func (h *Handler) InitiatePayment(w http.ResponseWriter, r *http.Request) {
 	orderID := r.Header.Get("X-ORDER-ID")
 	userID := r.Header.Get("X-USER-ID")
+
 	idempotencyKey := r.Header.Get("Idempotency-Key")
 
-	if orderID == "" || idempotencyKey == "" {
-		http.Error(w, "missing headers", http.StatusBadRequest)
+	missing := []string{}
+
+	if orderID == "" {
+		missing = append(missing, "X-ORDER-ID")
+	}
+	if idempotencyKey == "" {
+		missing = append(missing, "Idempotency-Key")
+	}
+
+	if len(missing) > 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"error":           "missing required headers",
+			"missing_headers": missing,
+		})
 		return
 	}
 
@@ -34,31 +54,61 @@ func (h *Handler) InitiatePayment(w http.ResponseWriter, r *http.Request) {
 		uid = &userID
 	}
 
+	// ✅ STEP 2: fetch order from orders service
+	amount, currency, status, err := h.orders.GetOrder(r.Context(), orderID)
+	if err != nil {
+		http.Error(w, "failed to fetch order", http.StatusBadGateway)
+		return
+	}
+
+	if status != "pending_payment" {
+		http.Error(w, "order not payable", http.StatusBadRequest)
+		return
+	}
+
+	if amount <= 0 {
+		http.Error(w, "invalid order amount", http.StatusBadRequest)
+		return
+	}
+
+	// ✅ create payment with authoritative amount
 	payment, err := h.store.CreateInitiatedPayment(
 		r.Context(),
 		orderID,
 		uid,
-		0, // amount will be fetched from orders later
+		amount,
 		idempotencyKey,
 	)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// ✅ create gateway order with same amount
 	resp, err := h.gateway.CreatePayment(r.Context(), gateway.CreatePaymentRequest{
 		OrderID:     orderID,
-		AmountCents: payment.AmountCents,
-		Currency:    "INR",
+		AmountCents: amount,
+		Currency:    currency,
 	})
 	if err != nil {
-		http.Error(w, err.Error(), 502)
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+
+	if err := h.store.AttachGatewayOrder(
+		r.Context(),
+		payment.ID,
+		resp.GatewayOrderID,
+	); err != nil {
+		http.Error(w, "failed to persist gateway order", http.StatusInternalServerError)
 		return
 	}
 
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"payment_id":       payment.ID,
 		"gateway_order_id": resp.GatewayOrderID,
+		"amount_cents":     amount,
+		"currency":         currency,
 		"status":           payment.Status,
 	})
 }
@@ -68,7 +118,7 @@ func (h *Handler) RazorpayWebhook(w http.ResponseWriter, r *http.Request) {
 	signature := r.Header.Get("X-Razorpay-Signature")
 
 	if err := h.gateway.VerifyWebhook(body, signature); err != nil {
-		http.Error(w, "invalid signature", 401)
+		http.Error(w, "invalid signature", http.StatusUnauthorized)
 		return
 	}
 
@@ -84,32 +134,38 @@ func (h *Handler) RazorpayWebhook(w http.ResponseWriter, r *http.Request) {
 		} `json:"payload"`
 	}
 
-	_ = json.Unmarshal(body, &event)
+	if err := json.Unmarshal(body, &event); err != nil {
+		http.Error(w, "invalid payload", http.StatusBadRequest)
+		return
+	}
 
 	if event.Event != "payment.captured" {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	paymentID := event.Payload.Payment.Entity.ID
-	orderID := event.Payload.Payment.Entity.OrderID
+	gatewayPaymentID := event.Payload.Payment.Entity.ID
+	gatewayOrderID := event.Payload.Payment.Entity.OrderID
 
-	// mark payment captured
-	_ = h.store.MarkPaymentCaptured(
+	_, err := h.store.MarkCapturedByGatewayOrder(
 		r.Context(),
-		paymentID,
-		paymentID,
+		gatewayOrderID,
+		gatewayPaymentID,
 	)
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 
-	// call orders service
-	req, _ := http.NewRequest(
+	req, err := http.NewRequest(
 		"POST",
-		"http://orders:8082/v1/orders/"+orderID+"/paid",
+		"http://orders:8082/v1/orders/"+gatewayOrderID+"/paid",
 		nil,
 	)
-	req.Header.Set("X-INTERNAL-KEY", os.Getenv("INTERNAL_SERVICE_KEY"))
-
-	http.DefaultClient.Do(req)
+	if err == nil {
+		req.Header.Set("X-INTERNAL-KEY", os.Getenv("INTERNAL_SERVICE_KEY"))
+		http.DefaultClient.Do(req)
+	}
 
 	w.WriteHeader(http.StatusOK)
 }

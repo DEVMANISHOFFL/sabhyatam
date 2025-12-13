@@ -10,6 +10,8 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 	r.Route("/v1/orders", func(r chi.Router) {
 		r.Post("/prepare", h.PrepareOrder)
 		r.Post("/confirm", h.ConfirmOrder)
+		r.Get("/internal/orders/{orderID}", h.GetOrderInternal)
+
 		r.Post("/{orderID}/paid", h.MarkOrderPaid)
 
 	})
