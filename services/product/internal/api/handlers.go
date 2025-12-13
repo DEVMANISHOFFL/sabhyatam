@@ -8,11 +8,15 @@ import (
 
 	"github.com/devmanishoffl/sabhyatam-product/internal/model"
 	"github.com/devmanishoffl/sabhyatam-product/internal/store"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
 func RegisterRoutes(r *chi.Mux, s *store.Store) {
+
 	r.Route("/v1", func(r chi.Router) {
+			r.Use(middleware.StripSlashes)
+
 		r.Get("/products", listProductsHandler(s))
 		r.Get("/products/{id}", getProductDetailHandler(s))
 
@@ -24,15 +28,15 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 			r.Delete("/products/{id}", deleteProductHandler(s))
 
 			r.Route("/variants", func(r chi.Router) {
-				r.Post("/{id}/reserve", reserveStockHandler(s))
-				r.Post("/{id}/release", releaseStockHandler(s))
-				r.Post("/{id}/deduct", deductStockHandler(s))
+				r.Post("/{variant_id}/reserve", reserveStockHandler(s))
+				r.Post("/{variant_id}/release", releaseStockHandler(s))
+				r.Post("/{variant_id}/deduct", deductStockHandler(s))
 			})
 
 			r.Post("/products/{id}/variants", createVariantHandler(s))
 			r.Put("/variants/{variant_id}", updateVariantHandler(s))
 			r.Delete("/variants/{variant_id}", deleteVariantHandler(s))
-			
+
 			r.Post("/products/{id}/media", createMediaHandler(s))
 			r.Delete("/media/{media_id}", deleteMediaHandler(s))
 		})
@@ -288,7 +292,7 @@ func deleteMediaHandler(s *store.Store) http.HandlerFunc {
 // ReserveStock: POST /v1/admin/variants/{id}/reserve
 func reserveStockHandler(s *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
+		id := chi.URLParam(r, "variant_id")
 		var body struct {
 			Quantity int `json:"quantity"`
 		}
@@ -312,7 +316,7 @@ func reserveStockHandler(s *store.Store) http.HandlerFunc {
 // ReleaseStock: POST /v1/admin/variants/{id}/release
 func releaseStockHandler(s *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
+		id := chi.URLParam(r, "variant_id")
 		var body struct {
 			Quantity int `json:"quantity"`
 		}
@@ -335,7 +339,7 @@ func releaseStockHandler(s *store.Store) http.HandlerFunc {
 // DeductStock: POST /v1/admin/variants/{id}/deduct
 func deductStockHandler(s *store.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
+		id := chi.URLParam(r, "variant_id")
 		var body struct {
 			Quantity int `json:"quantity"`
 		}

@@ -5,13 +5,14 @@ import (
 	"net/http"
 )
 
-func refundOrder(orderID string) {
+func initiatePayment(orderID string) {
 	req, _ := http.NewRequest(
 		"POST",
-		ordersBase+"/v1/orders/"+orderID+"/refund",
+		paymentsBase+"/v1/payments/initiate",
 		nil,
 	)
-	req.Header.Set("X-INTERNAL-KEY", internalKey)
+	req.Header.Set("X-ORDER-ID", orderID)
+	req.Header.Set("Idempotency-Key", "e2e-"+orderID)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -20,6 +21,6 @@ func refundOrder(orderID string) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		panic(fmt.Errorf("refundOrder failed: %d", resp.StatusCode))
+		panic(fmt.Errorf("initiatePayment failed: %d", resp.StatusCode))
 	}
 }
