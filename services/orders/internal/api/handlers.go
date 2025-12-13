@@ -3,10 +3,12 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/model"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/store"
+	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
@@ -157,3 +159,46 @@ func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "paid"})
 }
 
+// POST /v1/orders/{orderID}/paid
+// called ONLY by payments service
+func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+	if orderID == "" {
+		http.Error(w, "order id required", http.StatusBadRequest)
+		return
+	}
+
+	adminKey := r.Header.Get("X-INTERNAL-KEY")
+	if adminKey != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := r.Context()
+
+	order, err := h.store.GetOrder(ctx, orderID)
+	if err != nil {
+		http.Error(w, "order not found", http.StatusNotFound)
+		return
+	}
+
+	if order.Status == "paid" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// deduct stock
+	for _, it := range order.Items {
+		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
+			http.Error(w, "stock deduction failed", http.StatusBadGateway)
+			return
+		}
+	}
+
+	if err := h.store.UpdateOrderStatus(ctx, orderID, "paid"); err != nil {
+		http.Error(w, "failed to update order", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
