@@ -5,12 +5,11 @@ import "time"
 type OrderStatus string
 
 const (
-	StatusDraft          = "draft"
-	StatusPaymentPending = "payment_pending"
-	StatusPaid           = "paid"
-	StatusCancelled      = "cancelled"
+	StatusDraft   OrderStatus = "draft"
+	StatusPending OrderStatus = "pending_payment"
+	StatusPaid    OrderStatus = "paid"
+	StatusProc    OrderStatus = "processing"
 )
-
 
 type Order struct {
 	ID               string      `json:"id"`
