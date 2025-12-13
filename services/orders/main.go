@@ -33,8 +33,8 @@ func main() {
 	if err != nil {
 		log.Fatal("pg:", err)
 	}
-	pc := client.NewProductClientFromEnv()
-	cc := client.NewCartClientFromEnv()
+	pc := client.NewProductClient()
+	cc := client.NewCartClient()
 	h := api.NewHandler(ps, pc, cc)
 
 	r := chi.NewRouter()

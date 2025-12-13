@@ -4,12 +4,14 @@ import (
 	"context"
 	"os"
 
+	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/model"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type PGStore struct {
-	db *pgxpool.Pool
+	db            *pgxpool.Pool
+	productClient *client.ProductClient
 }
 
 func NewPG(databaseURL string) (*PGStore, error) {
@@ -25,7 +27,10 @@ func NewPG(databaseURL string) (*PGStore, error) {
 		return nil, err
 	}
 
-	return &PGStore{db: pool}, nil
+	return &PGStore{
+		db:            pool,
+		productClient: client.NewProductClient(),
+	}, nil
 }
 
 func (s *PGStore) Close() {
@@ -161,4 +166,139 @@ func (s *PGStore) GetOrder(ctx context.Context, orderID string) (*model.Order, e
 	}
 
 	return &o, nil
+}
+
+func (s *PGStore) ReleaseOrder(ctx context.Context, orderID string) error {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var status string
+	err = tx.QueryRow(ctx,
+		`SELECT status FROM orders WHERE id = $1`,
+		orderID,
+	).Scan(&status)
+
+	if err != nil {
+		return err
+	}
+
+	// Only pending_payment orders can be released
+	if status != "pending_payment" {
+		return nil // idempotent
+	}
+
+	// Fetch order items
+	rows, err := tx.Query(ctx,
+		`SELECT variant_id, quantity FROM order_items WHERE order_id = $1`,
+		orderID,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	type item struct {
+		VariantID string
+		Qty       int
+	}
+
+	var items []item
+	for rows.Next() {
+		var i item
+		if err := rows.Scan(&i.VariantID, &i.Qty); err != nil {
+			return err
+		}
+		items = append(items, i)
+	}
+
+	// Release stock via product service
+	for _, it := range items {
+		if err := s.productClient.ReleaseStock(ctx, it.VariantID, it.Qty); err != nil {
+			return err
+		}
+	}
+
+	// Mark order cancelled
+	_, err = tx.Exec(ctx,
+		`UPDATE orders SET status = 'cancelled', updated_at = now()
+		 WHERE id = $1`,
+		orderID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}
+
+func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var status string
+	err = tx.QueryRow(
+		ctx,
+		`SELECT status FROM orders WHERE id = $1`,
+		orderID,
+	).Scan(&status)
+	if err != nil {
+		return err
+	}
+
+	// Only PAID orders can be refunded
+	if status != "paid" {
+		return nil // idempotent: already refunded / cancelled / invalid
+	}
+
+	// Fetch order items
+	rows, err := tx.Query(
+		ctx,
+		`SELECT variant_id, quantity FROM order_items WHERE order_id = $1`,
+		orderID,
+	)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	type item struct {
+		VariantID string
+		Qty       int
+	}
+
+	var items []item
+	for rows.Next() {
+		var it item
+		if err := rows.Scan(&it.VariantID, &it.Qty); err != nil {
+			return err
+		}
+		items = append(items, it)
+	}
+
+	// Restore stock via product service
+	for _, it := range items {
+		if err := s.productClient.ReleaseStock(ctx, it.VariantID, it.Qty); err != nil {
+			return err
+		}
+	}
+
+	// Mark order as refunded
+	_, err = tx.Exec(
+		ctx,
+		`UPDATE orders
+		 SET status = 'refunded', updated_at = now()
+		 WHERE id = $1`,
+		orderID,
+	)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

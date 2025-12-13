@@ -67,3 +67,26 @@ func (o *OrdersClient) GetOrder(
 
 	return out.AmountCents, out.Currency, out.Status, nil
 }
+
+func (o *OrdersClient) ReleaseOrder(ctx context.Context, orderID string) error {
+	req, _ := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		o.base+"/v1/orders/"+orderID+"/release",
+		nil,
+	)
+
+	req.Header.Set("X-INTERNAL-KEY", o.key)
+
+	resp, err := o.c.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("release order failed: %d", resp.StatusCode)
+	}
+
+	return nil
+}

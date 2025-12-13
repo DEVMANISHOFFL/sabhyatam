@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/devmanishoffl/sabhyatam-payments/internal/model"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -132,4 +133,55 @@ func (s *PGStore) GetPaymentAmountByGatewayOrder(
 	`, gatewayOrderID).Scan(&amt)
 
 	return amt, err
+}
+
+func (s *PGStore) FindStalePayments(
+	ctx context.Context,
+	olderThan time.Duration,
+) ([]struct {
+	PaymentID string
+	OrderID   string
+}, error) {
+
+	rows, err := s.db.Query(ctx, `
+		SELECT id, order_id
+		FROM payments
+		WHERE status = 'initiated'
+		  AND created_at < now() - $1::interval
+	`, olderThan.String())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []struct {
+		PaymentID string
+		OrderID   string
+	}
+
+	for rows.Next() {
+		var p struct {
+			PaymentID string
+			OrderID   string
+		}
+		if err := rows.Scan(&p.PaymentID, &p.OrderID); err != nil {
+			return nil, err
+		}
+		out = append(out, p)
+	}
+
+	return out, nil
+}
+
+func (s *PGStore) MarkPaymentFailed(
+	ctx context.Context,
+	paymentID string,
+) error {
+	_, err := s.db.Exec(ctx, `
+		UPDATE payments
+		SET status = 'failed', updated_at = now()
+		WHERE id = $1
+		  AND status = 'initiated'
+	`, paymentID)
+	return err
 }

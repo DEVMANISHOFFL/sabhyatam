@@ -14,7 +14,7 @@ type CartClient struct {
 	c    *http.Client
 }
 
-func NewCartClientFromEnv() *CartClient {
+func NewCartClient() *CartClient {
 	base := os.Getenv("CART_SVC_BASE")
 	if base == "" {
 		base = "http://localhost:8081"

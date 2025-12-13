@@ -208,7 +208,7 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 
 	// deduct stock
 	for _, it := range order.Items {
-		if err := h.pclient.DeductReservedStock(ctx, it.VariantID, it.Quantity); err != nil {
+		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
 			http.Error(w, "stock deduction failed", http.StatusBadGateway)
 			return
 		}
@@ -246,4 +246,45 @@ func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
 		"amount_cents": order.TotalAmountCents,
 		"currency":     order.Currency,
 	})
+}
+
+func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+
+	if !isValidUUID(orderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := h.store.ReleaseOrder(r.Context(), orderID); err != nil {
+		// idempotent: already released / already paid
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) RefundOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+
+	// Internal auth
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Business logic
+	if err := h.store.RefundOrder(r.Context(), orderID); err != nil {
+		// Idempotent: already refunded / not refundable
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

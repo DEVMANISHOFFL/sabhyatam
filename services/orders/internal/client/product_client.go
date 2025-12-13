@@ -8,116 +8,123 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 type ProductClient struct {
 	base     string
-	c        *http.Client
 	adminKey string
+	c        *http.Client
 }
 
-func NewProductClientFromEnv() *ProductClient {
-	godotenv.Load()
+func NewProductClient() *ProductClient {
 	base := os.Getenv("PRODUCT_SVC_BASE")
 	if base == "" {
-		base = "http://localhost:8080"
+		// Docker DNS default
+		base = "http://product:8080"
 	}
 
-	adminKey := os.Getenv("PRODUCT_ADMIN_KEY")
+	adminKey := os.Getenv("ADMIN_KEY")
 	if adminKey == "" {
-		fmt.Println("WARNING: PRODUCT_ADMIN_KEY is not set")
+		adminKey = os.Getenv("PRODUCT_ADMIN_KEY")
+	}
+
+	if adminKey == "" {
+		fmt.Println("WARNING: ADMIN_KEY not set for ProductClient")
 	}
 
 	return &ProductClient{
 		base:     base,
-		c:        &http.Client{Timeout: 5 * time.Second},
 		adminKey: adminKey,
+		c: &http.Client{
+			Timeout: 5 * time.Second,
+		},
 	}
 }
 
-func (p *ProductClient) GetProductDetail(ctx context.Context, productID string) (map[string]any, error) {
+/* -------------------- READ APIs -------------------- */
+
+func (p *ProductClient) GetProductDetail(
+	ctx context.Context,
+	productID string,
+) (map[string]any, error) {
+
 	url := fmt.Sprintf("%s/v1/products/%s", p.base, productID)
-	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+
 	resp, err := p.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("product service returned %d", resp.StatusCode)
 	}
+
 	var out map[string]any
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return nil, err
 	}
+
 	return out, nil
 }
 
-func (p *ProductClient) DeductStock(ctx context.Context, variantID string, quantity int) error {
-	url := fmt.Sprintf("%s/v1/admin/variants/%s/deduct", p.base, variantID)
-	body := map[string]any{"quantity": quantity}
-	b, _ := json.Marshal(body)
+/* -------------------- STOCK APIs -------------------- */
 
-	req, _ := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(b))
-	req.Header.Set("Content-Type", "application/json")
-
-	// 💥 THE FIX: FORWARD ADMIN KEY
-	req.Header.Set("X-ADMIN-KEY", p.adminKey)
-
-	resp, err := p.c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("deduct returned %d", resp.StatusCode)
-	}
-	return nil
-}
-
-func (p *ProductClient) ReserveStock(ctx context.Context, variantID string, quantity int) error {
-	url := fmt.Sprintf("%s/v1/admin/variants/%s/reserve", p.base, variantID)
-	body := map[string]any{"quantity": quantity}
-	b, _ := json.Marshal(body)
-
-	req, _ := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(b))
-	req.Header.Set("Content-Type", "application/json")
-
-	// 💥 THE FIX AGAIN
-	req.Header.Set("X-ADMIN-KEY", p.adminKey)
-
-	resp, err := p.c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("reserve returned %d", resp.StatusCode)
-	}
-	return nil
-}
-
-func (p *ProductClient) DeductReservedStock(
+func (p *ProductClient) ReserveStock(
 	ctx context.Context,
 	variantID string,
 	quantity int,
 ) error {
+	return p.postStockAction(ctx, "reserve", variantID, quantity)
+}
 
-	url := fmt.Sprintf("%s/v1/admin/variants/%s/deduct", p.base, variantID)
+func (p *ProductClient) DeductStock(
+	ctx context.Context,
+	variantID string,
+	quantity int,
+) error {
+	return p.postStockAction(ctx, "deduct", variantID, quantity)
+}
 
-	body := map[string]any{
+func (p *ProductClient) ReleaseStock(
+	ctx context.Context,
+	variantID string,
+	quantity int,
+) error {
+	return p.postStockAction(ctx, "release", variantID, quantity)
+}
+
+/* -------------------- INTERNAL HELPER -------------------- */
+
+func (p *ProductClient) postStockAction(
+	ctx context.Context,
+	action string,
+	variantID string,
+	quantity int,
+) error {
+
+	url := fmt.Sprintf(
+		"%s/v1/admin/variants/%s/%s",
+		p.base,
+		variantID,
+		action,
+	)
+
+	body := map[string]int{
 		"quantity": quantity,
 	}
 	b, _ := json.Marshal(body)
 
-	req, _ := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(b))
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		url,
+		bytes.NewReader(b),
+	)
 
-	// INTERNAL AUTH
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-ADMIN-KEY", p.adminKey)
 
 	resp, err := p.c.Do(req)
@@ -127,7 +134,11 @@ func (p *ProductClient) DeductReservedStock(
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("deduct reserved stock failed: %d", resp.StatusCode)
+		return fmt.Errorf(
+			"product %s failed: %d",
+			action,
+			resp.StatusCode,
+		)
 	}
 
 	return nil
