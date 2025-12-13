@@ -23,72 +23,70 @@ func NewHandler(s *store.PGStore, pc *client.ProductClient, cc *client.CartClien
 // expects authenticated user via X-USER-ID
 func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-USER-ID")
-	if userID == "" {
+	sessionID := r.Header.Get("X-SESSION-ID")
+
+	if userID == "" && sessionID == "" {
 		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
 
 	ctx := r.Context()
-	cart, err := h.cartClient.GetCartForUser(ctx, userID)
+
+	var (
+		cart map[string]any
+		err  error
+	)
+
+	// fetch cart correctly
+	if sessionID != "" {
+		cart, err = h.cartClient.GetCartForSession(ctx, sessionID)
+	} else {
+		cart, err = h.cartClient.GetCartForUser(ctx, userID)
+	}
+
 	if err != nil {
 		http.Error(w, "failed to fetch cart: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 
-	// cart format: { items: [ { product: {...}, variant: {...}, quantity, line_total }, cart_total }]
 	itemsAny, _ := cart["items"].([]any)
 	if len(itemsAny) == 0 {
 		http.Error(w, "cart empty", http.StatusBadRequest)
 		return
 	}
 
-	var orderItems []model.OrderItem
-	var totalCents int64 = 0
+	var (
+		orderItems []model.OrderItem
+		totalCents int64
+	)
+
 	for _, v := range itemsAny {
 		m, ok := v.(map[string]any)
 		if !ok {
 			continue
 		}
-		// variant must be present
+
 		variant, _ := m["variant"].(map[string]any)
 		product, _ := m["product"].(map[string]any)
-		qty := 0
-		if q, ok := m["quantity"].(float64); ok {
-			qty = int(q)
-		}
-		// extract ids and price
-		variantID := ""
-		productID := ""
-		if id, ok := variant["id"].(string); ok {
-			variantID = id
-		}
-		if pid, ok := product["id"].(string); ok {
-			productID = pid
-		}
 
-		// price in variant.price (float)
-		var priceCents int64 = 0
-		if p, ok := variant["price"]; ok {
-			switch t := p.(type) {
-			case float64:
-				priceCents = int64(t * 100)
-			case int:
-				priceCents = int64(t * 100)
-			}
-		}
+		qty := int(m["quantity"].(float64))
+		variantID, _ := variant["id"].(string)
+		productID, _ := product["id"].(string)
+
+		price := int64(variant["price"].(float64) * 100)
 
 		if variantID == "" || productID == "" || qty <= 0 {
 			continue
 		}
 
-		oi := model.OrderItem{
+		orderItems = append(orderItems, model.OrderItem{
 			ProductID:  productID,
 			VariantID:  variantID,
 			Quantity:   qty,
-			PriceCents: priceCents,
-		}
-		orderItems = append(orderItems, oi)
-		totalCents += priceCents * int64(qty)
+			PriceCents: price,
+		})
+
+		totalCents += price * int64(qty)
 	}
 
 	if len(orderItems) == 0 {
@@ -96,15 +94,20 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create draft order in DB
-	orderID, err := h.store.CreateDraftOrder(ctx, &userID, orderItems, totalCents)
+	// user is optional
+	var uid *string
+	if userID != "" {
+		uid = &userID
+	}
+
+	orderID, err := h.store.CreateDraftOrder(ctx, uid, orderItems, totalCents)
 	if err != nil {
 		http.Error(w, "db error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{
+	json.NewEncoder(w).Encode(map[string]any{
 		"order_id":     orderID,
 		"amount_cents": totalCents,
 		"currency":     "INR",

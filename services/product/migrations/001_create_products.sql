@@ -66,3 +66,6 @@ FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
 DROP TRIGGER IF EXISTS set_timestamp_variant ON product_variants;
 CREATE TRIGGER set_timestamp_variant BEFORE UPDATE ON product_variants
 FOR EACH ROW EXECUTE FUNCTION trigger_set_timestamp();
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_media_url_unique
+ON product_media (url);

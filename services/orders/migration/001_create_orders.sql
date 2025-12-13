@@ -1,23 +1,24 @@
 -- orders table
 CREATE TABLE IF NOT EXISTS orders (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id text, -- your auth user id (string) — can be UUID or text depending on auth
-  status text NOT NULL,
-  currency text NOT NULL DEFAULT 'INR',
-  total_amount_cents bigint NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id TEXT,
+  status TEXT NOT NULL,
+  currency TEXT NOT NULL,
+  total_amount_cents BIGINT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- order_items
+-- order items table
 CREATE TABLE IF NOT EXISTS order_items (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid REFERENCES orders(id) ON DELETE CASCADE,
-  product_id uuid NOT NULL,
-  variant_id uuid NOT NULL,
-  quantity integer NOT NULL,
-  price_cents bigint NOT NULL, -- price snapshot
-  created_at timestamptz NOT NULL DEFAULT now()
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL,
+  variant_id UUID NOT NULL,
+  quantity INT NOT NULL,
+  price_cents BIGINT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id
+  ON order_items(order_id);

@@ -41,25 +41,20 @@ func (cc *CartClient) GetCartForUser(ctx context.Context, userID string) (map[st
 	return out, nil
 }
 
-func (cc *CartClient) GetCartForSession(ctx context.Context, sessionID string) (map[string]any, error) {
-	url := fmt.Sprintf("%s/v1/cart", cc.base)
-
-	req, _ := http.NewRequestWithContext(ctx, "GET", url, nil)
+func (c *CartClient) GetCartForSession(ctx context.Context, sessionID string) (map[string]any, error) {
+	req, _ := http.NewRequestWithContext(ctx, "GET", c.base+"/v1/cart", nil)
 	req.Header.Set("X-SESSION-ID", sessionID)
 
-	resp, err := cc.c.Do(req)
+	resp, err := c.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("cart service returned %d", resp.StatusCode)
+		return nil, fmt.Errorf("cart returned %d", resp.StatusCode)
 	}
 
 	var out map[string]any
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return nil, err
-	}
-	return out, nil
+	return out, json.NewDecoder(resp.Body).Decode(&out)
 }
