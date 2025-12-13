@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +11,14 @@ import (
 	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("error parsing env: order-svc")
+	}
+
 	port := 8082
 	if p := os.Getenv("ORDERSVC_PORT"); p != "" {
 		if v, err := strconv.Atoi(p); err == nil {

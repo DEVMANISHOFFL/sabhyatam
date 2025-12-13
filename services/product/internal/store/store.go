@@ -303,3 +303,48 @@ func (s *Store) DeleteMedia(ctx context.Context, id string) error {
 	_, err := s.db.Exec(ctx, `DELETE FROM product_media WHERE id=$1`, id)
 	return err
 }
+
+// ReserveVariantStock reserves stock atomically (decrement on available)
+func (s *Store) ReserveVariantStock(ctx context.Context, variantID string, qty int) error {
+	if qty <= 0 {
+		return fmt.Errorf("invalid quantity")
+	}
+	res, err := s.db.Exec(ctx,
+		`UPDATE product_variants SET stock = stock - $1 WHERE id = $2 AND stock >= $1`,
+		qty, variantID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("insufficient stock")
+	}
+	return nil
+}
+
+// ReleaseVariantStock increases stock (used to un-reserve)
+func (s *Store) ReleaseVariantStock(ctx context.Context, variantID string, qty int) error {
+	if qty <= 0 {
+		return fmt.Errorf("invalid quantity")
+	}
+	_, err := s.db.Exec(ctx,
+		`UPDATE product_variants SET stock = stock + $1 WHERE id = $2`,
+		qty, variantID)
+	return err
+}
+
+// DeductVariantStock permanently deducts stock (same as reserve->commit)
+func (s *Store) DeductVariantStock(ctx context.Context, variantID string, qty int) error {
+	if qty <= 0 {
+		return fmt.Errorf("invalid quantity")
+	}
+	res, err := s.db.Exec(ctx,
+		`UPDATE product_variants SET stock = stock - $1 WHERE id = $2 AND stock >= $1`,
+		qty, variantID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return fmt.Errorf("insufficient stock")
+	}
+	return nil
+}

@@ -23,6 +23,12 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 			r.Put("/products/{id}", updateProductHandler(s))
 			r.Delete("/products/{id}", deleteProductHandler(s))
 
+			r.Route("/variants", func(r chi.Router) {
+				r.Post("/{id}/reserve", reserveStockHandler(s))
+				r.Post("/{id}/release", releaseStockHandler(s))
+				r.Post("/{id}/deduct", deductStockHandler(s))
+			})
+
 			r.Post("/products/{id}/variants", createVariantHandler(s))
 			r.Put("/variants/{variant_id}", updateVariantHandler(s))
 			r.Delete("/variants/{variant_id}", deleteVariantHandler(s))
@@ -276,5 +282,76 @@ func deleteMediaHandler(s *store.Store) http.HandlerFunc {
 		}
 
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+	}
+}
+
+// ReserveStock: POST /v1/admin/variants/{id}/reserve
+func reserveStockHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		var body struct {
+			Quantity int `json:"quantity"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid body", http.StatusBadRequest)
+			return
+		}
+		if body.Quantity <= 0 {
+			http.Error(w, "quantity must be > 0", http.StatusBadRequest)
+			return
+		}
+		if err := s.ReserveVariantStock(r.Context(), id, body.Quantity); err != nil {
+			// 409 for insufficient stock or other domain error
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "reserved"})
+	}
+}
+
+// ReleaseStock: POST /v1/admin/variants/{id}/release
+func releaseStockHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		var body struct {
+			Quantity int `json:"quantity"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid body", http.StatusBadRequest)
+			return
+		}
+		if body.Quantity <= 0 {
+			http.Error(w, "quantity must be > 0", http.StatusBadRequest)
+			return
+		}
+		if err := s.ReleaseVariantStock(r.Context(), id, body.Quantity); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "released"})
+	}
+}
+
+// DeductStock: POST /v1/admin/variants/{id}/deduct
+func deductStockHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		var body struct {
+			Quantity int `json:"quantity"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			http.Error(w, "invalid body", http.StatusBadRequest)
+			return
+		}
+		if body.Quantity <= 0 {
+			http.Error(w, "quantity must be > 0", http.StatusBadRequest)
+			return
+		}
+		if err := s.DeductVariantStock(r.Context(), id, body.Quantity); err != nil {
+			// if insufficient stock -> return 409 so callers know it's a stock problem
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deducted"})
 	}
 }

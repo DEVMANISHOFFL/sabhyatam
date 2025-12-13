@@ -1,0 +1,86 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sabhyatam
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sabhyatam"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6380:6379"
+
+  product-migrate:
+    build:
+      context: ./services/product
+      dockerfile: Dockerfile.migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+    restart: "no"
+
+  product-seed:
+    build:
+      context: ./services/product
+      dockerfile: Dockerfile.seed
+    depends_on:
+      product-migrate:
+        condition: service_completed_successfully
+    environment:
+      DB: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+    command:
+      - node
+      - import_seed.js
+    restart: "no"
+
+  product:
+    build: ./services/product
+    container_name: product
+    depends_on:
+      product-seed:
+        condition: service_completed_successfully
+    env_file:
+      - ./services/product/.env
+    ports:
+      - "8080:8080"
+
+  cart:
+    build: ./services/cart
+    container_name: cart
+    env_file:
+      - ./services/cart/.env
+    depends_on:
+      - redis
+      - product
+    ports:
+      - "8081:8081"
+
+  orders:
+    build: ./services/orders
+    container_name: orders
+    env_file:
+      - ./services/orders/.env
+    depends_on:
+      - postgres
+      - cart
+      - product
+    ports:
+      - "8082:8082"
+
+volumes:
+  pgdata:
