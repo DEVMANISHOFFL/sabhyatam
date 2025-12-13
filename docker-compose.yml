@@ -54,7 +54,7 @@ services:
       - ./services/orders/migration:/migrations
     entrypoint: >
       sh -c "
-      until pg_isready -h postgres -p 5432; do sleep 1; done &&
+      until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done &&
       psql postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
       -f /migrations/001_create_orders.sql
       "
