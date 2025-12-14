@@ -119,3 +119,25 @@ func (r *RedisStore) Merge(ctx context.Context, targetKey, srcKey string) error 
 func isUserKey(k string) bool {
 	return len(k) > 10 && k[:10] == "cart:user:"
 }
+
+func (s *RedisStore) GetItem(
+	ctx context.Context,
+	key string,
+	variantID string,
+) (*model.CartItem, error) {
+
+	val, err := s.cli.HGet(ctx, key, variantID).Result()
+	if err == redis.Nil {
+		return nil, nil // item not present
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	var item model.CartItem
+	if err := json.Unmarshal([]byte(val), &item); err != nil {
+		return nil, err
+	}
+
+	return &item, nil
+}

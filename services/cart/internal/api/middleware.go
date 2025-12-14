@@ -3,29 +3,43 @@ package api
 import (
 	"context"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type ctxKey string
 
 const (
-	CtxUserID    ctxKey = "user_id"
 	CtxSessionID ctxKey = "session_id"
+	CtxUserID    ctxKey = "user_id"
 )
 
-// Auth-like header extraction
-// - If X-USER-ID present -> authenticated user
-// - Else read X-SESSION-ID or create one (client side should create)
 func UserSessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		uid := r.Header.Get("X-USER-ID")
-		sid := r.Header.Get("X-SESSION-ID")
-		// prefer user id if present
+
 		ctx := r.Context()
-		if uid != "" {
-			ctx = context.WithValue(ctx, CtxUserID, uid)
-		} else if sid != "" {
-			ctx = context.WithValue(ctx, CtxSessionID, sid)
+
+		// 1️⃣ Try reading session cookie
+		cookie, err := r.Cookie("sabhyatam_session")
+		if err == nil && cookie.Value != "" {
+			ctx = context.WithValue(ctx, CtxSessionID, cookie.Value)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
 		}
+
+		// 2️⃣ No session → create guest session
+		sessionID := uuid.NewString()
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "sabhyatam_session",
+			Value:    sessionID,
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			// Secure: true // enable in prod HTTPS
+		})
+
+		ctx = context.WithValue(ctx, CtxSessionID, sessionID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

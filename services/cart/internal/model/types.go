@@ -4,16 +4,21 @@ type CartItem struct {
 	ProductID string `json:"product_id"`
 	VariantID string `json:"variant_id"`
 	Quantity  int    `json:"quantity"`
+	UnitPrice int64  `json:"unit_price"`
+	Currency  string `json:"currency"`
 }
 
 type HydratedItem struct {
-	Product   any   `json:"product"`
-	Variant   any   `json:"variant"`
-	Quantity  int   `json:"quantity"`
-	LineTotal int64 `json:"line_total"` // price * qty in paisa (or smallest unit)
+	ProductID string `json:"product_id"`
+	VariantID string `json:"variant_id"`
+	Quantity  int    `json:"quantity"`
+	UnitPrice int64  `json:"unit_price"`
+	LineTotal int64  `json:"line_total"`
 }
 
 type CartResponse struct {
 	Items     []HydratedItem `json:"items"`
-	CartTotal int64          `json:"cart_total"`
+	Subtotal  int64          `json:"subtotal"`
+	ItemCount int            `json:"item_count"`
+	Currency  string         `json:"currency"`
 }

@@ -16,116 +16,90 @@ type Handler struct {
 }
 
 func NewHandler(s *store.RedisStore, pc *client.ProductClient) *Handler {
-	return &Handler{store: s, pclient: pc}
+	return &Handler{
+		store:   s,
+		pclient: pc,
+	}
 }
 
-// AddItem expects { "product_id": "...", "variant_id":"...", "quantity": 1 }
+// AddItem expects:
+// { "product_id": "...", "variant_id":"...", "quantity": 1 }
 func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
-	var item model.CartItem
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+	ctx := r.Context()
+	key := resolveKey(ctx)
+	if key == "" {
+		http.Error(w, "no user/session", http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		ProductID string `json:"product_id"`
+		VariantID string `json:"variant_id"`
+		Quantity  int    `json:"quantity"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
-	if item.Quantity <= 0 {
+
+	if req.Quantity <= 0 {
 		http.Error(w, "quantity must be > 0", http.StatusBadRequest)
 		return
 	}
-	ctx := r.Context()
-	key := resolveKey(ctx)
-	if key == "" {
-		http.Error(w, "no user/session", http.StatusBadRequest)
-		return
+
+	// fetch existing item (merge quantity)
+	existing, _ := h.store.GetItem(ctx, key, req.VariantID)
+	newQty := req.Quantity
+	if existing != nil {
+		newQty += existing.Quantity
 	}
 
-	// validate product + variant + stock via product service
-	prod, err := h.pclient.GetProductDetail(ctx, item.ProductID)
-	if err != nil {
-		http.Error(w, "product validation failed: "+err.Error(), http.StatusBadGateway)
-		return
-	}
-	variant, ok := client.VariantFromProduct(prod, item.VariantID)
-	if !ok {
-		http.Error(w, "variant not found", http.StatusBadRequest)
-		return
-	}
-	// check stock if present
-	if stockRaw, ok := variant["stock"]; ok {
-		// json numbers may be float64
-		switch v := stockRaw.(type) {
-		case float64:
-			if int(v) < item.Quantity {
-				http.Error(w, "insufficient stock", http.StatusConflict)
-				return
-			}
-		case int:
-			if v < item.Quantity {
-				http.Error(w, "insufficient stock", http.StatusConflict)
-				return
-			}
-		}
-	}
-
-	if err := h.store.SetItem(ctx, key, item.VariantID, item); err != nil {
-		http.Error(w, "redis error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(201)
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-}
-
-func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
-	var item model.CartItem
-	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
-	if item.Quantity < 0 {
-		http.Error(w, "quantity must be >= 0", http.StatusBadRequest)
-		return
-	}
-	ctx := r.Context()
-	key := resolveKey(ctx)
-	if key == "" {
-		http.Error(w, "no user/session", http.StatusBadRequest)
-		return
-	}
-
-	if item.Quantity == 0 {
-		if err := h.store.DeleteItem(ctx, key, item.VariantID); err != nil {
-			http.Error(w, "redis error", http.StatusInternalServerError)
-			return
-		}
-		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
-		return
-	}
-
-	// Validate variant exists (optional but good)
-	prod, err := h.pclient.GetProductDetail(ctx, item.ProductID)
+	// validate product + variant
+	prod, err := h.pclient.GetProductDetail(ctx, req.ProductID)
 	if err != nil {
 		http.Error(w, "product validation failed", http.StatusBadGateway)
 		return
 	}
-	_, ok := client.VariantFromProduct(prod, item.VariantID)
+
+	variant, ok := client.VariantFromProduct(prod, req.VariantID)
 	if !ok {
 		http.Error(w, "variant not found", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.store.SetItem(ctx, key, item.VariantID, item); err != nil {
+	// stock check (best effort)
+	if stockRaw, ok := variant["stock"]; ok {
+		if stock := asInt(stockRaw); stock >= 0 && stock < newQty {
+			http.Error(w, "insufficient stock", http.StatusConflict)
+			return
+		}
+	}
+
+	// snapshot price
+	price := int64(0)
+	if p, ok := variant["price"]; ok {
+		price = asMoney(p)
+	}
+
+	item := model.CartItem{
+		ProductID: req.ProductID,
+		VariantID: req.VariantID,
+		Quantity:  newQty,
+		UnitPrice: price,
+		Currency:  "INR",
+	}
+
+	if err := h.store.SetItem(ctx, key, req.VariantID, item); err != nil {
 		http.Error(w, "redis error", http.StatusInternalServerError)
 		return
 	}
-	_ = json.NewEncoder(w).Encode(map[string]string{"status": "updated"})
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(item)
 }
 
-func (h *Handler) RemoveItem(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		VariantID string `json:"variant_id"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
+func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	key := resolveKey(ctx)
 	if key == "" {
@@ -133,10 +107,62 @@ func (h *Handler) RemoveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.DeleteItem(ctx, key, body.VariantID); err != nil {
+	var req struct {
+		ProductID string `json:"product_id"`
+		VariantID string `json:"variant_id"`
+		Quantity  int    `json:"quantity"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Quantity < 0 {
+		http.Error(w, "quantity must be >= 0", http.StatusBadRequest)
+		return
+	}
+
+	if req.Quantity == 0 {
+		_ = h.store.DeleteItem(ctx, key, req.VariantID)
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
+		return
+	}
+
+	existing, err := h.store.GetItem(ctx, key, req.VariantID)
+	if err != nil || existing == nil {
+		http.Error(w, "item not found", http.StatusNotFound)
+		return
+	}
+
+	existing.Quantity = req.Quantity
+
+	if err := h.store.SetItem(ctx, key, req.VariantID, *existing); err != nil {
 		http.Error(w, "redis error", http.StatusInternalServerError)
 		return
 	}
+
+	_ = json.NewEncoder(w).Encode(existing)
+}
+
+func (h *Handler) RemoveItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	key := resolveKey(ctx)
+	if key == "" {
+		http.Error(w, "no user/session", http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		VariantID string `json:"variant_id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	_ = h.store.DeleteItem(ctx, key, req.VariantID)
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 }
 
@@ -147,73 +173,61 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "no user/session", http.StatusBadRequest)
 		return
 	}
+
 	items, err := h.store.GetAll(ctx, key)
 	if err != nil {
 		http.Error(w, "redis error", http.StatusInternalServerError)
 		return
 	}
-	// hydrate
+
 	var resp model.CartResponse
-	var total int64
+	var subtotal int64
+	var count int
+
 	for _, it := range items {
-		prod, err := h.pclient.GetProductDetail(ctx, it.ProductID)
-		if err != nil {
-			// if product not found, skip
-			continue
-		}
-		variant, ok := client.VariantFromProduct(prod, it.VariantID)
-		if !ok {
-			continue
-		}
-		// price read from variant.price (float)
-		var priceInt int64 = 0
-		if p, ok := variant["price"]; ok {
-			switch v := p.(type) {
-			case float64:
-				// convert to paisa: assume price is rupees float
-				priceInt = int64(v * 100)
-			case int:
-				priceInt = int64(v * 100)
-			case json.Number:
-				if f, err := v.Float64(); err == nil {
-					priceInt = int64(f * 100)
-				}
-			}
-		}
-		line := model.HydratedItem{
-			Product:   prod["product"],
-			Variant:   variant,
+		lineTotal := it.UnitPrice * int64(it.Quantity)
+		subtotal += lineTotal
+		count += it.Quantity
+
+		resp.Items = append(resp.Items, model.HydratedItem{
+			ProductID: it.ProductID,
+			VariantID: it.VariantID,
 			Quantity:  it.Quantity,
-			LineTotal: priceInt * int64(it.Quantity),
-		}
-		total += line.LineTotal
-		resp.Items = append(resp.Items, line)
+			UnitPrice: it.UnitPrice,
+			LineTotal: lineTotal,
+		})
 	}
-	resp.CartTotal = total
+
+	resp.Subtotal = subtotal
+	resp.ItemCount = count
+	resp.Currency = "INR"
+
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
 func (h *Handler) MergeCarts(w http.ResponseWriter, r *http.Request) {
-	var body struct {
+	var req struct {
 		GuestID string `json:"guest_id"`
 		UserID  string `json:"user_id"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
-	if body.GuestID == "" || body.UserID == "" {
-		http.Error(w, "missing ids", http.StatusBadRequest)
+
+	src := "cart:guest:" + req.GuestID
+	dst := "cart:user:" + req.UserID
+
+	if err := h.store.Merge(r.Context(), dst, src); err != nil {
+		http.Error(w, "merge failed", http.StatusInternalServerError)
 		return
 	}
-	src := "cart:guest:" + body.GuestID
-	dest := "cart:user:" + body.UserID
-	if err := h.store.Merge(r.Context(), dest, src); err != nil {
-		http.Error(w, "merge failed: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
+
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "merged"})
 }
+
+// ---------- helpers ----------
 
 func resolveKey(ctx context.Context) string {
 	if v := ctx.Value(CtxUserID); v != nil {
@@ -227,4 +241,32 @@ func resolveKey(ctx context.Context) string {
 		}
 	}
 	return ""
+}
+
+func asInt(v any) int {
+	switch x := v.(type) {
+	case int:
+		return x
+	case float64:
+		return int(x)
+	case json.Number:
+		i, _ := x.Int64()
+		return int(i)
+	default:
+		return -1
+	}
+}
+
+func asMoney(v any) int64 {
+	switch x := v.(type) {
+	case float64:
+		return int64(x * 100)
+	case int:
+		return int64(x * 100)
+	case json.Number:
+		f, _ := x.Float64()
+		return int64(f * 100)
+	default:
+		return 0
+	}
 }
