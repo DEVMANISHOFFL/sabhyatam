@@ -1,16 +1,31 @@
 package main
 
-const (
-	productBase  = "http://localhost:8080"
-	cartBase     = "http://localhost:8081"
-	ordersBase   = "http://localhost:8082"
-	paymentsBase = "http://localhost:8083"
+import "os"
 
-	internalKey = "sabhyatam-internal-2025"
+var (
+	productBase  = getenv("PRODUCT_BASE", "http://localhost:8080")
+	cartBase     = getenv("CART_BASE", "http://localhost:8081")
+	ordersBase   = getenv("ORDERS_BASE", "http://localhost:8082")
+	paymentsBase = getenv("PAYMENTS_BASE", "http://localhost:8083")
 
-	// change only this
-	testProductID = "99d56444-6e73-4ce1-aee1-e718331b0e1f"
-	testVariantID = "1d7d7b72-92f6-4451-af54-844454979b02"
+	internalKey = getenv("INTERNAL_SERVICE_KEY", "sabhyatam-internal-2025")
 
-	sessionID = "e2e_guest_001"
+	e2eProductID = mustEnv("E2E_PRODUCT_ID")
+	e2eVariantID = mustEnv("E2E_VARIANT_ID")
+	e2eSessionID = getenv("E2E_SESSION_ID", "e2e-session-001")
 )
+
+func getenv(k, d string) string {
+	if v := os.Getenv(k); v != "" {
+		return v
+	}
+	return d
+}
+
+func mustEnv(k string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		panic("missing required env: " + k)
+	}
+	return v
+}

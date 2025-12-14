@@ -1,23 +1,20 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
-func prepareOrder(sessionID string) string {
-	req, err := http.NewRequest(
-		"POST",
+func prepareOrder() string {
+	req, _ := http.NewRequest(
+		http.MethodPost,
 		ordersBase+"/v1/orders/prepare",
-		nil,
+		bytes.NewReader([]byte(`{}`)),
 	)
-	if err != nil {
-		panic(err)
-	}
-
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-SESSION-ID", sessionID)
+	req.Header.Set("X-SESSION-ID", e2eSessionID)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -32,9 +29,7 @@ func prepareOrder(sessionID string) string {
 	var out struct {
 		OrderID string `json:"order_id"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		panic(err)
-	}
+	json.NewDecoder(resp.Body).Decode(&out)
 
 	return out.OrderID
 }

@@ -5,9 +5,9 @@ import "log"
 func runFullFlow() {
 	log.Println("🚀 Starting E2E Checkout Flow")
 
-	addToCart(testProductID, testVariantID, sessionID)
+	addToCart()
 
-	orderID := prepareOrder(sessionID)
+	orderID := prepareOrder()
 	log.Println("🧾 Order ID:", orderID)
 
 	initiatePayment(orderID)

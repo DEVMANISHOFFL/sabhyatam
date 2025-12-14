@@ -62,6 +62,11 @@ jobs:
           exit 1
 
       - name: Run Full E2E Checkout Flow
+        env:
+          E2E_PRODUCT_ID: 92390a37-43f7-404c-979d-1614afc7309b
+          E2E_VARIANT_ID: b1db6569-6ad7-48d3-8c88-5a29bb05445d
+          E2E_SESSION_ID: e2e-ci-session
+          INTERNAL_SERVICE_KEY: sabhyatam-internal-2025
         run: |
           go run ./tools/e2e_checkout
 
