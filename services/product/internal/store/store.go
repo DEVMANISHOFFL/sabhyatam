@@ -371,3 +371,39 @@ func (s *Store) DeductVariantStock(ctx context.Context, variantID string, qty in
 	}
 	return nil
 }
+
+func (s *Store) GetProductBySlug(ctx context.Context, slug string) (*model.Product, error) {
+	var p model.Product
+	var attrs []byte
+
+	err := s.db.QueryRow(ctx, `
+		SELECT id, slug, title, short_desc, category, subcategory,
+		       attributes, tags, published, created_at, updated_at
+		FROM products
+		WHERE slug = $1 AND published = true
+	`, slug).Scan(
+		&p.ID,
+		&p.Slug,
+		&p.Title,
+		&p.ShortDesc,
+		&p.Category,
+		&p.Subcat,
+		&attrs,
+		&p.Tags,
+		&p.Published,
+		&p.CreatedAt,
+		&p.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(attrs) > 0 {
+		_ = json.Unmarshal(attrs, &p.Attributes)
+	} else {
+		p.Attributes = map[string]any{}
+	}
+
+	return &p, nil
+}

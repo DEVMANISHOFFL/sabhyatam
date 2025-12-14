@@ -1,0 +1,294 @@
+# SABHYATAM FRONTEND API CONTRACT (MVP)
+
+This document lists **all backend API routes used by the frontend** along with **example JSON responses**. Frontend should rely ONLY on this contract.
+
+---
+
+## 1. Health Check
+
+### GET /healthz
+
+Response:
+
+```
+ok
+```
+
+---
+
+## 2. Product Listing (Basic)
+
+### GET /v1/products
+
+Query Params:
+
+* page (default 1)
+* size (default 20)
+
+Response:
+
+```json
+{
+  "page": 1,
+  "size": 20,
+  "items": [
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "short_desc": "Tussar silk with Ajrakh-inspired border; artisanal handwork.",
+      "category": "Silk Sarees",
+      "subcategory": "Tussar",
+      "published": true,
+      "attributes": {
+        "fabric": "tussar silk",
+        "weave": "tussar",
+        "occasion": ["ethnic", "casual"]
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 3. Product Search (PRIMARY FRONTEND API)
+
+### GET /v1/products/search
+
+Query Params:
+
+* q
+* category
+* fabric
+* color
+* occasion
+* min_price
+* max_price
+* sort = price_asc | price_desc | newest
+* page (default 1)
+* limit (default 12)
+
+### Response (ALWAYS SAME SHAPE)
+
+```json
+{
+  "items": [
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "in_stock": true,
+      "attributes": {
+        "fabric": "tussar silk",
+        "weave": "tussar",
+        "occasion": ["ethnic", "casual"]
+      }
+    }
+  ],
+  "page": 1,
+  "limit": 12,
+  "total": 4,
+  "facets": {
+    "category": {
+      "Silk Sarees": 4,
+      "Cotton Sarees": 2
+    },
+    "fabric": {
+      "silk": 3,
+      "tussar silk": 1
+    },
+    "color": {
+      "earth brown": 1,
+      "maroon": 1
+    },
+    "occasion": {
+      "wedding": 2,
+      "casual": 1
+    }
+  }
+}
+```
+
+### Empty Search
+
+```json
+{
+  "items": [],
+  "page": 1,
+  "limit": 12,
+  "total": 0,
+  "facets": {}
+}
+```
+
+---
+
+## 4. Product Detail Page
+
+### GET /v1/products/{product_id}
+
+Response:
+
+```json
+{
+  "product": {
+    "id": "92390a37-43f7-404c-979d-1614afc7309b",
+    "slug": "tussar-ajrakh-earthy-brown",
+    "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+    "short_desc": "Tussar silk with Ajrakh-inspired border; artisanal handwork.",
+    "long_desc": "",
+    "category": "Silk Sarees",
+    "subcategory": "Tussar",
+    "attributes": {
+      "fabric": "tussar silk",
+      "weave": "tussar",
+      "occasion": ["ethnic", "casual"]
+    }
+  },
+  "variants": [
+    {
+      "id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "price": 8999,
+      "mrp": 9999,
+      "stock": 5,
+      "attributes": {
+        "color": "earth brown"
+      }
+    }
+  ],
+  "media": [
+    {
+      "url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "media_type": "image",
+      "meta": { "role": "hero" }
+    }
+  ],
+  "similar": [],
+  "seo": {
+    "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border | Sabhyatam",
+    "description": "Tussar silk with Ajrakh-inspired border; artisanal handwork.",
+    "canonical": "https://sabhyatam.com/products/tussar-ajrakh-earthy-brown"
+  }
+}
+```
+
+---
+
+## 5. Cart APIs
+
+### POST /v1/cart/add
+
+Headers:
+
+* X-SESSION-ID
+
+Body:
+
+```json
+{
+  "product_id": "...",
+  "variant_id": "...",
+  "quantity": 1
+}
+```
+
+Response:
+
+```json
+{ "status": "ok" }
+```
+
+### GET /v1/cart
+
+Headers:
+
+* X-SESSION-ID
+
+Response:
+
+```json
+{
+  "items": [
+    {
+      "quantity": 1,
+      "line_total": 899900,
+      "product": { "id": "...", "title": "..." },
+      "variant": { "id": "...", "price": 8999 }
+    }
+  ],
+  "cart_total": 899900
+}
+```
+
+---
+
+## 6. Order APIs
+
+### POST /v1/orders/prepare
+
+Headers:
+
+* X-SESSION-ID
+
+Response:
+
+```json
+{
+  "order_id": "uuid",
+  "amount_cents": 899900,
+  "currency": "INR"
+}
+```
+
+---
+
+## 7. Payments
+
+### POST /v1/payments/initiate
+
+Headers:
+
+* X-ORDER-ID
+* Idempotency-Key
+
+Response:
+
+```json
+{
+  "payment_id": "uuid",
+  "amount_cents": 899900,
+  "currency": "INR",
+  "status": "initiated"
+}
+```
+
+---
+
+## 8. Order Status (Internal)
+
+### POST /v1/orders/{order_id}/paid
+
+Headers:
+
+* X-INTERNAL-KEY
+
+Response:
+
+```json
+{ "status": "paid" }
+```
+
+---
+
+## FRONTEND GUARANTEES
+
+* Never returns null arrays
+* Stable keys across requests
+* Sorting + pagination deterministic
+* Facets always present
+
+This file is SAFE to build frontend against.

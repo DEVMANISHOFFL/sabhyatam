@@ -17,7 +17,6 @@ func (s *Store) SearchProducts(
 	args := []any{}
 	argPos := 1
 
-	// Keyword search (title + tags)
 	if p.Query != "" {
 		where = append(where,
 			fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", argPos, argPos),
@@ -66,7 +65,6 @@ func (s *Store) SearchProducts(
 		argPos++
 	}
 
-	// 🔑 FACETS — after ALL filters
 	facets, err := s.SearchFacets(ctx, where, args)
 	if err != nil {
 		return nil, 0, nil, err
@@ -160,7 +158,6 @@ LIMIT $%d OFFSET $%d
 		products = append(products, prod)
 	}
 
-	// ---- COUNT QUERY ----
 	countQuery := fmt.Sprintf(`
 	SELECT COUNT(DISTINCT p.id)
 	FROM products p

@@ -8,6 +8,7 @@ import (
 
 func RegisterRoutes(r *chi.Mux, h *Handler) {
 	r.Route("/v1/cart", func(r chi.Router) {
+
 		r.Use(UserSessionMiddleware)
 		r.Get("/", h.GetCart)
 		r.Post("/add", h.AddItem)

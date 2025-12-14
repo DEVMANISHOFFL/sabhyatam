@@ -13,14 +13,14 @@ import (
 )
 
 func RegisterRoutes(r *chi.Mux, s *store.Store) {
-
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(middleware.StripSlashes)
 
-		r.Get("/products", listProductsHandler(s))
-		r.Get("/products/{id}", getProductDetailHandler(s))
+		// 🔥 MOST SPECIFIC FIRST
 		r.Get("/products/search", searchProductsHandler(s))
-		// r.Get("/products", SearchProductsHandler(s))
+		r.Get("/products/slug/{slug}", getProductBySlugHandler(s))
+		r.Get("/products/{id}", getProductDetailHandler(s))
+		r.Get("/products", listProductsHandler(s))
 
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(AdminOnly)
@@ -42,9 +42,7 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 			r.Post("/products/{id}/media", createMediaHandler(s))
 			r.Delete("/media/{media_id}", deleteMediaHandler(s))
 		})
-
 	})
-
 }
 
 func listProductsHandler(s *store.Store) http.HandlerFunc {
@@ -63,16 +61,16 @@ func listProductsHandler(s *store.Store) http.HandlerFunc {
 
 		sortParam := q.Get("sort")
 		page := 1
-		size := 20
+		limit := 12
 		if v := q.Get("page"); v != "" {
 			page, _ = strconv.Atoi(v)
 		}
-		if v := q.Get("size"); v != "" {
-			size, _ = strconv.Atoi(v)
+		if v := q.Get("limit"); v != "" {
+			limit, _ = strconv.Atoi(v)
 		}
 
-		offset := (page - 1) * size
-		items, err := s.ListProductsFiltered(r.Context(), filters, sortParam, size, offset)
+		offset := (page - 1) * limit
+		items, err := s.ListProductsFiltered(r.Context(), filters, sortParam, limit, offset)
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
@@ -80,7 +78,7 @@ func listProductsHandler(s *store.Store) http.HandlerFunc {
 
 		resp := map[string]interface{}{
 			"page":  page,
-			"size":  size,
+			"limit": limit,
 			"items": items,
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -404,13 +402,33 @@ func searchProductsHandler(s *store.Store) http.HandlerFunc {
 			items = []model.ProductCard{}
 		}
 
-		
 		writeJSON(w, http.StatusOK, map[string]any{
 			"items":  items,
 			"facets": facets,
 			"page":   page,
 			"limit":  limit,
 			"total":  total,
+		})
+	}
+}
+
+func getProductBySlugHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		slug := chi.URLParam(r, "slug")
+
+		product, err := s.GetProductBySlug(r.Context(), slug)
+		if err != nil {
+			http.Error(w, "not found", http.StatusNotFound)
+			return
+		}
+
+		variants, _ := s.GetVariantsByProductID(r.Context(), product.ID)
+		media, _ := s.GetMediaByProductID(r.Context(), product.ID)
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"product":  product,
+			"variants": variants,
+			"media":    media,
 		})
 	}
 }
