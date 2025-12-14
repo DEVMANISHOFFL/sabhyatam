@@ -15,13 +15,15 @@ type SearchParams struct {
 }
 
 type ProductCard struct {
-	ID       string         `json:"id"`
-	Title    string         `json:"title"`
-	Slug     string         `json:"slug"`
-	Category string         `json:"category"`
-	Price    int            `json:"price"`
-	ImageURL string         `json:"image_url"`
-	Attrs    map[string]any `json:"attributes"`
+	ID        string         `json:"id"`
+	Title     string         `json:"title"`
+	Slug      string         `json:"slug"`
+	Category  string         `json:"category"`
+	Price     int            `json:"price"`
+	ImageURL  string         `json:"image_url"`
+	Attrs     map[string]any `json:"attributes"`
+	VariantID string         `json:"variant_id"`
+	InStock   bool           `json:"in_stock"`
 }
 
 type FacetCounts map[string]map[string]int

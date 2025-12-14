@@ -404,6 +404,7 @@ func searchProductsHandler(s *store.Store) http.HandlerFunc {
 			items = []model.ProductCard{}
 		}
 
+		
 		writeJSON(w, http.StatusOK, map[string]any{
 			"items":  items,
 			"facets": facets,

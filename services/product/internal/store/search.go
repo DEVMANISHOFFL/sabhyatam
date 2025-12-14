@@ -72,40 +72,59 @@ func (s *Store) SearchProducts(
 		return nil, 0, nil, err
 	}
 
-	order := "p.created_at DESC"
+	order := "price ASC"
 	switch p.Sort {
-	case "price_asc":
-		order = "v.price ASC"
 	case "price_desc":
-		order = "v.price DESC"
+		order = "price DESC"
 	case "newest":
-		order = "p.created_at DESC"
+		order = "created_at DESC"
 	}
 
 	offset := (p.Page - 1) * p.Limit
 
-	// ---- MAIN QUERY ----
 	query := fmt.Sprintf(`
-		SELECT DISTINCT ON (p.id)
-			p.id,
-			p.title,
-			p.slug,
-			p.category,
-			v.price,
-			(
-				SELECT url
-				FROM product_media
-				WHERE product_id = p.id
-				ORDER BY meta->>'order'
-				LIMIT 1
-			) AS image_url,
-			p.attributes
-		FROM products p
-		JOIN product_variants v ON v.product_id = p.id
-		WHERE %s
-		ORDER BY p.id, %s
-		LIMIT $%d OFFSET $%d
-	`,
+WITH ranked_variants AS (
+	SELECT
+		p.id,
+		p.title,
+		p.slug,
+		p.category,
+		v.id AS variant_id,
+		v.price,
+		p.attributes,
+		p.created_at,
+		(
+			SELECT url
+			FROM product_media
+			WHERE product_id = p.id
+			ORDER BY meta->>'order'
+			LIMIT 1
+		) AS image_url,
+		(v.stock > 0) AS in_stock,
+		ROW_NUMBER() OVER (
+			PARTITION BY p.id
+			ORDER BY v.price ASC
+		) AS rn
+	FROM products p
+	JOIN product_variants v ON v.product_id = p.id
+	WHERE %s
+	  AND v.stock > 0
+)
+SELECT
+	id,
+	title,
+	slug,
+	category,
+	variant_id,
+	price,
+	image_url,
+	attributes,
+	in_stock
+FROM ranked_variants
+WHERE rn = 1
+ORDER BY %s
+LIMIT $%d OFFSET $%d
+`,
 		strings.Join(where, " AND "),
 		order,
 		argPos,
@@ -130,9 +149,11 @@ func (s *Store) SearchProducts(
 			&prod.Title,
 			&prod.Slug,
 			&prod.Category,
+			&prod.VariantID,
 			&prod.Price,
 			&prod.ImageURL,
 			&prod.Attrs,
+			&prod.InStock,
 		); err != nil {
 			return nil, 0, nil, err
 		}
@@ -141,11 +162,12 @@ func (s *Store) SearchProducts(
 
 	// ---- COUNT QUERY ----
 	countQuery := fmt.Sprintf(`
-		SELECT COUNT(DISTINCT p.id)
-		FROM products p
-		JOIN product_variants v ON v.product_id = p.id
-		WHERE %s
-	`, strings.Join(where, " AND "))
+	SELECT COUNT(DISTINCT p.id)
+	FROM products p
+	JOIN product_variants v ON v.product_id = p.id
+	WHERE %s
+	  AND v.stock > 0
+`, strings.Join(where, " AND "))
 
 	var total int
 	if err := s.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {

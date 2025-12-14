@@ -1,0 +1,1764 @@
+thecodebymanish@JARVIS:~$ BASE=http://localhost:8080
+ENDPOINT=/v1/products/search
+thecodebymanish@JARVIS:~$ curl -s $BASE/healthz
+okthecodebymanish@JARVIS:~curl -s "$BASE$ENDPOINT" | jqjq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 2,
+      "cotton-silk": 1,
+      "georgette": 1,
+      "organza": 1,
+      "pure silk": 1,
+      "satin": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 5,
+      "ethnic": 1,
+      "festival": 1,
+      "festive": 1,
+      "formal": 1,
+      "office": 2,
+      "party": 2,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 2,
+      "bandhani": 1,
+      "chanderi": 1,
+      "ikat": 1,
+      "kanjivaram": 1,
+      "kota": 1,
+      "mysore": 1,
+      "print": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 47999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "00e03e49-6cb8-4ed1-af89-fe1fbe57582d",
+      "in_stock": true
+    },
+    {
+      "id": "5b2c5b85-023d-4d69-802e-0c6210d4e715",
+      "title": "Printed Satin Saree - Floral Coral",
+      "slug": "printed-satin-floral-coral",
+      "category": "Printed Sarees",
+      "price": 1999,
+      "image_url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+      "attributes": {
+        "care": "machine wash",
+        "fabric": "satin",
+        "length_meters": 5.5,
+        "occasion": [
+          "party",
+          "casual"
+        ],
+        "origin": "Unknown",
+        "weave": "print"
+      },
+      "variant_id": "1c92395c-9865-48e6-be62-30e6a93a0bbc",
+      "in_stock": true
+    },
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "8a4bdd16-91c5-4888-88fe-12422e03329c",
+      "title": "Banarasi Organza Saree - Pastel Peach with Zari",
+      "slug": "banarasi-organza-pastel-peach-zari",
+      "category": "Designer Sarees",
+      "price": 12999,
+      "image_url": "https://cdn.sabhyatam.com/prod/org_peach/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "organza",
+        "length_meters": 5.5,
+        "occasion": [
+          "party"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "1ff81c32-47d3-4db3-ab96-0b54db9f4361",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    },
+    {
+      "id": "99d56444-6e73-4ce1-aee1-e718331b0e1f",
+      "title": "Kota Doria Cotton Saree - Sky Blue Checks",
+      "slug": "kota-doria-sky-blue-checks",
+      "category": "Cotton Sarees",
+      "price": 2999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Rajasthan",
+        "weave": "kota"
+      },
+      "variant_id": "1d7d7b72-92f6-4451-af54-844454979b02",
+      "in_stock": true
+    },
+    {
+      "id": "afaaf3af-a301-487b-ae8c-b6d4098740f3",
+      "title": "Bandhani Georgette Saree - Marigold Yellow",
+      "slug": "bandhani-georgette-marigold",
+      "category": "Printed Sarees",
+      "price": 3499,
+      "image_url": "https://cdn.sabhyatam.com/prod/bandhani_marigold/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "georgette",
+        "length_meters": 5.5,
+        "occasion": [
+          "festival"
+        ],
+        "origin": "Gujarat",
+        "weave": "bandhani"
+      },
+      "variant_id": "47aeeaa2-7c57-444e-a0cf-89a73dc6185e",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    },
+    {
+      "id": "f9a00b7c-8202-4894-9efa-dff667121748",
+      "title": "Ikat Cotton Saree - Indigo Bandha",
+      "slug": "ikat-cotton-indigo-bandha",
+      "category": "Handloom Sarees",
+      "price": 3999,
+      "image_url": "https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "casual"
+        ],
+        "origin": "Odisha",
+        "weave": "ikat"
+      },
+      "variant_id": "f5615926-3a27-422f-b6ac-70cc6a278e6a",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 10
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?q=tussar" | jq
+{
+  "facets": {
+    "fabric": {
+      "tussar silk": 1
+    },
+    "occasion": {
+      "casual": 1,
+      "ethnic": 1
+    },
+    "weave": {
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 1
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?q=silk" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton-silk": 1,
+      "pure silk": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 2,
+      "ethnic": 1,
+      "festive": 1,
+      "formal": 1,
+      "office": 1,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 1,
+      "chanderi": 1,
+      "kanjivaram": 1,
+      "mysore": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 49999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "a2f8cca0-2d29-4b9d-932f-c1c6d54fb040",
+      "in_stock": true
+    },
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 5
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?category=Silk%20Sarees" | jq
+{
+  "facets": {
+    "fabric": {
+      "pure silk": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 1,
+      "ethnic": 1,
+      "festive": 1,
+      "formal": 1,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 1,
+      "kanjivaram": 1,
+      "mysore": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 49999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "a2f8cca0-2d29-4b9d-932f-c1c6d54fb040",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 4
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?category=Handloom%20Sarees" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 1,
+      "cotton-silk": 1
+    },
+    "occasion": {
+      "casual": 2,
+      "office": 1
+    },
+    "weave": {
+      "chanderi": 1,
+      "ikat": 1
+    }
+  },
+  "items": [
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "f9a00b7c-8202-4894-9efa-dff667121748",
+      "title": "Ikat Cotton Saree - Indigo Bandha",
+      "slug": "ikat-cotton-indigo-bandha",
+      "category": "Handloom Sarees",
+      "price": 3999,
+      "image_url": "https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "casual"
+        ],
+        "origin": "Odisha",
+        "weave": "ikat"
+      },
+      "variant_id": "f5615926-3a27-422f-b6ac-70cc6a278e6a",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?fabric=silk" | jq
+{
+  "facets": {
+    "fabric": {
+      "silk": 2
+    },
+    "occasion": {
+      "festive": 1,
+      "formal": 1,
+      "wedding": 1
+    },
+    "weave": {
+      "banarasi": 1,
+      "mysore": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?fabric=cotton-silk" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton-silk": 1
+    },
+    "occasion": {
+      "casual": 1,
+      "office": 1
+    },
+    "weave": {
+      "chanderi": 1
+    }
+  },
+  "items": [
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 1
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?color=earth%20brown" | jq
+{
+  "facets": {
+    "fabric": {
+      "tussar silk": 1
+    },
+    "occasion": {
+      "casual": 1,
+      "ethnic": 1
+    },
+    "weave": {
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 1
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?color=maroon" | jq
+{
+  "facets": {
+    "fabric": {
+      "pure silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "wedding": 1
+    },
+    "weave": {
+      "kanjivaram": 1
+    }
+  },
+  "items": [
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 49999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "a2f8cca0-2d29-4b9d-932f-c1c6d54fb040",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 1
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?occasion=wedding" | jq
+{
+  "facets": {
+    "fabric": {
+      "pure silk": 1,
+      "silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "festive": 1,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 1,
+      "kanjivaram": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 49999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "a2f8cca0-2d29-4b9d-932f-c1c6d54fb040",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?occasion=casual" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 2,
+      "cotton-silk": 1,
+      "satin": 1,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "casual": 5,
+      "ethnic": 1,
+      "office": 2,
+      "party": 1
+    },
+    "weave": {
+      "chanderi": 1,
+      "ikat": 1,
+      "kota": 1,
+      "print": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "5b2c5b85-023d-4d69-802e-0c6210d4e715",
+      "title": "Printed Satin Saree - Floral Coral",
+      "slug": "printed-satin-floral-coral",
+      "category": "Printed Sarees",
+      "price": 1999,
+      "image_url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+      "attributes": {
+        "care": "machine wash",
+        "fabric": "satin",
+        "length_meters": 5.5,
+        "occasion": [
+          "party",
+          "casual"
+        ],
+        "origin": "Unknown",
+        "weave": "print"
+      },
+      "variant_id": "1c92395c-9865-48e6-be62-30e6a93a0bbc",
+      "in_stock": true
+    },
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    },
+    {
+      "id": "99d56444-6e73-4ce1-aee1-e718331b0e1f",
+      "title": "Kota Doria Cotton Saree - Sky Blue Checks",
+      "slug": "kota-doria-sky-blue-checks",
+      "category": "Cotton Sarees",
+      "price": 2999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Rajasthan",
+        "weave": "kota"
+      },
+      "variant_id": "1d7d7b72-92f6-4451-af54-844454979b02",
+      "in_stock": true
+    },
+    {
+      "id": "f9a00b7c-8202-4894-9efa-dff667121748",
+      "title": "Ikat Cotton Saree - Indigo Bandha",
+      "slug": "ikat-cotton-indigo-bandha",
+      "category": "Handloom Sarees",
+      "price": 3999,
+      "image_url": "https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "casual"
+        ],
+        "origin": "Odisha",
+        "weave": "ikat"
+      },
+      "variant_id": "f5615926-3a27-422f-b6ac-70cc6a278e6a",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 5
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?min_price=5000&max_price=10000" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton-silk": 1,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "casual": 2,
+      "ethnic": 1,
+      "office": 1
+    },
+    "weave": {
+      "chanderi": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?max_price=3000" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 1,
+      "satin": 1
+    },
+    "occasion": {
+      "casual": 2,
+      "office": 1,
+      "party": 1
+    },
+    "weave": {
+      "kota": 1,
+      "print": 1
+    }
+  },
+  "items": [
+    {
+      "id": "5b2c5b85-023d-4d69-802e-0c6210d4e715",
+      "title": "Printed Satin Saree - Floral Coral",
+      "slug": "printed-satin-floral-coral",
+      "category": "Printed Sarees",
+      "price": 1999,
+      "image_url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+      "attributes": {
+        "care": "machine wash",
+        "fabric": "satin",
+        "length_meters": 5.5,
+        "occasion": [
+          "party",
+          "casual"
+        ],
+        "origin": "Unknown",
+        "weave": "print"
+      },
+      "variant_id": "1c92395c-9865-48e6-be62-30e6a93a0bbc",
+      "in_stock": true
+    },
+    {
+      "id": "99d56444-6e73-4ce1-aee1-e718331b0e1f",
+      "title": "Kota Doria Cotton Saree - Sky Blue Checks",
+      "slug": "kota-doria-sky-blue-checks",
+      "category": "Cotton Sarees",
+      "price": 2999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Rajasthan",
+        "weave": "kota"
+      },
+      "variant_id": "1d7d7b72-92f6-4451-af54-844454979b02",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?sort=price_asc" | jq '.items[].price'
+24999
+47999
+1999
+6999
+12999
+8999
+2999
+3499
+11999
+3999
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?sort=price_desc" | jq '.items[].price'
+24999
+49999
+1999
+6999
+12999
+8999
+2999
+3499
+11999
+3999
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?sort=newest" | jq '.items[].title'
+"Banarasi Silk Saree - Wine Red with Floral Buta"
+"Kanjivaram Pure Silk Saree - Maroon with Gold Zari"
+"Printed Satin Saree - Floral Coral"
+"Chanderi Cotton Silk Saree - Pastel Mint"
+"Banarasi Organza Saree - Pastel Peach with Zari"
+"Tussar Silk Saree - Earthy Brown with Ajrakh Border"
+"Kota Doria Cotton Saree - Sky Blue Checks"
+"Bandhani Georgette Saree - Marigold Yellow"
+"Mysore Silk Saree - Deep Teal with Contrast Border"
+"Ikat Cotton Saree - Indigo Bandha"
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?page=1&limit=2" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 2,
+      "cotton-silk": 1,
+      "georgette": 1,
+      "organza": 1,
+      "pure silk": 1,
+      "satin": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 5,
+      "ethnic": 1,
+      "festival": 1,
+      "festive": 1,
+      "formal": 1,
+      "office": 2,
+      "party": 2,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 2,
+      "bandhani": 1,
+      "chanderi": 1,
+      "ikat": 1,
+      "kanjivaram": 1,
+      "kota": 1,
+      "mysore": 1,
+      "print": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 47999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "00e03e49-6cb8-4ed1-af89-fe1fbe57582d",
+      "in_stock": true
+    }
+  ],
+  "limit": 2,
+  "page": 1,
+  "total": 10
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?page=2&limit=2" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 2,
+      "cotton-silk": 1,
+      "georgette": 1,
+      "organza": 1,
+      "pure silk": 1,
+      "satin": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 5,
+      "ethnic": 1,
+      "festival": 1,
+      "festive": 1,
+      "formal": 1,
+      "office": 2,
+      "party": 2,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 2,
+      "bandhani": 1,
+      "chanderi": 1,
+      "ikat": 1,
+      "kanjivaram": 1,
+      "kota": 1,
+      "mysore": 1,
+      "print": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "5b2c5b85-023d-4d69-802e-0c6210d4e715",
+      "title": "Printed Satin Saree - Floral Coral",
+      "slug": "printed-satin-floral-coral",
+      "category": "Printed Sarees",
+      "price": 1999,
+      "image_url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+      "attributes": {
+        "care": "machine wash",
+        "fabric": "satin",
+        "length_meters": 5.5,
+        "occasion": [
+          "party",
+          "casual"
+        ],
+        "origin": "Unknown",
+        "weave": "print"
+      },
+      "variant_id": "1c92395c-9865-48e6-be62-30e6a93a0bbc",
+      "in_stock": true
+    },
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    }
+  ],
+  "limit": 2,
+  "page": 2,
+  "total": 10
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?q=silk&fabric=silk&min_price=7000&sort=price_asc" | jq
+{
+  "facets": {
+    "fabric": {
+      "silk": 2
+    },
+    "occasion": {
+      "festive": 1,
+      "formal": 1,
+      "wedding": 1
+    },
+    "weave": {
+      "banarasi": 1,
+      "mysore": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?category=Silk%20Sarees&occasion=wedding&sort=price_desc" | jq
+{
+  "facets": {
+    "fabric": {
+      "pure silk": 1,
+      "silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "festive": 1,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 1,
+      "kanjivaram": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 49999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "a2f8cca0-2d29-4b9d-932f-c1c6d54fb040",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 2
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?q=nonexistentxyz" | jq
+{
+  "facets": {
+    "fabric": {},
+    "occasion": {},
+    "weave": {}
+  },
+  "items": [],
+  "limit": 12,
+  "page": 1,
+  "total": 0
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?category=Silk%20Sarees" | jq '.facets'
+{
+  "fabric": {
+    "pure silk": 1,
+    "silk": 2,
+    "tussar silk": 1
+  },
+  "occasion": {
+    "bridal": 1,
+    "casual": 1,
+    "ethnic": 1,
+    "festive": 1,
+    "formal": 1,
+    "wedding": 2
+  },
+  "weave": {
+    "banarasi": 1,
+    "kanjivaram": 1,
+    "mysore": 1,
+    "tussar": 1
+  }
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT?page=-10&limit=999" | jq
+{
+  "facets": {
+    "fabric": {
+      "cotton": 2,
+      "cotton-silk": 1,
+      "georgette": 1,
+      "organza": 1,
+      "pure silk": 1,
+      "satin": 1,
+      "silk": 2,
+      "tussar silk": 1
+    },
+    "occasion": {
+      "bridal": 1,
+      "casual": 5,
+      "ethnic": 1,
+      "festival": 1,
+      "festive": 1,
+      "formal": 1,
+      "office": 2,
+      "party": 2,
+      "wedding": 2
+    },
+    "weave": {
+      "banarasi": 2,
+      "bandhani": 1,
+      "chanderi": 1,
+      "ikat": 1,
+      "kanjivaram": 1,
+      "kota": 1,
+      "mysore": 1,
+      "print": 1,
+      "tussar": 1
+    }
+  },
+  "items": [
+    {
+      "id": "15f66f2e-49f3-4c87-8f58-3bf7c0a46471",
+      "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
+      "slug": "banarasi-silk-wine-red-floral-buta",
+      "category": "Silk Sarees",
+      "price": 24999,
+      "image_url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+      "attributes": {
+        "care": "dry clean only",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "festive",
+          "wedding"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "35dce073-fe16-476d-a53c-0dc9d015cffb",
+      "in_stock": true
+    },
+    {
+      "id": "4fc51c82-0910-4100-8e8c-d1c292f7ecf5",
+      "title": "Kanjivaram Pure Silk Saree - Maroon with Gold Zari",
+      "slug": "kanjivaram-pure-silk-maroon-gold-zari",
+      "category": "Silk Sarees",
+      "price": 47999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+      "attributes": {
+        "blouse_included": true,
+        "border_style": "temple",
+        "care": "dry clean only",
+        "fabric": "pure silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "bridal",
+          "wedding"
+        ],
+        "origin": "Tamil Nadu",
+        "pattern": "zari",
+        "weave": "kanjivaram"
+      },
+      "variant_id": "00e03e49-6cb8-4ed1-af89-fe1fbe57582d",
+      "in_stock": true
+    },
+    {
+      "id": "5b2c5b85-023d-4d69-802e-0c6210d4e715",
+      "title": "Printed Satin Saree - Floral Coral",
+      "slug": "printed-satin-floral-coral",
+      "category": "Printed Sarees",
+      "price": 1999,
+      "image_url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+      "attributes": {
+        "care": "machine wash",
+        "fabric": "satin",
+        "length_meters": 5.5,
+        "occasion": [
+          "party",
+          "casual"
+        ],
+        "origin": "Unknown",
+        "weave": "print"
+      },
+      "variant_id": "1c92395c-9865-48e6-be62-30e6a93a0bbc",
+      "in_stock": true
+    },
+    {
+      "id": "6b98bd11-d7f7-4c7d-a812-607149ccee40",
+      "title": "Chanderi Cotton Silk Saree - Pastel Mint",
+      "slug": "chanderi-cotton-silk-pastel-mint",
+      "category": "Handloom Sarees",
+      "price": 6999,
+      "image_url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton-silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "chanderi"
+      },
+      "variant_id": "9fbdce9b-ad62-4c90-8dcc-2ae5ae870130",
+      "in_stock": true
+    },
+    {
+      "id": "8a4bdd16-91c5-4888-88fe-12422e03329c",
+      "title": "Banarasi Organza Saree - Pastel Peach with Zari",
+      "slug": "banarasi-organza-pastel-peach-zari",
+      "category": "Designer Sarees",
+      "price": 12999,
+      "image_url": "https://cdn.sabhyatam.com/prod/org_peach/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "organza",
+        "length_meters": 5.5,
+        "occasion": [
+          "party"
+        ],
+        "origin": "Uttar Pradesh",
+        "weave": "banarasi"
+      },
+      "variant_id": "1ff81c32-47d3-4db3-ab96-0b54db9f4361",
+      "in_stock": true
+    },
+    {
+      "id": "92390a37-43f7-404c-979d-1614afc7309b",
+      "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
+      "slug": "tussar-ajrakh-earthy-brown",
+      "category": "Silk Sarees",
+      "price": 8999,
+      "image_url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "tussar silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "ethnic",
+          "casual"
+        ],
+        "origin": "Madhya Pradesh",
+        "weave": "tussar"
+      },
+      "variant_id": "b1db6569-6ad7-48d3-8c88-5a29bb05445d",
+      "in_stock": true
+    },
+    {
+      "id": "99d56444-6e73-4ce1-aee1-e718331b0e1f",
+      "title": "Kota Doria Cotton Saree - Sky Blue Checks",
+      "slug": "kota-doria-sky-blue-checks",
+      "category": "Cotton Sarees",
+      "price": 2999,
+      "image_url": "https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "office",
+          "casual"
+        ],
+        "origin": "Rajasthan",
+        "weave": "kota"
+      },
+      "variant_id": "1d7d7b72-92f6-4451-af54-844454979b02",
+      "in_stock": true
+    },
+    {
+      "id": "afaaf3af-a301-487b-ae8c-b6d4098740f3",
+      "title": "Bandhani Georgette Saree - Marigold Yellow",
+      "slug": "bandhani-georgette-marigold",
+      "category": "Printed Sarees",
+      "price": 3499,
+      "image_url": "https://cdn.sabhyatam.com/prod/bandhani_marigold/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "georgette",
+        "length_meters": 5.5,
+        "occasion": [
+          "festival"
+        ],
+        "origin": "Gujarat",
+        "weave": "bandhani"
+      },
+      "variant_id": "47aeeaa2-7c57-444e-a0cf-89a73dc6185e",
+      "in_stock": true
+    },
+    {
+      "id": "f2c757ba-6706-462c-9f5e-48526127a417",
+      "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
+      "slug": "mysore-silk-deep-teal",
+      "category": "Silk Sarees",
+      "price": 11999,
+      "image_url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+      "attributes": {
+        "care": "dry clean",
+        "fabric": "silk",
+        "length_meters": 5.5,
+        "occasion": [
+          "formal"
+        ],
+        "origin": "Karnataka",
+        "weave": "mysore"
+      },
+      "variant_id": "742cca8d-790d-4904-a7dc-5daf1a7602e9",
+      "in_stock": true
+    },
+    {
+      "id": "f9a00b7c-8202-4894-9efa-dff667121748",
+      "title": "Ikat Cotton Saree - Indigo Bandha",
+      "slug": "ikat-cotton-indigo-bandha",
+      "category": "Handloom Sarees",
+      "price": 3999,
+      "image_url": "https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg",
+      "attributes": {
+        "care": "gentle wash",
+        "fabric": "cotton",
+        "length_meters": 5.5,
+        "occasion": [
+          "casual"
+        ],
+        "origin": "Odisha",
+        "weave": "ikat"
+      },
+      "variant_id": "f5615926-3a27-422f-b6ac-70cc6a278e6a",
+      "in_stock": true
+    }
+  ],
+  "limit": 12,
+  "page": 1,
+  "total": 10
+}
+thecodebymanish@JARVIS:~$ curl -s "$BASE$ENDPOINT" | jq '.items[].in_stock'
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+thecodebymanish@JARVIS:~$ 
