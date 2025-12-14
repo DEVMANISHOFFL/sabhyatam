@@ -15,10 +15,12 @@ import (
 func RegisterRoutes(r *chi.Mux, s *store.Store) {
 
 	r.Route("/v1", func(r chi.Router) {
-			r.Use(middleware.StripSlashes)
+		r.Use(middleware.StripSlashes)
 
 		r.Get("/products", listProductsHandler(s))
 		r.Get("/products/{id}", getProductDetailHandler(s))
+		r.Get("/products/search", searchProductsHandler(s))
+		// r.Get("/products", SearchProductsHandler(s))
 
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(AdminOnly)
@@ -357,5 +359,57 @@ func deductStockHandler(s *store.Store) http.HandlerFunc {
 			return
 		}
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deducted"})
+	}
+}
+
+func searchProductsHandler(s *store.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+
+		page, _ := strconv.Atoi(q.Get("page"))
+		limit, _ := strconv.Atoi(q.Get("limit"))
+
+		if page <= 0 {
+			page = 1
+		}
+		if limit <= 0 || limit > 50 {
+			limit = 12
+		}
+
+		params := model.SearchParams{
+			Query:    q.Get("q"),
+			Category: q.Get("category"),
+			Fabric:   q.Get("fabric"),
+			Color:    q.Get("color"),
+			Occasion: q.Get("occasion"),
+			Sort:     q.Get("sort"),
+			Page:     page,
+			Limit:    limit,
+		}
+
+		if v := q.Get("min_price"); v != "" {
+			params.MinPrice, _ = strconv.Atoi(v)
+		}
+		if v := q.Get("max_price"); v != "" {
+			params.MaxPrice, _ = strconv.Atoi(v)
+		}
+
+		items, total, facets, err := s.SearchProducts(r.Context(), params)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if items == nil {
+			items = []model.ProductCard{}
+		}
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"items":  items,
+			"facets": facets,
+			"page":   page,
+			"limit":  limit,
+			"total":  total,
+		})
 	}
 }
