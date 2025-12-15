@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/devmanishoffl/sabhyatam-cart/internal/client"
@@ -180,28 +181,98 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var resp model.CartResponse
-	var subtotal int64
-	var count int
-
-	for _, it := range items {
-		lineTotal := it.UnitPrice * int64(it.Quantity)
-		subtotal += lineTotal
-		count += it.Quantity
-
-		resp.Items = append(resp.Items, model.HydratedItem{
-			ProductID: it.ProductID,
-			VariantID: it.VariantID,
-			Quantity:  it.Quantity,
-			UnitPrice: it.UnitPrice,
-			LineTotal: lineTotal,
-		})
+	resp := model.CartResponse{
+		Currency: "INR",
 	}
 
-	resp.Subtotal = subtotal
-	resp.ItemCount = count
-	resp.Currency = "INR"
+	for _, it := range items {
+		// 1. Fetch product snapshot (source of truth)
+		prodResp, err := h.pclient.GetProductDetail(ctx, it.ProductID)
+		if err != nil {
+			_ = h.store.DeleteItem(ctx, key, it.VariantID)
+			continue
+		}
 
+		productRaw, ok := prodResp["product"].(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// unpublished product → auto remove
+		if pub, ok := productRaw["published"].(bool); ok && !pub {
+			_ = h.store.DeleteItem(ctx, key, it.VariantID)
+			continue
+		}
+
+		// 2. Resolve variant
+		variant, ok := client.VariantFromProduct(prodResp, it.VariantID)
+		if !ok {
+			_ = h.store.DeleteItem(ctx, key, it.VariantID)
+			continue
+		}
+
+		// 3. Normalize price
+		// 3. Normalize price (ALWAYS cents)
+		var unitPrice int64
+		var mrp int64
+
+		if v, ok := variant["price"]; ok {
+			// product service gives rupees → convert to paise
+			unitPrice = int64(toFloat(v) * 100)
+		}
+
+		if v, ok := variant["mrp"]; ok {
+			mrp = int64(toFloat(v) * 100)
+		}
+
+		// 4. Enforce stock limits
+		if s, ok := variant["stock"]; ok {
+			maxQty := int(toFloat(s))
+			if it.Quantity > maxQty {
+				it.Quantity = maxQty
+				if it.Quantity <= 0 {
+					_ = h.store.DeleteItem(ctx, key, it.VariantID)
+					continue
+				}
+				_ = h.store.SetItem(ctx, key, it.VariantID, it)
+			}
+		}
+
+		lineTotal := unitPrice * int64(it.Quantity)
+
+		// 5. Extract hero image
+		image := ""
+		if media, ok := prodResp["media"].([]any); ok && len(media) > 0 {
+			if m, ok := media[0].(map[string]any); ok {
+				if u, ok := m["url"].(string); ok {
+					image = u
+				}
+			}
+		}
+
+		resp.Items = append(resp.Items, model.HydratedItem{
+			Product: map[string]any{
+				"id":    productRaw["id"],
+				"title": productRaw["title"],
+				"slug":  productRaw["slug"],
+				"image": image,
+			},
+			Variant: map[string]any{
+				"id":    variant["id"],
+				"price": unitPrice,
+				"mrp":   mrp,
+			},
+			Quantity:  it.Quantity,
+			UnitPrice: unitPrice,
+			LineTotal: lineTotal,
+		})
+
+		resp.Subtotal += lineTotal
+		resp.ItemCount += it.Quantity
+	}
+	log.Println("CART SESSION:", ctx.Value(CtxSessionID))
+
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
@@ -228,17 +299,12 @@ func (h *Handler) MergeCarts(w http.ResponseWriter, r *http.Request) {
 }
 
 // ---------- helpers ----------
-
 func resolveKey(ctx context.Context) string {
-	if v := ctx.Value(CtxUserID); v != nil {
-		if s, ok := v.(string); ok && s != "" {
-			return "cart:user:" + s
-		}
+	if sid := ctx.Value(CtxSessionID); sid != nil && sid.(string) != "" {
+		return "session:" + sid.(string)
 	}
-	if v := ctx.Value(CtxSessionID); v != nil {
-		if s, ok := v.(string); ok && s != "" {
-			return "cart:guest:" + s
-		}
+	if uid := ctx.Value(CtxUserID); uid != nil && uid.(string) != "" {
+		return "user:" + uid.(string)
 	}
 	return ""
 }
@@ -269,4 +335,37 @@ func asMoney(v any) int64 {
 	default:
 		return 0
 	}
+}
+
+func toFloat(v any) float64 {
+	switch t := v.(type) {
+	case float64:
+		return t
+	case int:
+		return float64(t)
+	case json.Number:
+		f, _ := t.Float64()
+		return f
+	default:
+		return 0
+	}
+}
+
+func (h *Handler) ClearCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	key := resolveKey(ctx)
+	if key == "" {
+		http.Error(w, "no user/session", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.store.DeleteAll(ctx, key); err != nil {
+		http.Error(w, "failed to clear cart", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "cleared",
+	})
 }

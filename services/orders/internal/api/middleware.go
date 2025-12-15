@@ -1,1 +1,63 @@
 package api
+
+import (
+	"context"
+	"net/http"
+)
+
+type ctxKey string
+
+const (
+	ctxUserID    ctxKey = "user_id"
+	ctxSessionID ctxKey = "session_id"
+)
+
+func getUserID(ctx context.Context) string {
+	if v := ctx.Value(ctxUserID); v != nil {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return ""
+}
+
+func getSessionID(ctx context.Context) string {
+	if v := ctx.Value(ctxSessionID); v != nil {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return ""
+}
+
+func UserSessionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		if uid := r.Header.Get("X-USER-ID"); uid != "" {
+			ctx = context.WithValue(ctx, ctxUserID, uid)
+		}
+
+		if sid := r.Header.Get("X-SESSION-ID"); sid != "" {
+			ctx = context.WithValue(ctx, ctxSessionID, sid)
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-USER-ID, X-SESSION-ID")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}

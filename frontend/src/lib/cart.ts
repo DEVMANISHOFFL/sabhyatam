@@ -1,35 +1,54 @@
 import { getOrCreateSessionId } from './session'
 
-
 const CART_BASE = 'http://localhost:8081/v1/cart'
 
+/**
+ * Types mirror backend response exactly
+ */
 export type CartItem = {
-  product_id: string
-  variant_id: string
-  title: string
-  price: number
+  product: {
+    id: string
+    title: string
+    slug: string
+    image: string
+  }
+  variant: {
+    id: string
+    price: number
+    mrp?: number
+  }
   quantity: number
-  image_url?: string
+  line_total: number
 }
 
 export type CartResponse = {
   items: CartItem[]
-  total_items: number
-  total_price: number
+  subtotal: number
 }
 
-export async function getCart() {
+/**
+ * GET CART
+ */
+export async function getCart(): Promise<CartResponse> {
   const res = await fetch(`${CART_BASE}/`, {
+    method: 'GET',
+    credentials: 'include',
     headers: {
       'X-SESSION-ID': getOrCreateSessionId(),
     },
-    credentials: 'include',
   })
 
-  if (!res.ok) throw new Error('Failed to fetch cart')
+  if (!res.ok) {
+    throw new Error('Failed to fetch cart')
+  }
+
   return res.json()
 }
 
+/**
+ * ADD TO CART
+ * Backend expects full context
+ */
 export async function addToCart(input: {
   product_id: string
   variant_id: string
@@ -37,17 +56,25 @@ export async function addToCart(input: {
 }) {
   const res = await fetch(`${CART_BASE}/add`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       'X-SESSION-ID': getOrCreateSessionId(),
     },
     body: JSON.stringify(input),
-    credentials: 'include',
   })
 
-  if (!res.ok) throw new Error('Failed to add to cart')
+  if (!res.ok) {
+    throw new Error('Failed to add to cart')
+  }
+
   return res.json()
 }
+
+/**
+ * UPDATE CART ITEM
+ * product_id is NOT required here
+ */
 export async function updateCartItem(input: {
   variant_id: string
   quantity: number
@@ -55,19 +82,33 @@ export async function updateCartItem(input: {
   const res = await fetch(`${CART_BASE}/update`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-SESSION-ID': getOrCreateSessionId(),
+    },
     body: JSON.stringify(input),
   })
-  if (!res.ok) throw new Error('Update failed')
+
+  if (!res.ok) {
+    throw new Error('Update failed')
+  }
 }
 
+/**
+ * REMOVE ITEM
+ */
 export async function removeCartItem(variant_id: string) {
   const res = await fetch(`${CART_BASE}/remove`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-SESSION-ID': getOrCreateSessionId(),
+    },
     body: JSON.stringify({ variant_id }),
   })
-  if (!res.ok) throw new Error('Remove failed')
+
+  if (!res.ok) {
+    throw new Error('Remove failed')
+  }
 }
-    

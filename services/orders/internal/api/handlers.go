@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 
@@ -18,102 +19,110 @@ type Handler struct {
 	cartClient *client.CartClient
 }
 
+func NewHandler(
+	s *store.PGStore,
+	pc *client.ProductClient,
+	cc *client.CartClient,
+) *Handler {
+	return &Handler{
+		store:      s,
+		pclient:    pc,
+		cartClient: cc,
+	}
+}
+
 func isValidUUID(id string) bool {
 	_, err := uuid.Parse(id)
 	return err == nil
 }
 
-func NewHandler(s *store.PGStore, pc *client.ProductClient, cc *client.CartClient) *Handler {
-	return &Handler{store: s, pclient: pc, cartClient: cc}
-}
-
-// PrepareOrder: POST /v1/orders/prepare
-// expects authenticated user via X-USER-ID
+// PREPARE ORDER (cart → draft order)
+// POST /v1/orders/prepare
 func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	userID := r.Header.Get("X-USER-ID")
 	sessionID := r.Header.Get("X-SESSION-ID")
+	log.Printf("PrepareOrder headers: user=%s session=%s", userID, sessionID)
 
 	if userID == "" && sessionID == "" {
 		http.Error(w, "authentication required", http.StatusUnauthorized)
 		return
 	}
 
-	ctx := r.Context()
-
+	// 1. Fetch cart (typed)
 	var (
-		cart map[string]any
+		cart *client.CartResponse
 		err  error
 	)
 
-	// fetch cart correctly
-	if sessionID != "" {
-		cart, err = h.cartClient.GetCartForSession(ctx, sessionID)
-	} else {
+	if userID != "" {
 		cart, err = h.cartClient.GetCartForUser(ctx, userID)
+	} else {
+		cart, err = h.cartClient.GetCartForSession(ctx, sessionID)
 	}
+	log.Printf("Cart received: %+v", cart)
 
 	if err != nil {
 		http.Error(w, "failed to fetch cart: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 
-	itemsAny, _ := cart["items"].([]any)
-	if len(itemsAny) == 0 {
-		http.Error(w, "cart empty", http.StatusBadRequest)
+	if len(cart.Items) == 0 {
+		http.Error(w, "cart is empty", http.StatusBadRequest)
 		return
 	}
 
+	// 2. Convert cart → order items
 	var (
 		orderItems []model.OrderItem
 		totalCents int64
 	)
 
-	for _, v := range itemsAny {
-		m, ok := v.(map[string]any)
-		if !ok {
-			continue
-		}
+	for _, it := range cart.Items {
+		log.Printf("Cart item: %+v", it)
 
-		variant, _ := m["variant"].(map[string]any)
-		product, _ := m["product"].(map[string]any)
-
-		qty := int(m["quantity"].(float64))
-		variantID, _ := variant["id"].(string)
-		productID, _ := product["id"].(string)
-
-		price := int64(variant["price"].(float64) * 100)
-
-		if variantID == "" || productID == "" || qty <= 0 {
+		if it.Quantity <= 0 {
 			continue
 		}
 
 		orderItems = append(orderItems, model.OrderItem{
-			ProductID:  productID,
-			VariantID:  variantID,
-			Quantity:   qty,
-			PriceCents: price,
+			ProductID:  it.Product.ID,
+			VariantID:  it.Variant.ID,
+			Quantity:   it.Quantity,
+			PriceCents: it.Variant.Price,
 		})
 
-		totalCents += price * int64(qty)
+		totalCents += it.Variant.Price * int64(it.Quantity)
+		if totalCents <= 0 {
+			http.Error(w, "invalid order total", http.StatusBadRequest)
+			return
+		}
 	}
 
 	if len(orderItems) == 0 {
-		http.Error(w, "no valid items", http.StatusBadRequest)
+		http.Error(w, "no valid items in cart", http.StatusBadRequest)
 		return
 	}
 
-	// user is optional
+	// 3. Create draft order
 	var uid *string
 	if userID != "" {
 		uid = &userID
 	}
 
-	orderID, err := h.store.CreateDraftOrder(ctx, uid, orderItems, totalCents)
+	orderID, err := h.store.CreateDraftOrder(
+		ctx,
+		uid,
+		orderItems,
+		totalCents,
+	)
 	if err != nil {
 		http.Error(w, "db error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	// 4. Reserve stock (soft lock)
 	for _, it := range orderItems {
 		if err := h.pclient.ReserveStock(ctx, it.VariantID, it.Quantity); err != nil {
 			http.Error(w, "stock reservation failed", http.StatusConflict)
@@ -121,17 +130,17 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// 5. Respond
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"order_id":     orderID,
 		"amount_cents": totalCents,
 		"currency":     "INR",
 	})
 }
 
-// ConfirmOrder: POST /v1/orders/confirm
-// body: { "order_id": "..." }
-// It will mark order paid and deduct stock by calling product-svc deduct API
+// CONFIRM ORDER (manual / fallback)
+// POST /v1/orders/confirm
 func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		OrderID string `json:"order_id"`
@@ -140,40 +149,174 @@ func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
-	if body.OrderID == "" {
-		http.Error(w, "order_id required", http.StatusBadRequest)
+
+	if !isValidUUID(body.OrderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
 		return
 	}
 
 	ctx := r.Context()
+
 	order, err := h.store.GetOrder(ctx, body.OrderID)
 	if err != nil {
 		http.Error(w, "order not found", http.StatusNotFound)
 		return
 	}
-	if order.Status != string(model.StatusDraft) && order.Status != string(model.StatusPending) {
-		http.Error(w, "order not in confirmable state", http.StatusBadRequest)
+
+	if order.Status != string(model.StatusDraft) &&
+		order.Status != string(model.StatusPending) {
+		http.Error(w, "order not confirmable", http.StatusBadRequest)
 		return
 	}
 
-	// call DeductStock for each item
+	// Deduct stock permanently
 	for _, it := range order.Items {
 		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
-			http.Error(w, "stock deduction failed: "+err.Error(), http.StatusBadGateway)
+			http.Error(w, "stock deduction failed", http.StatusBadGateway)
 			return
 		}
 	}
 
 	if err := h.store.UpdateOrderStatus(ctx, order.ID, string(model.StatusPaid)); err != nil {
-		http.Error(w, "failed to update order status", http.StatusInternalServerError)
+		http.Error(w, "failed to update order", http.StatusInternalServerError)
 		return
 	}
 
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "paid"})
 }
 
+// POST /v1/orders/{orderID}/release
+// INTERNAL ONLY
+func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+
+	if !isValidUUID(orderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := r.Context()
+
+	order, err := h.store.GetOrder(ctx, orderID)
+	if err != nil {
+		w.WriteHeader(http.StatusOK) // idempotent
+		return
+	}
+
+	// only draft / pending can be released
+	if order.Status == string(model.StatusPaid) {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// release reserved stock
+	for _, it := range order.Items {
+		_ = h.pclient.ReleaseStock(ctx, it.VariantID, it.Quantity)
+	}
+
+	_ = h.store.UpdateOrderStatus(ctx, orderID, "cancelled")
+	w.WriteHeader(http.StatusOK)
+}
+
+// POST /v1/orders/{orderID}/refund
+// INTERNAL ONLY
+func (h *Handler) RefundOrder(w http.ResponseWriter, r *http.Request) {
+	orderID := chi.URLParam(r, "orderID")
+
+	if !isValidUUID(orderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
+		return
+	}
+
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := r.Context()
+
+	order, err := h.store.GetOrder(ctx, orderID)
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if order.Status != string(model.StatusPaid) {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// restore stock
+	for _, it := range order.Items {
+		_ = h.pclient.ReleaseStock(ctx, it.VariantID, it.Quantity)
+	}
+
+	_ = h.store.UpdateOrderStatus(ctx, orderID, "refunded")
+	w.WriteHeader(http.StatusOK)
+}
+
+// POST /v1/orders/from-cart
+func (h *Handler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	userID := r.Header.Get("X-USER-ID")
+	sessionID := r.Header.Get("X-SESSION-ID")
+
+	if userID == "" && sessionID == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var (
+		cart *client.CartResponse
+		err  error
+	)
+
+	if userID != "" {
+		cart, err = h.cartClient.GetCartForUser(ctx, userID)
+	} else {
+		cart, err = h.cartClient.GetCartForSession(ctx, sessionID)
+	}
+
+	if err != nil || len(cart.Items) == 0 {
+		http.Error(w, "cart empty", http.StatusBadRequest)
+		return
+	}
+
+	var (
+		items []model.OrderItem
+		total int64
+	)
+
+	for _, it := range cart.Items {
+		items = append(items, model.OrderItem{
+			ProductID:  it.Product.ID,
+			VariantID:  it.Variant.ID,
+			Quantity:   it.Quantity,
+			PriceCents: it.Variant.Price,
+		})
+		total += it.Variant.Price * int64(it.Quantity)
+	}
+
+	orderID, err := h.store.CreateDraftOrder(ctx, nil, items, total)
+	if err != nil {
+		http.Error(w, "order create failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"order_id": orderID,
+	})
+}
+
+// INTERNAL: mark order paid (called by payments)
 // POST /v1/orders/{orderID}/paid
-// called ONLY by payments service
 func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -182,13 +325,7 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if orderID == "" {
-		http.Error(w, "order id required", http.StatusBadRequest)
-		return
-	}
-
-	adminKey := r.Header.Get("X-INTERNAL-KEY")
-	if adminKey != os.Getenv("INTERNAL_SERVICE_KEY") {
+	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -201,12 +338,11 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if order.Status == "paid" {
+	if order.Status == string(model.StatusPaid) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// deduct stock
 	for _, it := range order.Items {
 		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
 			http.Error(w, "stock deduction failed", http.StatusBadGateway)
@@ -214,7 +350,7 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := h.store.UpdateOrderStatus(ctx, orderID, "paid"); err != nil {
+	if err := h.store.UpdateOrderStatus(ctx, orderID, string(model.StatusPaid)); err != nil {
 		http.Error(w, "failed to update order", http.StatusInternalServerError)
 		return
 	}
@@ -222,10 +358,12 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// INTERNAL: fetch order
 func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
-	if orderID == "" {
-		http.Error(w, "order id required", http.StatusBadRequest)
+
+	if !isValidUUID(orderID) {
+		http.Error(w, "invalid order id", http.StatusBadRequest)
 		return
 	}
 
@@ -240,15 +378,12 @@ func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"order_id":     order.ID,
-		"status":       order.Status,
-		"amount_cents": order.TotalAmountCents,
-		"currency":     order.Currency,
-	})
+	_ = json.NewEncoder(w).Encode(order)
 }
 
-func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
+// GET /v1/orders/{orderID}
+// Public-safe order fetch (no internal key)
+func (h *Handler) GetOrderPublic(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
 	if !isValidUUID(orderID) {
@@ -256,35 +391,19 @@ func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+	order, err := h.store.GetOrder(r.Context(), orderID)
+	if err != nil {
+		http.Error(w, "order not found", http.StatusNotFound)
 		return
 	}
 
-	if err := h.store.ReleaseOrder(r.Context(), orderID); err != nil {
-		// idempotent: already released / already paid
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func (h *Handler) RefundOrder(w http.ResponseWriter, r *http.Request) {
-	orderID := chi.URLParam(r, "orderID")
-
-	// Internal auth
-	if r.Header.Get("X-INTERNAL-KEY") != os.Getenv("INTERNAL_SERVICE_KEY") {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Business logic
-	if err := h.store.RefundOrder(r.Context(), orderID); err != nil {
-		// Idempotent: already refunded / not refundable
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+	// ⛔ Do NOT leak internals
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"id":        order.ID,
+		"status":    order.Status,
+		"subtotal":  order.Subtotal,
+		"currency":  order.Currency,
+		"items":     order.Items,
+		"createdAt": order.CreatedAt,
+	})
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/store"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -38,6 +39,15 @@ func main() {
 	h := api.NewHandler(ps, pc, cc)
 
 	r := chi.NewRouter()
+	r.Use(api.CORSMiddleware)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-SESSION-ID", "X-USER-ID"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
+
 	api.RegisterRoutes(r, h)
 
 	addr := ":" + strconv.Itoa(port)

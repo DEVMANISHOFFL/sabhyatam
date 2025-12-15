@@ -90,3 +90,24 @@ func (o *OrdersClient) ReleaseOrder(ctx context.Context, orderID string) error {
 
 	return nil
 }
+
+func (c *OrdersClient) MarkOrderPaid(ctx context.Context, orderID string) error {
+	req, _ := http.NewRequest(
+		http.MethodPost,
+		c.base+"/v1/orders/"+orderID+"/paid",
+		nil,
+	)
+	req.Header.Set("X-INTERNAL-KEY", c.key)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("orders returned %d", resp.StatusCode)
+	}
+
+	return nil
+}

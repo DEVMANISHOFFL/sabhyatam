@@ -9,11 +9,11 @@ type CartItem struct {
 }
 
 type HydratedItem struct {
-	ProductID string `json:"product_id"`
-	VariantID string `json:"variant_id"`
-	Quantity  int    `json:"quantity"`
-	UnitPrice int64  `json:"unit_price"`
-	LineTotal int64  `json:"line_total"`
+	Product   map[string]any `json:"product"`
+	Variant   map[string]any `json:"variant"`
+	Quantity  int            `json:"quantity"`
+	UnitPrice int64          `json:"unit_price"`
+	LineTotal int64          `json:"line_total"`
 }
 
 type CartResponse struct {

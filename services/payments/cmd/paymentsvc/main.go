@@ -49,6 +49,8 @@ func main() {
 	handler := api.NewHandler(pgStore, gw, ordersClient)
 
 	r := chi.NewRouter()
+	r.Use(api.CORSMiddleware)
+
 	api.RegisterRoutes(r, handler)
 
 	log.Println("paymentsvc listening on :8083")

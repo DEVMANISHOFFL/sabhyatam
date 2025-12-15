@@ -20,6 +20,7 @@ type Order struct {
 	CreatedAt        time.Time   `json:"created_at"`
 	UpdatedAt        time.Time   `json:"updated_at"`
 	Items            []OrderItem `json:"items,omitempty"`
+	Subtotal         int64       `json:"subtotal"`
 }
 
 type OrderItem struct {

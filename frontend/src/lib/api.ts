@@ -1,4 +1,16 @@
+import { AdminProduct } from "./types"
+
 const BASE = process.env.NEXT_PUBLIC_API_BASE!
+
+export type ProductSearchResponse = {
+  items: AdminProduct[]
+  facets: Record<string, any>
+  page: number
+  limit: number
+  total: number
+}
+
+
 
 export async function api<T>(
   path: string,
@@ -25,4 +37,22 @@ export async function api<T>(
   }
 
   return res.json() as Promise<T>
+}
+
+
+export async function fetchProducts(
+  params: { page: number; limit: number; sort?: string }
+): Promise<ProductSearchResponse> {
+  const q = new URLSearchParams()
+  if (params.page) q.set('page', String(params.page))
+  if (params.limit) q.set('limit', String(params.limit))
+  if (params.sort) q.set('sort', params.sort)
+
+  const res = await fetch(
+    `http://localhost:8080/v1/products/search?${q.toString()}`,
+    { credentials: 'include' }
+  )
+
+  if (!res.ok) throw new Error('products fetch failed')
+  return res.json()
 }

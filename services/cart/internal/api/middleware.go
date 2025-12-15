@@ -19,15 +19,21 @@ func UserSessionMiddleware(next http.Handler) http.Handler {
 
 		ctx := r.Context()
 
-		// 1️⃣ Try reading session cookie
-		cookie, err := r.Cookie("sabhyatam_session")
-		if err == nil && cookie.Value != "" {
+		// 1️⃣ INTERNAL / API CALLS: trust header first
+		if sid := r.Header.Get("X-SESSION-ID"); sid != "" {
+			ctx = context.WithValue(ctx, CtxSessionID, sid)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		// 2️⃣ BROWSER: read cookie
+		if cookie, err := r.Cookie("sabhyatam_session"); err == nil && cookie.Value != "" {
 			ctx = context.WithValue(ctx, CtxSessionID, cookie.Value)
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
 
-		// 2️⃣ No session → create guest session
+		// 3️⃣ New guest session (browser only)
 		sessionID := uuid.NewString()
 
 		http.SetCookie(w, &http.Cookie{
@@ -36,7 +42,6 @@ func UserSessionMiddleware(next http.Handler) http.Handler {
 			Path:     "/",
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
-			// Secure: true // enable in prod HTTPS
 		})
 
 		ctx = context.WithValue(ctx, CtxSessionID, sessionID)

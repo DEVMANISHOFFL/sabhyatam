@@ -3,12 +3,14 @@ package api
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/devmanishoffl/sabhyatam-payments/internal/client"
 	"github.com/devmanishoffl/sabhyatam-payments/internal/gateway"
 	"github.com/devmanishoffl/sabhyatam-payments/internal/store"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -165,6 +167,60 @@ func (h *Handler) RazorpayWebhook(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		req.Header.Set("X-INTERNAL-KEY", os.Getenv("INTERNAL_SERVICE_KEY"))
 		http.DefaultClient.Do(req)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) CreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		OrderID     string `json:"order_id"`
+		AmountCents int64  `json:"amount_cents"`
+		Currency    string `json:"currency"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	if body.OrderID == "" || body.AmountCents <= 0 {
+		http.Error(w, "invalid payment request", http.StatusBadRequest)
+		return
+	}
+
+	// mock gateway payload for now
+	intentID := uuid.NewString()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"payment_id": intentID,
+		"order_id":   body.OrderID,
+		"amount":     body.AmountCents,
+		"currency":   body.Currency,
+		"gateway": map[string]any{
+			"type": "mock",
+			"id":   intentID,
+		},
+	})
+}
+
+func (h *Handler) MockPaymentSuccess(w http.ResponseWriter, r *http.Request) {
+	log.Println("payments: server booting")
+
+	var body struct {
+		OrderID string `json:"order_id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	err := h.orders.MarkOrderPaid(r.Context(), body.OrderID)
+	if err != nil {
+		http.Error(w, "failed to mark order paid", http.StatusBadGateway)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

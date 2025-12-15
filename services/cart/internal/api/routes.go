@@ -12,6 +12,8 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 		r.Use(UserSessionMiddleware)
 		r.Get("/", h.GetCart)
 		r.Post("/add", h.AddItem)
+		r.Post("/clear", h.ClearCart)
+
 		r.Post("/update", h.UpdateItem)
 		r.Post("/remove", h.RemoveItem)
 		r.Post("/merge", h.MergeCarts) // expects {guest_id, user_id}

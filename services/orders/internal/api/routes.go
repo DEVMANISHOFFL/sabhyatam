@@ -8,9 +8,12 @@ import (
 
 func RegisterRoutes(r *chi.Mux, h *Handler) {
 	r.Route("/v1/orders", func(r chi.Router) {
+		r.Use(UserSessionMiddleware)
 		r.Post("/prepare", h.PrepareOrder)
 		r.Post("/confirm", h.ConfirmOrder)
 		r.Post("/{orderID}/refund", h.RefundOrder)
+		r.Post("/orders/from-cart", h.CreateOrderFromCart)
+		r.Get("/{orderID}/public", h.GetOrderPublic)
 
 		r.Get("/internal/orders/{orderID}", h.GetOrderInternal)
 

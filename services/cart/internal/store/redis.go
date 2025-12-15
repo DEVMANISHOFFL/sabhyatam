@@ -141,3 +141,7 @@ func (s *RedisStore) GetItem(
 
 	return &item, nil
 }
+
+func (r *RedisStore) DeleteAll(ctx context.Context, key string) error {
+	return r.cli.Del(ctx, key).Err()
+}

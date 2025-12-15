@@ -45,6 +45,7 @@ func main() {
 			"Authorization",
 			"Content-Type",
 			"X-SESSION-ID",
+			"X-ADMIN-KEY",
 		},
 		ExposedHeaders: []string{
 			"Link",
