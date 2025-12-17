@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -13,157 +14,143 @@ func (s *Store) SearchProducts(
 	p model.SearchParams,
 ) ([]model.ProductCard, int, model.Facets, error) {
 
-	where := []string{"p.published = true"}
+	where := []string{
+		"p.deleted_at IS NULL",
+		"p.published = true",
+	}
 	args := []any{}
-	argPos := 1
+	arg := 1
 
 	if p.Query != "" {
 		where = append(where,
-			fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", argPos, argPos),
+			fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", arg, arg),
 		)
 		args = append(args, "%"+p.Query+"%")
-		argPos++
+		arg++
 	}
 
 	if p.Category != "" {
-		where = append(where, fmt.Sprintf("LOWER(p.category) = LOWER($%d)", argPos))
+		where = append(where, fmt.Sprintf("p.category = $%d", arg))
 		args = append(args, p.Category)
-		argPos++
+		arg++
 	}
 
 	if p.Fabric != "" {
-		where = append(where, fmt.Sprintf("p.attributes->>'fabric' = $%d", argPos))
+		where = append(where, fmt.Sprintf("p.attributes->>'fabric' = $%d", arg))
 		args = append(args, p.Fabric)
-		argPos++
-	}
-
-	if p.Color != "" {
-		where = append(where,
-			fmt.Sprintf("LOWER(v.attributes->>'color') = LOWER($%d)", argPos),
-		)
-		args = append(args, p.Color)
-		argPos++
+		arg++
 	}
 
 	if p.Occasion != "" {
 		where = append(where,
-			fmt.Sprintf("p.attributes->'occasion' ? $%d", argPos),
+			fmt.Sprintf("p.attributes->'occasion' ? $%d", arg),
 		)
 		args = append(args, p.Occasion)
-		argPos++
+		arg++
 	}
 
+	// --- PRICE FILTERS (variant-level) ---
 	if p.MinPrice > 0 {
-		where = append(where, fmt.Sprintf("v.price >= $%d", argPos))
+		where = append(where, fmt.Sprintf(`
+			EXISTS (
+				SELECT 1
+				FROM product_variants v
+				WHERE v.product_id = p.id
+				AND v.price >= $%d
+			)
+		`, arg))
 		args = append(args, p.MinPrice)
-		argPos++
+		arg++
 	}
 
 	if p.MaxPrice > 0 {
-		where = append(where, fmt.Sprintf("v.price <= $%d", argPos))
+		where = append(where, fmt.Sprintf(`
+			EXISTS (
+				SELECT 1
+				FROM product_variants v
+				WHERE v.product_id = p.id
+				AND v.price <= $%d
+			)
+		`, arg))
 		args = append(args, p.MaxPrice)
-		argPos++
-	}
-
-	facets, err := s.SearchFacets(ctx, where, args)
-	if err != nil {
-		return nil, 0, nil, err
-	}
-
-	order := "price ASC"
-	switch p.Sort {
-	case "price_desc":
-		order = "price DESC"
-	case "newest":
-		order = "created_at DESC"
+		arg++
 	}
 
 	offset := (p.Page - 1) * p.Limit
 
 	query := fmt.Sprintf(`
-WITH ranked_variants AS (
-	SELECT
-		p.id,
-		p.title,
-		p.slug,
-		p.category,
-		v.id AS variant_id,
-		v.price,
-		p.attributes,
-		p.created_at,
-		(
-			SELECT url
-			FROM product_media
-			WHERE product_id = p.id
-			ORDER BY meta->>'order'
-			LIMIT 1
-		) AS image_url,
-		(v.stock > 0) AS in_stock,
-		ROW_NUMBER() OVER (
-			PARTITION BY p.id
-			ORDER BY v.price ASC
-		) AS rn
-	FROM products p
-	JOIN product_variants v ON v.product_id = p.id
-	WHERE %s
-	  AND v.stock > 0
-)
 SELECT
-	id,
-	title,
-	slug,
-	category,
-	variant_id,
-	price,
-	image_url,
-	attributes,
-	in_stock
-FROM ranked_variants
-WHERE rn = 1
-ORDER BY %s
+	p.id,
+	p.title,
+	p.slug,
+	p.category,
+	(
+		SELECT v.id
+		FROM product_variants v
+		WHERE v.product_id = p.id
+		ORDER BY v.price ASC
+		LIMIT 1
+	) AS variant_id,
+	COALESCE((
+    SELECT (v.price)::INT
+    FROM product_variants v
+    WHERE v.product_id = p.id
+    ORDER BY v.price ASC
+    LIMIT 1
+), 0) AS price,
+		COALESCE((
+    SELECT url
+    FROM product_media
+    WHERE product_id = p.id
+    ORDER BY (meta->>'order')::int
+    LIMIT 1
+), '') AS image_url,
+	p.attributes
+FROM products p
+WHERE %s
+ORDER BY p.created_at DESC
 LIMIT $%d OFFSET $%d
 `,
 		strings.Join(where, " AND "),
-		order,
-		argPos,
-		argPos+1,
+		arg,
+		arg+1,
 	)
 
-	rows, err := s.db.Query(
-		ctx,
-		query,
-		append(args, p.Limit, offset)...,
-	)
+	rows, err := s.db.Query(ctx, query, append(args, p.Limit, offset)...)
 	if err != nil {
 		return nil, 0, nil, err
 	}
 	defer rows.Close()
 
-	var products []model.ProductCard
+	var items []model.ProductCard
 	for rows.Next() {
-		var prod model.ProductCard
+		var pc model.ProductCard
+		var variantID sql.NullString
+
 		if err := rows.Scan(
-			&prod.ID,
-			&prod.Title,
-			&prod.Slug,
-			&prod.Category,
-			&prod.VariantID,
-			&prod.Price,
-			&prod.ImageURL,
-			&prod.Attrs,
-			&prod.InStock,
+			&pc.ID,
+			&pc.Title,
+			&pc.Slug,
+			&pc.Category,
+			&variantID,
+			&pc.Price,
+			&pc.ImageURL,
+			&pc.Attrs,
 		); err != nil {
 			return nil, 0, nil, err
 		}
-		products = append(products, prod)
+
+		if variantID.Valid {
+			pc.VariantID = variantID.String
+		}
+
+		items = append(items, pc)
 	}
 
 	countQuery := fmt.Sprintf(`
-	SELECT COUNT(DISTINCT p.id)
-	FROM products p
-	JOIN product_variants v ON v.product_id = p.id
-	WHERE %s
-	  AND v.stock > 0
+SELECT COUNT(*)
+FROM products p
+WHERE %s
 `, strings.Join(where, " AND "))
 
 	var total int
@@ -171,5 +158,5 @@ LIMIT $%d OFFSET $%d
 		return nil, 0, nil, err
 	}
 
-	return products, total, facets, nil
+	return items, total, nil, nil
 }

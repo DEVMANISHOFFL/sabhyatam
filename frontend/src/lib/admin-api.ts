@@ -4,6 +4,14 @@ import type { AdminProduct, ProductMedia } from "./types"
 const BASE = process.env.NEXT_PUBLIC_API_BASE!
 const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY!
 
+export type AdminVariant = {
+  id: string
+  price: number
+  stock: number
+  attributes?: Record<string, any>
+}
+
+
 export async function adminFetch<T>(
   path: string,
   options: RequestInit = {}
@@ -40,6 +48,8 @@ export async function adminListProducts(): Promise<{
 export async function adminGetProduct(id: string): Promise<{
   product: AdminProduct
   media: ProductMedia[]
+  variants: AdminVariant[]
+
 }> {
   return adminFetch(`/v1/products/${id}`)
 }
@@ -91,5 +101,41 @@ export function adminDeleteMedia(mediaId: string) {
     {
       method: "DELETE",
     }
+  )
+}
+
+/* VARIANTS */
+
+
+export function adminCreateVariant(
+  productId: string,
+  v: Partial<AdminVariant>
+) {
+  return adminFetch<{ id: string }>(
+    `/v1/admin/products/${productId}/variants`,
+    {
+      method: "POST",
+      body: JSON.stringify(v),
+    }
+  )
+}
+
+export function adminUpdateVariant(
+  variantId: string,
+  v: Partial<AdminVariant>
+) {
+  return adminFetch(
+    `/v1/admin/variants/${variantId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(v),
+    }
+  )
+}
+
+export function adminDeleteVariant(variantId: string) {
+  return adminFetch(
+    `/v1/admin/variants/${variantId}`,
+    { method: "DELETE" }
   )
 }

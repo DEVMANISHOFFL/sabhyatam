@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/devmanishoffl/sabhyatam-product/internal/model"
 	"github.com/devmanishoffl/sabhyatam-product/internal/store"
@@ -16,7 +18,6 @@ func RegisterRoutes(r *chi.Mux, s *store.Store) {
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(middleware.StripSlashes)
 
-		// 🔥 MOST SPECIFIC FIRST
 		r.Get("/products/search", searchProductsHandler(s))
 		r.Get("/products/slug/{slug}", getProductBySlugHandler(s))
 		r.Get("/products/{id}", getProductDetailHandler(s))
@@ -260,17 +261,64 @@ func createMediaHandler(s *store.Store) http.HandlerFunc {
 
 		var req model.Media
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, err.Error(), 400)
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
+		}
+
+		// 🔐 ENFORCE: only one hero image per product
+		if role, ok := req.Meta["role"]; ok && role == "hero" {
+			exists, err := s.HasHeroImage(r.Context(), productID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			if exists {
+				http.Error(
+					w,
+					"product already has a hero image",
+					http.StatusBadRequest,
+				)
+
+				// 🔐 ENFORCE: media order must be unique per product
+				if rawOrder, ok := req.Meta["order"]; ok {
+					order, err := strconv.Atoi(fmt.Sprint(rawOrder))
+					if err != nil {
+						http.Error(w, "invalid media order", http.StatusBadRequest)
+						return
+					}
+
+					exists, err := s.HasMediaOrder(r.Context(), productID, order)
+					if err != nil {
+						http.Error(w, err.Error(), http.StatusConflict)
+						return
+					}
+
+					if exists {
+						http.Error(
+							w,
+							"media order already exists for product",
+							http.StatusBadRequest,
+						)
+						return
+					}
+				}
+
+				return
+			}
 		}
 
 		id, err := s.CreateMedia(r.Context(), productID, &req)
 		if err != nil {
-			http.Error(w, err.Error(), 500)
+			if strings.Contains(err.Error(), "already exists") {
+				http.Error(w, err.Error(), http.StatusConflict)
+				return
+			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.WriteHeader(201)
+		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]string{"id": id})
 	}
 }

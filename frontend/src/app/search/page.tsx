@@ -57,7 +57,9 @@ const totalPages = Math.ceil(data.total / limit)
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {data.items.map((p: any) => (
-            <Link href={`/product/${p.slug}`}>
+            <Link 
+            key  ={p.id}
+            href={`/product/${p.slug}`}>
 
             <div
               key={p.id}

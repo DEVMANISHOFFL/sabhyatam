@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { fetchProducts } from "@/lib/api"
-import type { AdminProduct } from "@/lib/types"
+import { ProductCard, ProductMedia, type AdminProduct } from "@/lib/types"
 
 import {
   Search,
@@ -18,11 +18,20 @@ import {
   TrendingUp,
   Percent,
   Tag,
+  Package,
+  Shield,
+  Truck,
+  Award,
+  X,
 } from "lucide-react"
+
+import { CATEGORIES } from "@/lib/categories"
 
 export default function HomePage() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [products, setProducts] = useState<AdminProduct[]>([])
+const [products, setProducts] = useState<ProductCard[]>([])
+
+  const [pimage,setPimage] = useState<ProductMedia[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -36,7 +45,6 @@ export default function HomePage() {
         limit: 24,
         sort: "latest",
       })
-
       setProducts(res.items ?? [])
     } catch (err) {
       console.error("failed to load products", err)
@@ -45,6 +53,7 @@ export default function HomePage() {
       setLoading(false)
     }
   }
+  
 
   // ✅ ALWAYS return JSX from component
   if (loading) {
@@ -58,6 +67,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* everything below is unchanged UI */}
+
+
+
 
       {/* Top Header Bar */}
       <div className="bg-white border-b border-gray-200">
@@ -77,173 +89,169 @@ export default function HomePage() {
       </div>
 
       {/* Main Header */}
-      <header className="sticky top-0 z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-3 gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#2874f0]">Sabhyatam</h1>
-              <p className="text-[10px] text-gray-500 italic hidden md:block">Explore Premium Sarees</p>
-            </Link>
-
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl hidden md:block">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search for silk, cotton, banarasi, wedding sarees..."
-                  className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-sm focus:outline-none focus:border-[#2874f0] text-sm"
-                />
-                <button className="absolute right-0 top-0 bottom-0 bg-[#2874f0] px-5 text-white hover:bg-[#1c5fd1] rounded-r-sm">
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-3 md:gap-6">
-              <button className="md:hidden" onClick={() => setShowMobileMenu(!showMobileMenu)}>
-                <Menu className="w-6 h-6 text-gray-700" />
-              </button>
-
-              <Link
-                href="/account"
-                className="hidden md:flex flex-col items-center text-gray-700 hover:text-[#2874f0] transition"
-              >
-                <User className="w-5 h-5" />
-                <span className="text-xs mt-0.5">Account</span>
-              </Link>
-
-              <Link
-                href="/wishlist"
-                className="hidden md:flex flex-col items-center text-gray-700 hover:text-[#2874f0] transition"
-              >
-                <Heart className="w-5 h-5" />
-                <span className="text-xs mt-0.5">Wishlist</span>
-              </Link>
-
-              <Link
-                href="/cart"
-                className="flex flex-col items-center text-gray-700 hover:text-[#2874f0] transition relative"
-              >
-                <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
-                <span className="text-xs mt-0.5 hidden md:block">Cart</span>
-                <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center">
-                  0
-                </span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Mobile Search */}
-          <div className="md:hidden pb-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search sarees..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm text-sm focus:outline-none focus:border-[#2874f0]"
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+     
 
       {/* Category Navigation */}
-      <nav className="bg-white border-b border-gray-200 sticky top-[108px] md:top-[88px] z-40 shadow-sm">
+      <nav className="bg-white border-b border-gray-200  top-[108px] md:top-[88px] z-40 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-6 overflow-x-auto py-3 text-sm scrollbar-hide">
-            {[
-              "Silk Sarees",
-              "Cotton Sarees",
-              "Banarasi",
-              "Kanjivaram",
-              "Wedding Collection",
-              "Party Wear",
-              "Designer Sarees",
-              "Daily Wear",
-              "Festival Special",
-              "Under ₹999",
-            ].map((cat) => (
-              <Link
-                key={cat}
-                href={`/category/${cat.toLowerCase().replace(/\s+/g, "-")}`}
-                className="whitespace-nowrap text-gray-700 hover:text-[#2874f0] font-medium transition"
-              >
-                {cat}
-              </Link>
-            ))}
+          {CATEGORIES.map((cat) => (
+  <Link
+    key={cat.slug}
+    href={`/search?category=${cat.slug}`}
+    className="whitespace-nowrap text-gray-700 hover:text-[#2874f0] font-medium transition"
+  >
+
+
+    {cat.label}
+  </Link>
+))}
           </div>
         </div>
       </nav>
 
       {/* Hero Banners - Carousel Style */}
-      <section className="bg-white">
+     <section className="bg-white">
+  <div className="container mx-auto px-4 py-5">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+
+      {/* LEFT — BIG HERO BANNER */}
+      <Link
+        href="/deals"
+        className="md:col-span-8 relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition group aspect-[16/7]"
+      >
+        <img
+          src="https://ssptex.com/cdn/shop/files/Kanjivaram_e578e068-7e05-4183-930b-3ac7f885bcda.jpg?v=1758891090&width=5760"
+          alt="Festive Sale"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+        />
+
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-transparent" />
+
+        <div className="absolute inset-0 flex items-center">
+          <div className="p-6 md:p-10 text-white max-w-lg">
+            <span className="inline-block bg-red-600 px-3 py-1 rounded-full text-xs font-bold mb-4 animate-pulse">
+              MEGA FESTIVE SALE
+            </span>
+
+            <h2 className="text-2xl md:text-4xl font-extrabold leading-tight mb-3">
+              Festive Saree Collection
+            </h2>
+
+            <p className="text-sm md:text-base mb-5 text-white/90">
+              Premium handloom & designer sarees
+            </p>
+
+            <span className="inline-block bg-white text-red-600 px-6 py-2 rounded font-bold text-sm">
+              Shop Now →
+            </span>
+          </div>
+        </div>
+      </Link>
+
+      {/* RIGHT — WEDDING + COTTON (SAME SIZE) */}
+      <div className="md:col-span-4 grid grid-rows-2 gap-4">
+
+        {/* Wedding Collection */}
+        <Link
+          href="/category/wedding"
+          className="relative overflow-hidden rounded-xl group shadow-md hover:shadow-xl transition"
+        >
+          <img
+            src="https://mavuris.com/cdn/shop/files/1000016648_2.jpg?v=1756219205"
+            alt="Wedding Collection"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
+
+          <div className="absolute bottom-0 p-4 text-white">
+            <span className="text-xs uppercase tracking-wide opacity-80">
+              Trending
+            </span>
+            <h3 className="text-lg font-bold mt-1">
+              Wedding Collection
+            </h3>
+            <p className="text-xs mt-1">Starting ₹2,999</p>
+            <span className="inline-block mt-2 text-xs font-semibold underline">
+              Explore →
+            </span>
+          </div>
+        </Link>
+
+        {/* Cotton Sarees */}
+        <Link
+          href="/category/cotton-sarees"
+          className="relative overflow-hidden rounded-xl group shadow-md hover:shadow-xl transition"
+        >
+          <img
+            src="https://www.taneira.com/on/demandware.static/-/Sites-Taneira-Library/default/dwf690c7fa/PLP/linen.jpg"
+            alt="Cotton Sarees"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
+
+          <div className="absolute bottom-0 p-4 text-white">
+            <span className="text-xs uppercase tracking-wide opacity-80">
+              Daily Wear
+            </span>
+            <h3 className="text-lg font-bold mt-1">
+              Cotton Sarees
+            </h3>
+            <p className="text-xs mt-1">Under ₹999</p>
+            <span className="inline-block mt-2 text-xs font-semibold underline">
+              Shop Now →
+            </span>
+          </div>
+        </Link>
+
+      </div>
+    </div>
+  </div>
+</section>
+ <section className="bg-gradient-to-r from-blue-50 to-purple-50 border-y border-gray-200">
         <div className="container mx-auto px-4 py-4">
-          <div className="grid md:grid-cols-3 gap-4">
-            {/* Main Banner */}
-            <Link
-              href="/deals"
-              className="md:col-span-2 relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition group aspect-[16/7] md:aspect-[16/6]"
-            >
-              <img
-                src="/placeholder.svg?height=400&width=800"
-                alt="Festive Sale"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
-                <div className="p-6 md:p-8 text-white max-w-md">
-                  <div className="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold inline-block mb-3">
-                    MEGA SALE
-                  </div>
-                  <h2 className="text-2xl md:text-4xl font-bold mb-2">Festive Collection</h2>
-                  <p className="text-sm md:text-base mb-4">Up to 60% OFF on Premium Sarees</p>
-                  <span className="bg-white text-red-600 px-6 py-2 rounded-sm font-bold text-sm inline-block">
-                    Shop Now →
-                  </span>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+            {[
+              { icon: <Truck className="w-6 h-6" />, text: "Free Delivery", color: "text-green-600" },
+              { icon: <Shield className="w-6 h-6" />, text: "Secure Payments", color: "text-blue-600" },
+              { icon: <Package className="w-6 h-6" />, text: "Easy Returns", color: "text-orange-600" },
+              { icon: <Award className="w-6 h-6" />, text: "Authentic Products", color: "text-purple-600" },
+              { icon: <Star className="w-6 h-6" />, text: "4.5★ Rated", color: "text-yellow-600" },
+              { icon: "🇮🇳", text: "Made in India", color: "text-red-600" },
+            ].map((badge, idx) => (
+              <div key={idx} className="flex flex-col items-center gap-2">
+                <div className={`${badge.color} text-2xl`}>
+                  {typeof badge.icon === "string" ? badge.icon : badge.icon}
                 </div>
+                <span className="text-xs md:text-sm font-semibold text-gray-700">{badge.text}</span>
               </div>
-            </Link>
-
-            {/* Side Banners */}
-            <div className="space-y-4">
-              <Link
-                href="/category/wedding"
-                className="block relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition group aspect-[16/7] md:aspect-[4/3]"
-              >
-                <img
-                  src="/placeholder.svg?height=200&width=300"
-                  alt="Wedding Collection"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
-                  <div className="text-white">
-                    <h3 className="font-bold text-lg">Wedding Special</h3>
-                    <p className="text-xs">Starting ₹2,999</p>
-                  </div>
-                </div>
-              </Link>
-
-              <Link
-                href="/category/cotton"
-                className="block relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition group aspect-[16/7] md:aspect-[4/3]"
-              >
-                <img
-                  src="/placeholder.svg?height=200&width=300"
-                  alt="Cotton Collection"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
-                  <div className="text-white">
-                    <h3 className="font-bold text-lg">Cotton Sarees</h3>
-                    <p className="text-xs">Under ₹999</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+{/* Shop by Occasion */}
+<section className="py-6 bg-white">
+  <div className="container mx-auto px-4">
+    <h2 className="text-xl font-bold mb-4">Shop by Occasion</h2>
+    <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+      {["Wedding","Office","Festival","Party","Daily Wear","Casual"].map(o => (
+        <Link
+          key={o}
+          href={`/search?occasion=${o.toLowerCase()}`}
+          className="border rounded-lg p-4 text-center hover:border-[#2874f0] hover:text-[#2874f0] transition"
+        >
+          {o}
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+
 
       {/* Deal of the Day */}
       <section className="py-6 bg-white border-t border-b border-gray-200">
@@ -273,12 +281,12 @@ export default function HomePage() {
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
                   <img
-                    src={product.hero_image || "/placeholder.svg"}
+                    src={product.image_url || "/placeholder.svg"}
                     alt={product.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold shadow">
-                    {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                    {Math.round(((product.price + 100 - product.price) / product.price) * 500)}% OFF
                   </div>
                   <button className="absolute top-2 right-2 bg-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition shadow">
                     <Heart className="w-4 h-4 text-gray-600 hover:fill-red-500 hover:text-red-500" />
@@ -292,7 +300,7 @@ export default function HomePage() {
                     <span className="text-base md:text-lg font-bold text-gray-900">
                       ₹{product.price.toLocaleString("en-IN")}
                     </span>
-                    <span className="text-xs line-through text-gray-500">₹{product.mrp}</span>
+                    <span className="text-xs line-through text-gray-500">₹{product.price}</span>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-green-600 font-semibold">
                     <Tag className="w-3 h-3" />
@@ -304,6 +312,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      
 
       {/* Top Picks */}
       <section className="py-6 md:py-8">
@@ -333,13 +342,13 @@ export default function HomePage() {
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
                   <img
-                    src={product.hero_image || "/placeholder.svg"}
+                    src={product.image_url || "/placeholder.svg"}
                     alt={product.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  {product.mrp > product.price && (
+                  {product.price > product.price && (
                     <div className="absolute top-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs font-bold shadow">
-                      {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% OFF
+                      {Math.round(((product.price + 1000 - product.price) / product.price) * 500)}% OFF
                     </div>
                   )}
                   {!product.in_stock && (
@@ -368,8 +377,8 @@ export default function HomePage() {
                     <span className="text-base md:text-lg font-bold text-gray-900">
                       ₹{product.price.toLocaleString("en-IN")}
                     </span>
-                    {product.mrp > product.price && (
-                      <span className="text-xs line-through text-gray-500">₹{product.mrp.toLocaleString("en-IN")}</span>
+                    {product.price > product.price && (
+                      <span className="text-xs line-through text-gray-500">₹{product.price.toLocaleString("en-IN")}</span>
                     )}
                   </div>
                   <p className="text-[10px] text-gray-600 mt-1">Free Delivery</p>
@@ -404,7 +413,7 @@ export default function HomePage() {
                   className={`w-16 h-16 md:w-20 md:h-20 ${cat.color} rounded-full overflow-hidden shadow-md group-hover:shadow-xl transition-all group-hover:scale-110`}
                 >
                   <img
-                    src={`/placeholder.svg?height=100&width=100&query=${cat.img}`}
+                    src={"https://www.vhv.rs/dpng/d/548-5485432_cotton-saree-png-transparent-png.png"}
                     alt={cat.name}
                     className="w-full h-full object-cover"
                   />
@@ -417,6 +426,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+
 
       {/* Budget Store - Under ₹999 */}
       <section className="py-6 md:py-8 bg-gradient-to-br from-green-50 to-teal-50">
@@ -438,6 +449,18 @@ export default function HomePage() {
               View All <ChevronRight className="w-5 h-5" />
             </Link>
           </div>
+          <section className="py-10 bg-gray-50">
+  <div className="container mx-auto px-4 max-w-4xl text-center">
+    <h2 className="text-2xl font-bold mb-4">
+      Crafted by India’s Master Weavers
+    </h2>
+    <p className="text-gray-600 leading-relaxed">
+      Sabhyatam brings you authentic sarees directly from weaving clusters
+      like Kanchipuram, Banaras, Chanderi, and Odisha. No middlemen. 
+      Just timeless craftsmanship.
+    </p>
+  </div>
+</section>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
       {products
@@ -452,7 +475,7 @@ export default function HomePage() {
                 >
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
                     <img
-                      src={product.hero_image || "/placeholder.svg"}
+                      src={product.image_url || "/placeholder.svg"}
                       alt={product.title} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -466,7 +489,7 @@ export default function HomePage() {
                     </h3>
                     <div className="flex items-baseline gap-2">
                       <span className="text-lg font-bold text-green-600">₹{product.price.toLocaleString("en-IN")}</span>
-                      <span className="text-xs line-through text-gray-500">₹{product.mrp.toLocaleString("en-IN")}</span>
+                      <span className="text-xs line-through text-gray-500">₹{product.price.toLocaleString("en-IN")}</span>
                     </div>
                   </div>
                 </Link>
@@ -474,6 +497,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+
+
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-8 md:py-12">

@@ -4,6 +4,9 @@ import "time"
 
 type Product struct {
 	ID         string                 `json:"id"`
+	Price      int                    `json:"price"`
+	ImageURL   string                 `json:"image_url"`
+	MRP        *int                   `json:"mrp,omitempty"`
 	Slug       string                 `json:"slug"`
 	Title      string                 `json:"title"`
 	ShortDesc  string                 `json:"short_desc"`
@@ -15,6 +18,7 @@ type Product struct {
 	Published  bool                   `json:"published"`
 	CreatedAt  time.Time              `json:"created_at"`
 	UpdatedAt  time.Time              `json:"updated_at"`
+	InStock    bool                   `json:"in_stock"`
 }
 
 type Variant struct {

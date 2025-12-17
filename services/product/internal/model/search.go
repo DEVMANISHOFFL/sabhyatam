@@ -18,6 +18,7 @@ type ProductCard struct {
 	ID        string         `json:"id"`
 	Title     string         `json:"title"`
 	Slug      string         `json:"slug"`
+	Published bool           `json:"published"`
 	Category  string         `json:"category"`
 	Price     int            `json:"price"`
 	ImageURL  string         `json:"image_url"`

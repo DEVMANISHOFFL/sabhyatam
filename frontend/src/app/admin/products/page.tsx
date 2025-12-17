@@ -5,6 +5,8 @@ import Link from "next/link"
 import {
   adminListProducts,
   adminDeleteProduct,
+    adminUpdateProduct,
+
 } from "@/lib/admin-api"
 import type { AdminProduct } from "@/lib/types"
 
@@ -66,9 +68,29 @@ export default function AdminProductsPage() {
             <tr key={p.id} className="border-b">
               <td className="p-2">{p.title}</td>
               <td className="p-2">{p.category}</td>
-              <td className="p-2">
-                {p.published ? "Yes" : "No"}
-              </td>
+            <td className="p-2">
+  <button
+    onClick={async () => {
+      const next = !p.published
+
+      await adminUpdateProduct(p.id, { published: next })
+
+      setProducts(xs =>
+        xs.map(x =>
+          x.id === p.id ? { ...x, published: next } : x
+        )
+      )
+    }}
+    className={`px-2 py-1 text-xs rounded font-medium ${
+      p.published
+        ? "bg-green-100 text-green-700"
+        : "bg-gray-100 text-gray-600"
+    }`}
+  >
+    {p.published ? "Published" : "Draft"}
+  </button>
+</td>
+
               <td className="p-2 space-x-3">
                 <Link
                   href={`/admin/products/${p.id}`}

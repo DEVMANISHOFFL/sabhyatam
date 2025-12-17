@@ -1,6 +1,7 @@
 'use client'
 
 import { updateCartItem, removeCartItem } from '@/lib/cart'
+import { formatPrice } from '@/lib/utils'
 import { useState } from 'react'
 
 export default function CartItem({ item, onRefresh }: any) {
@@ -32,7 +33,7 @@ export default function CartItem({ item, onRefresh }: any) {
 
       <div className="flex-1">
         <h3 className="font-medium">{item.product.title}</h3>
-        <p className="text-sm text-gray-500">₹{item.variant.price}</p>
+        <p className="text-sm text-gray-500">{formatPrice(item.variant.price)}</p>
 
         <div className="flex items-center gap-2 mt-2">
           <button onClick={() => updateQty(item.quantity - 1)} disabled={loading || item.quantity <= 1}>
@@ -50,7 +51,7 @@ export default function CartItem({ item, onRefresh }: any) {
       </div>
 
       <div className="font-semibold">
-        ₹{item.line_total}
+        {formatPrice(item.line_total)}
       </div>
     </div>
   )

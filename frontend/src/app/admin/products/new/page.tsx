@@ -3,137 +3,77 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { adminCreateProduct } from "@/lib/admin-api"
+import type { AdminProduct } from "@/lib/types"
 
-export default function NewProductPage() {
+export default function AdminNewProductPage() {
   const router = useRouter()
+
+  const [title, setTitle] = useState("")
+  const [slug, setSlug] = useState("")
+  const [category, setCategory] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [form, setForm] = useState({
-    title: "",
-    slug: "",
-    category: "",
-    description: "",
-    price: "",
-    mrp: "",
-    in_stock: true,
-    published: false,
-  })
-
-  function update<K extends keyof typeof form>(
-    key: K,
-    value: typeof form[K]
-  ) {
-    setForm(f => ({ ...f, [key]: value }))
-  }
-
-  async function submit(e: React.FormEvent) {
+  async function create(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    setLoading(true)
+
+    if (!title || !slug || !category) {
+      setError("All fields are required")
+      return
+    }
 
     try {
-      await adminCreateProduct({
-        title: form.title,
-        slug: form.slug,
-        category: form.category,
-        description: form.description || undefined,
-        price: Number(form.price),
-        mrp: form.mrp ? Number(form.mrp) : undefined,
-        in_stock: form.in_stock,
-        published: form.published,
+      setLoading(true)
+
+      const res = await adminCreateProduct({
+        title,
+        slug,
+        category,
+        published: false,
+        in_stock: false,
       })
 
-      router.push("/admin/products")
-    } catch (err: any) {
-      setError(err.message || "Failed to create product")
+      // 🔥 redirect straight to edit page
+      router.push(`/admin/products/${res.id}`)
+    } catch (e: any) {
+      setError(e.message || "Create failed")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="max-w-2xl bg-white p-6 rounded shadow">
-      <h1 className="text-xl font-bold mb-4">Create Product</h1>
+    <div className="max-w-xl bg-white p-6 rounded shadow">
+      <h1 className="text-xl font-bold mb-4">New Product</h1>
 
-      {error && (
-        <div className="mb-4 text-red-600 text-sm">{error}</div>
-      )}
+      {error && <div className="text-red-600 mb-3">{error}</div>}
 
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={create} className="space-y-4">
         <input
+          className="w-full border p-2"
           placeholder="Title"
-          className="w-full border p-2"
-          value={form.title}
-          onChange={e => update("title", e.target.value)}
-          required
+          value={title}
+          onChange={e => setTitle(e.target.value)}
         />
 
         <input
+          className="w-full border p-2"
           placeholder="Slug (unique)"
-          className="w-full border p-2"
-          value={form.slug}
-          onChange={e => update("slug", e.target.value)}
-          required
+          value={slug}
+          onChange={e => setSlug(e.target.value)}
         />
 
         <input
+          className="w-full border p-2"
           placeholder="Category"
-          className="w-full border p-2"
-          value={form.category}
-          onChange={e => update("category", e.target.value)}
-          required
+          value={category}
+          onChange={e => setCategory(e.target.value)}
         />
-
-        <textarea
-          placeholder="Description"
-          className="w-full border p-2"
-          value={form.description}
-          onChange={e => update("description", e.target.value)}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            placeholder="Price (₹)"
-            type="number"
-            className="border p-2"
-            value={form.price}
-            onChange={e => update("price", e.target.value)}
-            required
-          />
-
-          <input
-            placeholder="MRP (₹)"
-            type="number"
-            className="border p-2"
-            value={form.mrp}
-            onChange={e => update("mrp", e.target.value)}
-          />
-        </div>
-
-        <div className="flex gap-6">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.in_stock}
-              onChange={e => update("in_stock", e.target.checked)}
-            />
-            In Stock
-          </label>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.published}
-              onChange={e => update("published", e.target.checked)}
-            />
-            Published
-          </label>
-        </div>
 
         <button
           disabled={loading}
-          className="bg-black text-white px-4 py-2 disabled:opacity-50"
+          className="bg-black text-white px-4 py-2"
         >
           {loading ? "Creating..." : "Create Product"}
         </button>

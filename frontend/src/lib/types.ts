@@ -19,3 +19,21 @@ export type ProductMedia = {
     order: number
   }
 }
+
+export type AdminProductForm = Omit<
+  AdminProduct,
+  "price" | "mrp"
+> & {
+  price: number | ""
+  mrp?: number | ""
+}
+
+export type ProductCard = {
+  id: string
+  slug: string
+  title: string
+  category: string
+  price: number
+  image_url: string | null
+  in_stock: boolean
+}

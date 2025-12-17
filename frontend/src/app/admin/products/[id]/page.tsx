@@ -7,12 +7,24 @@ import {
   adminUpdateProduct,
   adminAddMedia,
   adminDeleteMedia,
+    adminCreateVariant,
+  adminUpdateVariant,
+  adminDeleteVariant,
 } from "@/lib/admin-api"
-import type { AdminProduct, ProductMedia } from "@/lib/types"
+
+
+
+import type { AdminProduct, AdminProductForm, ProductMedia } from "@/lib/types"
+
+
 
 export default function AdminEditProductPage() {
+    
   const params = useParams()
   const router = useRouter()
+  const [variants, setVariants] = useState<any[]>([])
+const [activeImage, setActiveImage] = useState<string | null>(null)
+
 
   const id = params?.id as string | undefined
 
@@ -20,7 +32,7 @@ export default function AdminEditProductPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [product, setProduct] = useState<AdminProduct | null>(null)
+  const [product, setProduct] = useState<AdminProductForm | null>(null)
   const [media, setMedia] = useState<ProductMedia[]>([])
 
   const [mediaForm, setMediaForm] = useState({
@@ -37,12 +49,20 @@ export default function AdminEditProductPage() {
     load(id)
   }, [id])
 
+
+  
   async function load(productId: string) {
     try {
       setLoading(true)
       const res = await adminGetProduct(productId)
-      setProduct(res.product)
-      setMedia(res.media ?? [])
+setProduct({
+  ...res.product,
+  price: res.product.price ?? "",
+  mrp: res.product.mrp ?? "",
+})
+      setMedia(res.media || [])
+      setVariants(res.variants || [])
+
     } catch {
       setError("Failed to load product")
     } finally {
@@ -61,16 +81,15 @@ export default function AdminEditProductPage() {
     setError(null)
 
     try {
-      await adminUpdateProduct(id, {
-        title: product.title,
-        slug: product.slug,
-        category: product.category,
-        description: product.description,
-        price: Number(product.price),
-        mrp: product.mrp ? Number(product.mrp) : undefined,
-        in_stock: product.in_stock,
-        published: product.published,
-      })
+    await adminUpdateProduct(id, {
+  ...product,
+  price: Number(product.price),
+  mrp:
+    product.mrp === "" || product.mrp === undefined
+      ? undefined
+      : Number(product.mrp),
+})
+
     } catch (e: any) {
       setError(e.message || "Save failed")
     } finally {
@@ -81,9 +100,20 @@ export default function AdminEditProductPage() {
   // -----------------------------
   // Add image
   // -----------------------------
-  async function addImage() {
-    if (!id || !mediaForm.url) return
+async function addImage() {
+  if (!id) {
+    alert("Product ID missing")
+    return
+  }
 
+  if (!mediaForm.url) return
+
+  if (media.some(m => m.url === mediaForm.url)) {
+    alert("This image is already added")
+    return
+  }
+
+  try {
     const m = await adminAddMedia(id, {
       url: mediaForm.url,
       media_type: "image",
@@ -95,7 +125,11 @@ export default function AdminEditProductPage() {
 
     setMedia(xs => [...xs, m])
     setMediaForm({ url: "", role: "gallery", order: 1 })
+  } catch (e: any) {
+    alert(e.message || "Image already exists")
   }
+}
+
 
   // -----------------------------
   // Delete image
@@ -158,15 +192,18 @@ export default function AdminEditProductPage() {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              className="border p-2"
-              value={product.price}
-              onChange={e =>
-                setProduct({ ...product, price: Number(e.target.value) })
-              }
-              placeholder="Price"
-            />
+          <input
+  type="number"
+  className="border p-2"
+  value={product.price}
+  onChange={e =>
+    setProduct({
+      ...product,
+      price: e.target.value === "" ? "" : Number(e.target.value),
+    })
+  }
+/>
+
 
             <input
               type="number"
@@ -274,14 +311,17 @@ export default function AdminEditProductPage() {
         <div className="grid grid-cols-4 gap-4">
           {media.map(m => (
             <div key={m.id} className="border p-2 relative">
-              <img
-                src={m.url}
-                className="w-full h-32 object-cover"
-              />
+            <img
+  key={m.id}
+  src={m.url}
+  onClick={() => setActiveImage(m.url)}
+  className="h-20 object-cover rounded cursor-pointer border"
+/>
+
 
               <div className="text-xs mt-1">
-                <div>{m.meta.role}</div>
-                <div>Order: {m.meta.order}</div>
+                {/* <div>{m.meta.role}</div> */}
+                {/* <div>Order: {m.meta.order}</div> */}
               </div>
 
               <button
@@ -294,6 +334,111 @@ export default function AdminEditProductPage() {
           ))}
         </div>
       </section>
+      {/* ---------------- VARIANTS ---------------- */}
+<section className="bg-white p-6 rounded shadow">
+  <h2 className="text-lg font-bold mb-4">Variants</h2>
+
+  {/* Add variant */}
+  <div className="flex gap-2 mb-4">
+    <input
+      type="number"
+      placeholder="Price"
+      className="border p-2 w-32"
+      id="new-price"
+    />
+    <input
+      type="number"
+      placeholder="Stock"
+      className="border p-2 w-32"
+      id="new-stock"
+    />
+    <button
+      className="bg-black text-white px-4"
+      onClick={async () => {
+        const price = Number(
+          (document.getElementById("new-price") as HTMLInputElement).value
+        )
+        const stock = Number(
+          (document.getElementById("new-stock") as HTMLInputElement).value
+        )
+
+        const res = await adminCreateVariant(id, { price, stock })
+
+        setVariants(xs => [
+          ...xs,
+          { id: res.id, price, stock },
+        ])
+      }}
+    >
+      Add Variant
+    </button>
+  </div>
+
+  {/* Variant list */}
+  <div className="space-y-2">
+    {variants.map(v => (
+      <div
+        key={v.id}
+        className="flex items-center gap-3 border p-2 rounded"
+      >
+        <input
+          type="number"
+          value={v.price}
+          onChange={e =>
+            setVariants(xs =>
+              xs.map(x =>
+                x.id === v.id
+                  ? { ...x, price: Number(e.target.value) }
+                  : x
+              )
+            )
+          }
+          className="border p-1 w-32"
+        />
+
+        <input
+          type="number"
+          value={v.stock}
+          onChange={e =>
+            setVariants(xs =>
+              xs.map(x =>
+                x.id === v.id
+                  ? { ...x, stock: Number(e.target.value) }
+                  : x
+              )
+            )
+          }
+          className="border p-1 w-32"
+        />
+
+        <button
+          onClick={() =>
+            adminUpdateVariant(v.id, {
+              price: v.price,
+              stock: v.stock,
+            })
+          }
+          className="text-sm underline"
+        >
+          Save
+        </button>
+
+        <button
+          onClick={async () => {
+            await adminDeleteVariant(v.id)
+            setVariants(xs =>
+              xs.filter(x => x.id !== v.id)
+            )
+          }}
+          className="text-sm text-red-600"
+        >
+          Delete
+        </button>
+      </div>
+    ))}
+  </div>
+</section>
+
     </div>
   )
 }

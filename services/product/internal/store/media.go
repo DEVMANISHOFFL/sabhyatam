@@ -7,27 +7,30 @@ import (
 	"github.com/devmanishoffl/sabhyatam-product/internal/model"
 )
 
-func (s *Store) GetMediaByProductID(ctx context.Context, productID string) ([]model.Media, error) {
-	rows, err := s.db.Query(ctx, `
-        SELECT 
-            id,
-            product_id,
-            variant_id,
-            url,
-            media_type,
-            meta,
-            created_at
-        FROM product_media
-        WHERE product_id = $1
-        ORDER BY (meta->>'order')::int ASC
-    `, productID)
+func (s *Store) GetMediaByProductID(
+	ctx context.Context,
+	productID string,
+) ([]model.Media, error) {
 
+	rows, err := s.db.Query(ctx, `
+		SELECT 
+			id,
+			product_id,
+			variant_id,
+			url,
+			media_type,
+			meta,
+			created_at
+		FROM product_media
+		WHERE product_id = $1
+		ORDER BY (meta->>'order')::int ASC
+	`, productID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var out []model.Media
+	out := make([]model.Media, 0)
 
 	for rows.Next() {
 		var (
@@ -47,11 +50,8 @@ func (s *Store) GetMediaByProductID(ctx context.Context, productID string) ([]mo
 			return nil, err
 		}
 
-		// parse JSON meta field
 		if len(metaBytes) > 0 {
-			var meta map[string]any
-			_ = json.Unmarshal(metaBytes, &meta)
-			m.Meta = meta
+			_ = json.Unmarshal(metaBytes, &m.Meta)
 		} else {
 			m.Meta = map[string]any{}
 		}

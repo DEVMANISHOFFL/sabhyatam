@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getCart } from '@/lib/cart'
 import CartItem from '@/components/CartItem'
+import { formatPrice } from '@/lib/utils'
 
 export default function CartPage() {
   const [cart, setCart] = useState<any>(null)
@@ -30,7 +31,7 @@ export default function CartPage() {
 
       <div className="flex justify-between mt-6 text-lg font-semibold">
         <span>Subtotal</span>
-        <span>₹{cart.subtotal}</span>
+        <span>{formatPrice(cart.Subtotal)}</span>
       </div>
 
       <button
