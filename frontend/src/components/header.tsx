@@ -2,7 +2,7 @@
 
 import { useCartCount } from "@/lib/use-cart-count"
 
-import { Search, ShoppingCart, User, Menu, Heart,MapPin } from "lucide-react"
+import { Search, ShoppingCart, User, Menu, Heart,MapPin,UserCog } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -112,6 +112,12 @@ export default function Header() {
               <User className="h-5 w-5 text-gray-700" />
               <span className="hidden text-sm font-medium text-gray-700 md:inline">Profile</span>
             </button>
+            <Link href="/admin/products">
+              <button className="flex items-center gap-2 rounded p-2 hover:bg-gray-100" aria-label="Admin">
+              <UserCog className="h-5 w-5 text-gray-700" />
+              <span className="hidden text-sm font-medium text-gray-700 md:inline">Admin</span>
+            </button>
+            </Link>
           </div>
         </div>
 

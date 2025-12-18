@@ -314,13 +314,19 @@ func (s *Store) UpdateProduct(ctx context.Context, id string, p *model.Product) 
 }
 
 func (s *Store) DeleteProduct(ctx context.Context, id string) error {
-	_, err := s.db.Exec(ctx, `
-		UPDATE products
-		SET deleted_at = NOW()
+	cmd, err := s.db.Exec(ctx, `
+		DELETE FROM products
 		WHERE id = $1
 	`, id)
+	if err != nil {
+		return err
+	}
 
-	return err
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("product not found")
+	}
+
+	return nil
 }
 
 func (s *Store) CreateVariant(ctx context.Context, productID string, v *model.Variant) (string, error) {

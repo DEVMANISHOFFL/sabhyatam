@@ -351,13 +351,13 @@ const [products, setProducts] = useState<ProductCard[]>([])
                       {Math.round(((product.price + 1000 - product.price) / product.price) * 500)}% OFF
                     </div>
                   )}
-                  {!product.in_stock && (
+                  {/* {!product.in_stock && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                       <span className="bg-white text-red-600 px-3 py-1.5 rounded font-semibold text-xs shadow">
                         Out of Stock
                       </span>
                     </div>
-                  )}
+                  )} */}
                   <button className="absolute top-2 right-2 bg-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition shadow">
                     <Heart className="w-4 h-4 text-gray-600 hover:fill-red-500 hover:text-red-500" />
                   </button>

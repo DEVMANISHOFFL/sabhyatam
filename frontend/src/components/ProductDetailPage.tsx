@@ -64,7 +64,7 @@ async function handleAddToCart() {
     })
 
     // optional UX
-    alert("Added to cart")
+    // alert("Added to cart")
 
   } catch (e: any) {
     alert(e.message || "Failed to add to cart")
