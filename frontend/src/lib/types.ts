@@ -1,4 +1,4 @@
-// --- PRODUCT TYPES (These are perfect) ---
+// --- PRODUCT TYPES ---
 
 export type AdminProduct = {
   id: string
@@ -7,14 +7,11 @@ export type AdminProduct = {
   category: string
   short_desc?: string
   long_desc?: string
-  
-  // Commerce Fields (Flattened - No Variants)
   price: number
   mrp?: number
   stock: number
   in_stock: boolean
   sku?: string
-  
   published: boolean
   media?: ProductMedia[]
   attributes?: Record<string, any>  
@@ -47,20 +44,22 @@ export type ProductCard = {
   in_stock: boolean
 }
 
-// --- CART TYPES (FIXED TO MATCH BACKEND) ---
+// --- CART TYPES (Fixed to match Nested Backend Response) ---
 
 export type CartItemProduct = {
   id: string
   title: string
   slug: string
-  image: string
+  price: number
+  // Backend returns media array, sometimes image string
+  image?: string 
+  media?: ProductMedia[]
 }
 
 export type CartItem = {
-  // Backend returns a nested 'product' object
   product: CartItemProduct
   quantity: number
-  unit_price: number // Backend sends 'unit_price', not 'price'
+  unit_price: number
   line_total: number
 }
 
@@ -69,10 +68,8 @@ export type Cart = {
   subtotal: number
   item_count: number
   currency: string
-  // 'id', 'tax', and 'total' are not sent by your Cart Service currently
 }
 
-// Input for the API call
 export type AddToCartInput = {
   product_id: string
   quantity: number
@@ -82,7 +79,6 @@ export type ProductSearchParams = {
   page: number
   limit: number
   sort?: "latest" | "price_asc" | "price_desc"
-  
   q?: string 
   category?: string
   min_price?: number

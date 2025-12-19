@@ -1,10 +1,8 @@
-// import { ProductCard } from "@/components/ProductCard" // You likely have this, or use a generic card
 import FilterSidebar from "@/components/search/FilterSidebar"
 import Link from "next/link"
 import { formatPrice } from "@/lib/utils"
 import { searchProducts } from "@/lib/api"
 
-// Helper component if you don't have ProductCard yet
 function SimpleProductCard({ item }: { item: any }) {
   return (
     <Link href={`/product/${item.slug}`} className="group block">
@@ -41,6 +39,7 @@ type SearchPageProps = {
     fabric?: string
     weave?: string
     occasion?: string
+    color?: string
     sort?: "latest" | "price_asc" | "price_desc"
     page?: string
   }>
@@ -53,11 +52,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   // 1. Fetch Data
   const data = await searchProducts({
-    // q: query,
+    q: query, // FIX: Uncommented
     category: params.category,
     fabric: params.fabric,
     occasion: params.occasion,
-    // weave: params.weave, // Add weave to api.ts if backend supports it in `ProductSearchParams` type
+    // @ts-ignore 
+    weave: params.weave, 
+    color: params.color, 
     sort: params.sort,
     page,
     limit: 12,

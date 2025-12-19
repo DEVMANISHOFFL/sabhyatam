@@ -64,8 +64,8 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	// Extract product object
 	product, ok := prodResp["product"].(map[string]any)
 	if !ok {
-		http.Error(w, "invalid product response", http.StatusBadGateway)
-		return
+		// Fallback: If product service returns raw product (no wrapper)
+		product = prodResp
 	}
 
 	// stock check
@@ -183,17 +183,15 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, it := range items {
-		// 1. Fetch product snapshot (source of truth)
 		prodResp, err := h.pclient.GetProductDetail(ctx, it.ProductID)
 		if err != nil {
-			_ = h.store.DeleteItem(ctx, key, it.ProductID)
 			continue
 		}
 
 		productRaw, ok := prodResp["product"].(map[string]any)
 		if !ok {
-			_ = h.store.DeleteItem(ctx, key, it.ProductID)
-			continue
+			// Fallback: If product service returns raw product
+			productRaw = prodResp
 		}
 
 		// unpublished product → auto remove
@@ -224,12 +222,30 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 		lineTotal := unitPrice * int64(it.Quantity)
 
 		// 4. Extract hero image
+		// FIX: Check INSIDE productRaw["media"] first, then siblings
 		image := ""
-		if media, ok := prodResp["media"].([]any); ok && len(media) > 0 {
-			if m, ok := media[0].(map[string]any); ok {
-				if u, ok := m["url"].(string); ok {
-					image = u
+
+		// Helper to find image in a list
+		findImage := func(list []any) string {
+			if len(list) > 0 {
+				if m, ok := list[0].(map[string]any); ok {
+					if u, ok := m["url"].(string); ok {
+						return u
+					}
 				}
+			}
+			return ""
+		}
+
+		// Check nested media (Standard)
+		if media, ok := productRaw["media"].([]any); ok {
+			image = findImage(media)
+		}
+
+		// If not found, check root media (Legacy/Wrapper)
+		if image == "" {
+			if media, ok := prodResp["media"].([]any); ok {
+				image = findImage(media)
 			}
 		}
 

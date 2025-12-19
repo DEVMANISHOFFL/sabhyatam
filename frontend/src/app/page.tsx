@@ -3,22 +3,18 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { fetchProducts } from "@/lib/api"
-import { ProductCard, ProductMedia } from "@/lib/types"
+import { ProductCard } from "@/lib/types"
 
 import {
-  ChevronRight,
-  Star,
-  Heart,
   MapPin,
   Zap,
-  TrendingUp,
-  Percent,
-  Tag,
   Shield,
   Truck,
   Award,
   ArrowRight,
   ShoppingBag,
+  Heart,
+  ChevronDown // Added for dropdown indicator
 } from "lucide-react"
 
 import { CATEGORIES } from "@/lib/categories"
@@ -51,7 +47,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-pink-600 rounded-full animate-spin mb-4"></div>
         <p className="text-gray-500 font-medium animate-pulse">Curating your collection...</p>
       </div>
     )
@@ -75,102 +71,136 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 2. Sticky Category Nav */}
-      <nav className="sticky top-[64px] z-30 bg-white border-b border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
+      {/* 2. TEXT-BASED CATEGORY NAV (Mega-menu style) */}
+      <nav className="sticky top-[64px] z-30 bg-white border-b border-gray-100 shadow-sm transition-all">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-8 py-4 min-w-max">
+          
+          {/* Desktop: Centered Links with Hover Dropdowns */}
+          <ul className="hidden lg:flex items-center justify-center gap-8">
             {CATEGORIES.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/search?category=${cat.slug}`}
-                className="group flex flex-col items-center gap-2 cursor-pointer"
-              >
-                <div className="w-16 h-16 rounded-full p-[2px] border-2 border-transparent group-hover:border-pink-600 transition-all">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 relative">
-                     {/* Placeholder images for categories - replace with real ones if available in cat object */}
-                    <img 
-                      src={`https://source.unsplash.com/random/100x100/?saree,${cat.slug}`} 
-                      // onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
-                      alt={cat.label} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
-                    />
-                  </div>
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-pink-600 transition-colors">
-                  {cat.label}
-                </span>
-              </Link>
+               <li key={cat.slug} className="group relative">
+                  <Link 
+                    href={`/search?category=${cat.slug}`}
+                    className="flex items-center gap-1 py-4 text-xs font-bold text-gray-700 hover:text-pink-600 uppercase tracking-widest transition-colors"
+                  >
+                    {cat.label}
+                    {cat.subcategories && cat.subcategories.length > 0 && (
+                      <ChevronDown className="w-3 h-3 transition-transform duration-200 group-hover:-rotate-180" />
+                    )}
+                  </Link>
+
+                  {/* Nested Dropdown */}
+                  {cat.subcategories && cat.subcategories.length > 0 && (
+                     <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 bg-white border border-gray-100 shadow-xl rounded-b-lg opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50 overflow-hidden">
+                        <div className="h-0.5 w-full bg-pink-600"></div> {/* Accent Line */}
+                        <ul className="py-2">
+                           {cat.subcategories.map((sub) => (
+                              <li key={sub.slug}>
+                                 <Link 
+                                   href={`/search?category=${cat.slug}&subcategory=${sub.slug}`}
+                                   className="block px-5 py-3 text-sm text-gray-600 hover:bg-pink-50 hover:text-pink-700 transition-colors"
+                                 >
+                                    {sub.label}
+                                 </Link>
+                              </li>
+                           ))}
+                        </ul>
+                     </div>
+                  )}
+               </li>
             ))}
+            {/* View All Link */}
+             <li>
+                <Link href="/search" className="py-4 text-xs font-bold text-gray-400 hover:text-black uppercase tracking-widest transition-colors">
+                  View All
+                </Link>
+             </li>
+          </ul>
+
+          {/* Mobile: Horizontal Text Scroll */}
+          <div className="lg:hidden flex items-center gap-6 overflow-x-auto no-scrollbar py-4 px-2">
+             {CATEGORIES.map((cat) => (
+               <Link 
+                 key={cat.slug}
+                 href={`/search?category=${cat.slug}`}
+                 className="text-sm font-bold text-gray-700 whitespace-nowrap active:text-pink-600"
+               >
+                 {cat.label}
+               </Link>
+             ))}
+             <Link href="/search" className="text-sm font-bold text-gray-400 whitespace-nowrap">View All</Link>
           </div>
         </div>
       </nav>
 
       {/* 3. Hero Section (Bento Grid) */}
-      <section className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-auto md:h-[500px]">
+      <section className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-auto md:h-[550px]">
           
           {/* Main Hero */}
-          <Link href="/deals" className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl">
+          <Link href="/search?category=silk-sarees" className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl shadow-sm">
             <img
-              src="https://ssptex.com/cdn/shop/files/Kanjivaram_e578e068-7e05-4183-930b-3ac7f885bcda.jpg?v=1758891090&width=5760"
+              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1200"
               alt="Festive Collection"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-8 text-white">
-              <span className="bg-white text-black text-xs font-bold px-3 py-1 uppercase tracking-wider mb-3 inline-block">
+              <span className="bg-white text-black text-xs font-bold px-3 py-1 uppercase tracking-wider mb-4 inline-block shadow-sm">
                 New Arrival
               </span>
-              <h2 className="text-3xl md:text-5xl font-serif mb-4">The Royal Kanjivaram</h2>
-              <p className="mb-6 text-gray-200 max-w-sm">Handwoven masterpieces directly from the weavers of Tamil Nadu.</p>
-              <button className="bg-pink-600 text-white px-8 py-3 rounded-sm font-medium hover:bg-pink-700 transition">
-                Shop Collection
+              <h2 className="text-3xl md:text-5xl font-serif mb-4 leading-tight">The Royal <br/>Kanjivaram</h2>
+              <p className="mb-8 text-gray-200 max-w-sm text-sm md:text-base">Handwoven masterpieces directly from the weavers of Tamil Nadu, featuring pure zari work.</p>
+              <button className="bg-pink-600 text-white px-8 py-3 rounded-sm font-bold tracking-wide hover:bg-pink-700 transition shadow-lg">
+                SHOP COLLECTION
               </button>
             </div>
           </Link>
 
           {/* Secondary Hero 1 */}
-          <Link href="/category/wedding" className="relative group overflow-hidden rounded-2xl md:col-span-1 md:row-span-2">
+          <Link href="/search?occasion=wedding" className="relative group overflow-hidden rounded-2xl md:col-span-1 md:row-span-2 shadow-sm">
              <img
-              src="https://mavuris.com/cdn/shop/files/1000016648_2.jpg?v=1756219205"
+              src="https://images.unsplash.com/photo-1705351509028-7dac9460039f?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Wedding"
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
-             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition" />
-             <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-4">
-                <h3 className="text-2xl font-serif mb-2">Bridal Trousseau</h3>
-                <p className="text-sm opacity-90 mb-4">Starting @ ₹4,999</p>
-                <span className="underline decoration-1 underline-offset-4 text-sm font-medium">Explore</span>
+             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition" />
+             <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6">
+                <h3 className="text-3xl font-serif mb-2 drop-shadow-md">Bridal Trousseau</h3>
+                <p className="text-sm font-medium mb-6 drop-shadow-md bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">Starting @ ₹4,999</p>
+                <span className="border-b-2 border-white pb-1 font-bold uppercase text-xs tracking-widest hover:text-pink-200 hover:border-pink-200 transition">Explore Now</span>
              </div>
           </Link>
 
           {/* Secondary Hero 2 (Split) */}
           <div className="md:col-span-1 md:row-span-2 flex flex-col gap-4">
-             <Link href="/category/cotton" className="flex-1 relative group overflow-hidden rounded-2xl">
+             <Link href="/search?category=cotton-sarees" className="flex-1 relative group overflow-hidden rounded-2xl shadow-sm">
                 <img
-                  src="https://www.taneira.com/on/demandware.static/-/Sites-Taneira-Library/default/dwf690c7fa/PLP/linen.jpg"
+                  src="https://images.unsplash.com/photo-1580250569064-b2ac463aa820?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Cotton"
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                   <h4 className="font-bold text-lg">Summer Cottons</h4>
-                   <span className="text-xs">Under ₹1,499</span>
+                <div className="absolute bottom-6 left-6 text-white">
+                   <h4 className="font-bold text-xl mb-1">Summer Cottons</h4>
+                   <span className="text-xs bg-white/20 backdrop-blur-md px-2 py-1 rounded">Under ₹1,499</span>
                 </div>
              </Link>
-             <Link href="/deals" className="flex-1 relative group overflow-hidden rounded-2xl bg-indigo-900 flex items-center justify-center">
-                <div className="text-center text-white p-4">
-                   <p className="text-xs uppercase tracking-widest text-indigo-300 mb-2">Flash Sale</p>
-                   <h3 className="text-3xl font-bold mb-1">FLAT 50% OFF</h3>
-                   <p className="text-xs text-indigo-200">On Banarasi Silk</p>
+             <Link href="/search?sort=price_asc" className="flex-1 relative group overflow-hidden rounded-2xl bg-[#2a2a72] flex items-center justify-center shadow-sm">
+                <div className="text-center text-white p-6 relative z-10">
+                   <p className="text-[10px] uppercase tracking-[0.2em] text-yellow-300 mb-2 font-bold">Flash Sale</p>
+                   <h3 className="text-4xl font-black mb-1 italic">FLAT 50%</h3>
+                   <p className="text-sm text-indigo-100">On Banarasi Silk</p>
                 </div>
+                {/* Decorative Circle */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-pink-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition duration-700"></div>
              </Link>
           </div>
         </div>
       </section>
 
       {/* 4. Trust Signals */}
-      <section className="bg-white py-8 border-y border-gray-100">
+      <section className="bg-white py-10 border-y border-gray-100 mb-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -179,12 +209,12 @@ export default function HomePage() {
               { icon: Award, title: "Authentic Products", desc: "Sourced directly from weavers" },
               { icon: Zap, title: "Fast Delivery", desc: "Dispatched within 24 hours" },
             ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-900">
+              <div key={idx} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition cursor-default">
+                <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center text-pink-600 shrink-0">
                   <item.icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm text-gray-900">{item.title}</h4>
+                  <h4 className="font-bold text-sm text-gray-900 mb-0.5">{item.title}</h4>
                   <p className="text-xs text-gray-500">{item.desc}</p>
                 </div>
               </div>
@@ -194,33 +224,35 @@ export default function HomePage() {
       </section>
 
       {/* 5. Trending / Deal of the Day */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="container mx-auto px-4 py-8">
         <div className="flex items-end justify-between mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-1 h-6 bg-pink-600 rounded-sm"></span>
-              <h3 className="text-pink-600 font-bold uppercase tracking-wider text-sm">Don't Miss Out</h3>
+              <h3 className="text-pink-600 font-bold uppercase tracking-wider text-sm">Don&apos;t Miss Out</h3>
             </div>
             <h2 className="text-3xl font-serif text-gray-900">Deal of the Day</h2>
           </div>
-          <Link href="/deals" className="group flex items-center gap-1 text-sm font-semibold text-gray-900 hover:text-pink-600 transition">
+          <Link href="/search" className="group flex items-center gap-1 text-sm font-semibold text-gray-900 hover:text-pink-600 transition">
             View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
           </Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {products.slice(0, 6).map((product) => (
-            <Link key={product.id} href={`/product/${product.slug}`} className="group">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-3">
+            <Link key={product.id} href={`/product/${product.slug}`} className="group block h-full">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-3 shadow-sm group-hover:shadow-md transition">
                 <img
                   src={product.image_url || "/placeholder.svg"}
                   alt={product.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wide rounded-sm">
+                {/* Discount Badge */}
+                <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wide rounded-sm shadow-sm">
                    {Math.round(((product.price * 1.2 - product.price) / (product.price * 1.2)) * 100)}% OFF
                 </div>
-                <button className="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-lg translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition duration-300 hover:text-pink-600">
+                {/* Wishlist Button */}
+                <button className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition opacity-0 group-hover:opacity-100">
                   <Heart className="w-4 h-4" />
                 </button>
               </div>
@@ -230,10 +262,11 @@ export default function HomePage() {
                   <span className="text-base font-bold text-gray-900">₹{product.price.toLocaleString("en-IN")}</span>
                   <span className="text-xs text-gray-500 line-through">₹{Math.round(product.price * 1.2).toLocaleString("en-IN")}</span>
                 </div>
+                {/* Stock Bar */}
                 <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3 overflow-hidden">
-                   <div className="bg-orange-500 h-full w-[70%]"></div>
+                   <div className="bg-orange-500 h-full w-[70%] rounded-full"></div>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-1">Selling Fast! 12 left</p>
+                <p className="text-[10px] text-gray-500 mt-1 font-medium">Selling Fast! 12 left</p>
               </div>
             </Link>
           ))}
@@ -241,7 +274,7 @@ export default function HomePage() {
       </section>
 
       {/* 6. Shop By Occasion (Grid) */}
-      <section className="bg-[#fff5f5] py-16">
+      <section className="bg-[#fff5f5] py-16 my-12">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl md:text-4xl font-serif text-gray-900 mb-4">Shop By Occasion</h2>
@@ -250,18 +283,18 @@ export default function HomePage() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { name: "Wedding", img: "https://images.unsplash.com/photo-1610189012906-4783382c527d?auto=format&fit=crop&q=80&w=300" },
-              { name: "Party", img: "https://images.unsplash.com/photo-1609357606619-a429a187a02d?auto=format&fit=crop&q=80&w=300" },
+              { name: "Wedding", img: "https://manyavar.scene7.com/is/image/manyavar/SB18145-407-MAROON2_22-07-2025-09-58:650x900?&dpr=on,2" },
+              { name: "Party", img: "https://manyavar.scene7.com/is/image/manyavar/SB18223-426-T.BLUE-101_27-10-2025-11-01:650x900?&dpr=on,2" },
               { name: "Casual", img: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=300" },
-              { name: "Office", img: "https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&q=80&w=300" },
-              { name: "Festival", img: "https://images.unsplash.com/photo-1595981234058-206a9f52e1bd?auto=format&fit=crop&q=80&w=300" },
-              { name: "Haldi", img: "https://images.unsplash.com/photo-1621570169561-0c2a2e193ee1?auto=format&fit=crop&q=80&w=300" },
+              { name: "Office", img: "https://lazreesarees.com/cdn/shop/files/E7D6BFB2-319E-472A-B5E9-07A86BF6291F.jpg?v=1716906975&width=600" },
+              { name: "Festival", img: "https://manyavar.scene7.com/is/image/manyavar/SB18689-404-FAWN1_22-07-2025-10-53:650x900?&dpr=on,2" },
+              { name: "Haldi", img: "https://lazreesarees.com/cdn/shop/files/5DA5BAC1-A05C-4EFC-BB75-667DFF83B2B8.jpg?v=1702717852&width=600" },
             ].map((occasion) => (
-              <Link key={occasion.name} href={`/search?occasion=${occasion.name.toLowerCase()}`} className="group relative rounded-xl overflow-hidden aspect-[3/4]">
+              <Link key={occasion.name} href={`/search?occasion=${occasion.name.toLowerCase()}`} className="group relative rounded-xl overflow-hidden aspect-[3/4] shadow-md hover:shadow-xl transition-all duration-300">
                 <img src={occasion.img} alt={occasion.name} className="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white font-serif text-xl font-medium tracking-wide border-b border-white pb-1">{occasion.name}</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-90 transition" />
+                <div className="absolute inset-0 flex items-end justify-center pb-6">
+                  <span className="text-white font-serif text-lg font-medium tracking-wide">{occasion.name}</span>
                 </div>
               </Link>
             ))}
@@ -270,7 +303,7 @@ export default function HomePage() {
       </section>
 
       {/* 7. New Arrivals / Top Picks */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-8 mb-16">
         <div className="flex items-end justify-between mb-8">
           <div>
             <h2 className="text-3xl font-serif text-gray-900">Curated For You</h2>
@@ -281,10 +314,10 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
           {products.slice(6, 14).map((product) => (
-            <Link key={product.id} href={`/product/${product.slug}`} className="group">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4">
+            <Link key={product.id} href={`/product/${product.slug}`} className="group block">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm group-hover:shadow-md transition">
                 <img
                   src={product.image_url || "/placeholder.svg"}
                   alt={product.title}
@@ -292,18 +325,15 @@ export default function HomePage() {
                 />
                 {/* Quick Action Overlay */}
                 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition duration-300">
-                    <button className="w-full bg-white text-gray-900 py-3 text-sm font-bold shadow-lg rounded hover:bg-gray-50 flex items-center justify-center gap-2">
-                      <ShoppingBag className="w-4 h-4" /> ADD TO CART
+                    <button className="w-full bg-white text-gray-900 py-3 text-xs font-bold shadow-lg rounded hover:bg-gray-50 flex items-center justify-center gap-2 uppercase tracking-wide">
+                      <ShoppingBag className="w-4 h-4" /> Add to Cart
                     </button>
                 </div>
-                <button className="absolute top-3 right-3 bg-white/80 p-2 rounded-full hover:bg-white hover:text-pink-600 transition">
-                   <Heart className="w-4 h-4" />
-                </button>
               </div>
               
-              <div className="space-y-1">
+              <div className="space-y-1 px-1">
                  <h3 className="text-base font-medium text-gray-900 line-clamp-1 group-hover:text-pink-600 transition">{product.title}</h3>
-                 <p className="text-sm text-gray-500">{product.attributes?.fabric || "Premium Fabric"} • {product.attributes?.weave || "Handloom"}</p>
+                 <p className="text-xs text-gray-500">{product.attributes?.fabric || "Premium Fabric"} • {product.attributes?.weave || "Handloom"}</p>
                  <div className="flex items-center gap-3 pt-1">
                     <span className="text-lg font-bold text-gray-900">₹{product.price.toLocaleString("en-IN")}</span>
                     {product.price > 1000 && (
@@ -316,44 +346,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. Budget Banner */}
-      <section className="container mx-auto px-4 mb-16">
-        <Link href="/budget" className="block relative rounded-2xl overflow-hidden shadow-2xl">
-           <div className="absolute inset-0 bg-gradient-to-r from-teal-900 to-emerald-800" />
-           <div className="relative grid md:grid-cols-2 items-center min-h-[300px]">
-              <div className="p-8 md:p-12 text-center md:text-left">
-                 <span className="text-teal-300 font-bold tracking-widest uppercase text-sm mb-2 block">Pocket Friendly</span>
-                 <h2 className="text-4xl md:text-5xl font-serif text-white mb-6">Budget Buys <br/>Under ₹999</h2>
-                 <p className="text-teal-100 mb-8 max-w-md">Experience the elegance without breaking the bank. Premium cottons and daily wear sarees at unbeatable prices.</p>
-                 <button className="bg-white text-teal-900 px-8 py-3 rounded font-bold hover:bg-teal-50 transition">
-                    Shop Budget Store
-                 </button>
-              </div>
-              <div className="h-full min-h-[300px] relative hidden md:block">
-                  <img 
-                    src="https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80&w=800"
-                    alt="Budget Saree"
-                    className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay"
-                  />
-              </div>
-           </div>
-        </Link>
-      </section>
-
       {/* 9. Brand Story / Footer */}
-      <footer className="bg-[#1a1a1a] text-gray-400 pt-16 pb-8">
+      <footer className="bg-[#1a1a1a] text-gray-400 pt-20 pb-10">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             
             {/* About */}
             <div className="col-span-1 md:col-span-1">
-               <h3 className="text-white text-2xl font-serif mb-6">Sabhyatam</h3>
-               <p className="text-sm leading-relaxed mb-6">
+               <h3 className="text-white text-3xl font-serif mb-6 tracking-tight">Sabhyatam</h3>
+               <p className="text-sm leading-relaxed mb-8 text-gray-400">
                  We are on a mission to revive the golden era of Indian Handlooms. Every saree in our collection tells a story of heritage, craftsmanship, and timeless beauty.
                </p>
                <div className="flex gap-4">
                   {["facebook", "instagram", "twitter"].map(social => (
-                     <div key={social} className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition cursor-pointer">
+                     <div key={social} className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition cursor-pointer">
                         <span className="sr-only">{social}</span>
                         <div className="w-4 h-4 bg-current rounded-full" />
                      </div>
@@ -363,18 +369,18 @@ export default function HomePage() {
 
             {/* Links */}
             <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-sm mb-6">Shop</h4>
-               <ul className="space-y-3 text-sm">
-                  <li><Link href="/search?category=silk" className="hover:text-white transition">Silk Sarees</Link></li>
-                  <li><Link href="/search?category=cotton" className="hover:text-white transition">Cotton Collection</Link></li>
-                  <li><Link href="/search?category=wedding" className="hover:text-white transition">Wedding Special</Link></li>
-                  <li><Link href="/deals" className="hover:text-white transition">New Arrivals</Link></li>
+               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Shop</h4>
+               <ul className="space-y-4 text-sm">
+                  <li><Link href="/search?category=silk-sarees" className="hover:text-white transition">Silk Sarees</Link></li>
+                  <li><Link href="/search?category=cotton-sarees" className="hover:text-white transition">Cotton Collection</Link></li>
+                  <li><Link href="/search?occasion=wedding" className="hover:text-white transition">Wedding Special</Link></li>
+                  <li><Link href="/search?sort=latest" className="hover:text-white transition">New Arrivals</Link></li>
                </ul>
             </div>
 
             <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-sm mb-6">Support</h4>
-               <ul className="space-y-3 text-sm">
+               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Support</h4>
+               <ul className="space-y-4 text-sm">
                   <li><Link href="/track" className="hover:text-white transition">Track Order</Link></li>
                   <li><Link href="/returns" className="hover:text-white transition">Returns & Exchange</Link></li>
                   <li><Link href="/shipping" className="hover:text-white transition">Shipping Policy</Link></li>
@@ -384,21 +390,22 @@ export default function HomePage() {
 
             {/* Newsletter */}
             <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-sm mb-6">Stay Updated</h4>
-               <p className="text-sm mb-4">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Stay Updated</h4>
+               <p className="text-sm mb-6 text-gray-400">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
                <div className="flex">
-                  <input type="email" placeholder="Enter your email" className="bg-gray-800 border-none text-white px-4 py-3 w-full rounded-l focus:ring-1 focus:ring-pink-600" />
-                  <button className="bg-pink-600 text-white px-4 rounded-r font-bold hover:bg-pink-700 transition">JOIN</button>
+                  <input type="email" placeholder="Enter your email" className="bg-gray-800 border-none text-white px-4 py-3 w-full rounded-l-md focus:ring-1 focus:ring-pink-600 outline-none text-sm" />
+                  <button className="bg-pink-600 text-white px-6 rounded-r-md font-bold hover:bg-pink-700 transition text-sm tracking-wide">JOIN</button>
                </div>
             </div>
 
           </div>
 
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
+          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
              <p>&copy; 2025 Sabhyatam Retail Pvt Ltd. All rights reserved.</p>
-             <div className="flex gap-4">
-                <span>Privacy Policy</span>
-                <span>Terms of Service</span>
+             <div className="flex gap-6">
+                <span className="hover:text-gray-300 cursor-pointer transition">Privacy Policy</span>
+                <span className="hover:text-gray-300 cursor-pointer transition">Terms of Service</span>
+                <span className="hover:text-gray-300 cursor-pointer transition">Sitemap</span>
              </div>
           </div>
         </div>

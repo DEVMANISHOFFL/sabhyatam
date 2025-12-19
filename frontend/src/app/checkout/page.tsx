@@ -229,18 +229,24 @@ export default function CheckoutPage() {
 
                <div className="ml-10 space-y-4">
                   {items.map((item: any) => (
-                    <div key={item.variant.id} className="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                    // FIX: Use item.product.id instead of item.variant.id
+                    <div key={item.product.id} className="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                        <div className="h-20 w-16 bg-gray-100 rounded shrink-0 overflow-hidden border border-gray-200">
-                          {/* Placeholder image logic since it wasn't strictly in payload */}
-                          <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">IMG</div>
+                          {/* FIX: Use real image URL from item.product.image */}
+                          <img 
+                            src={item.product.image || "/placeholder.svg"} 
+                            alt={item.product.title}
+                            className="w-full h-full object-cover"
+                          />
                        </div>
                        <div className="flex-1">
                           <h4 className="font-medium text-gray-900 text-sm">{item.product.title}</h4>
                           <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
                           <div className="mt-2 flex items-center gap-2">
+                             {/* FIX: Display correct pricing (paise -> rupees) */}
                              <span className="font-bold text-gray-900">₹{(item.line_total / 100).toLocaleString('en-IN')}</span>
-                             {/* Mock struck price */}
-                             <span className="text-xs text-gray-400 line-through">₹{((item.line_total / 100) * 1.2).toFixed(0)}</span>
+                             {/* Mock struck price logic */}
+                             <span className="text-xs text-gray-400 line-through">₹{((item.line_total / 100) * 1.25).toFixed(0)}</span>
                              <span className="text-xs text-green-600 font-bold">20% Off</span>
                           </div>
                        </div>
@@ -284,11 +290,12 @@ export default function CheckoutPage() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Price ({items.length} items)</span>
-                  <span className="font-medium">₹{(cart.subtotal / 100 * 1.2).toFixed(2)}</span>
+                  {/* FIX: Price logic */}
+                  <span className="font-medium">₹{(cart.subtotal / 100 * 1.25).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                    <span className="text-gray-600">Discount</span>
-                   <span className="text-green-600">- ₹{(cart.subtotal / 100 * 0.2).toFixed(2)}</span>
+                   <span className="text-green-600">- ₹{(cart.subtotal / 100 * 0.25).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                    <span className="text-gray-600">Delivery Charges</span>

@@ -1,117 +1,85 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronDown, X } from "lucide-react"
-import { useState } from "react"
-import { cn } from "@/lib/utils"
-
-type FilterGroupProps = {
-  title: string
-  paramKey: string
-  options: Record<string, number> // { "Silk": 10, "Cotton": 5 }
-  selected?: string
-}
-
-function FilterGroup({ title, paramKey, options, selected }: FilterGroupProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isOpen, setIsOpen] = useState(true)
-
-  function toggleFilter(value: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    
-    // Toggle: if already selected, remove it. Otherwise, set it.
-    if (selected === value) {
-      params.delete(paramKey)
-    } else {
-      params.set(paramKey, value)
-    }
-    
-    // Reset page on filter change
-    params.set("page", "1")
-    
-    router.push(`/search?${params.toString()}`)
-  }
-
-  if (Object.keys(options).length === 0) return null
-
-  return (
-    <div className="border-b border-gray-100 py-4">
-      <button 
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-sm font-bold text-gray-900 uppercase tracking-wide mb-2"
-      >
-        {title}
-        <ChevronDown className={cn("h-4 w-4 transition", isOpen ? "rotate-180" : "")} />
-      </button>
-      
-      {isOpen && (
-        <div className="space-y-2 mt-2">
-          {Object.entries(options).map(([label, count]) => (
-            <label key={label} className="flex items-center gap-3 cursor-pointer group">
-              <div className={cn(
-                "w-4 h-4 border rounded flex items-center justify-center transition",
-                selected === label ? "bg-black border-black" : "border-gray-300 group-hover:border-gray-400"
-              )}>
-                {selected === label && <div className="w-2 h-2 bg-white rounded-sm" />}
-              </div>
-              <input 
-                type="checkbox" 
-                className="hidden" 
-                checked={selected === label}
-                onChange={() => toggleFilter(label)}
-              />
-              <span className={cn("text-sm", selected === label ? "text-gray-900 font-medium" : "text-gray-600")}>
-                {label} <span className="text-gray-400 text-xs">({count})</span>
-              </span>
-            </label>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+import { X } from "lucide-react"
+import FacetFilter from "@/components/FacetFilter"
 
 export default function FilterSidebar({ facets }: { facets: any }) {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const hasFilters = ["category", "fabric", "occasion", "min_price"].some(k => searchParams.has(k))
+  // Check if any specific filter is active (excluding 'q' and 'sort')
+  const filterKeys = ["category", "fabric", "weave", "occasion", "min_price", "max_price"]
+  const hasFilters = filterKeys.some(k => searchParams.has(k))
+
+  function clearAll() {
+    const params = new URLSearchParams(searchParams.toString())
+    
+    // Remove all filter keys but keep 'q' (search query) and 'sort'
+    filterKeys.forEach(key => params.delete(key))
+    
+    // Reset to page 1
+    params.set("page", "1")
+    
+    router.push(`/search?${params.toString()}`, { scroll: false })
+  }
 
   return (
-    <div className="w-64 flex-shrink-0 hidden lg:block pr-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-serif text-lg font-bold">Filters</h3>
+    <div className="w-64 flex-shrink-0 hidden lg:block pr-8 sticky top-24 h-[calc(100vh-100px)] overflow-y-auto scrollbar-hide">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-100">
+        <h3 className="font-serif text-lg font-bold text-gray-900">Filters</h3>
         {hasFilters && (
           <button 
-            onClick={() => router.push("/search")}
-            className="text-xs text-red-600 hover:underline flex items-center gap-1"
+            onClick={clearAll}
+            className="text-xs text-red-600 hover:text-red-800 hover:underline flex items-center gap-1 font-medium transition"
           >
             <X className="h-3 w-3" /> Clear All
           </button>
         )}
       </div>
 
-      <FilterGroup 
-        title="Fabric" 
-        paramKey="fabric" 
-        options={facets.fabric || {}} 
-        selected={searchParams.get("fabric") || undefined} 
-      />
+      {/* Filter Groups */}
+      <div className="space-y-1">
+        
+        {/* Category Facet */}
+        <FacetFilter 
+          title="Category" 
+          name="category" 
+          options={facets.category || {}} 
+        />
 
-      <FilterGroup 
-        title="Weave" 
-        paramKey="weave" 
-        options={facets.weave || {}} 
-        selected={searchParams.get("weave") || undefined} 
-      />
+        {/* Fabric Facet */}
+        <FacetFilter 
+          title="Fabric" 
+          name="fabric" 
+          options={facets.fabric || {}} 
+        />
 
-      <FilterGroup 
-        title="Occasion" 
-        paramKey="occasion" 
-        options={facets.occasion || {}} 
-        selected={searchParams.get("occasion") || undefined} 
-      />
+        {/* Weave Facet */}
+        <FacetFilter 
+          title="Weave" 
+          name="weave" 
+          options={facets.weave || {}} 
+        />
+
+        {/* Occasion Facet */}
+        <FacetFilter 
+          title="Occasion" 
+          name="occasion" 
+          options={facets.occasion || {}} 
+        />
+
+        {/* Color Facet (if available in backend) */}
+        {facets.color && (
+          <FacetFilter 
+            title="Color" 
+            name="color" 
+            options={facets.color} 
+          />
+        )}
+      </div>
     </div>
   )
 }
