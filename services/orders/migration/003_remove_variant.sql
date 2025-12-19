@@ -1,0 +1,1 @@
+ALTER TABLE order_items ALTER COLUMN variant_id DROP NOT NULL;

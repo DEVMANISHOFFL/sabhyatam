@@ -23,8 +23,7 @@ func NewHandler(s *store.RedisStore, pc *client.ProductClient) *Handler {
 	}
 }
 
-// AddItem expects:
-// { "product_id": "...", "variant_id":"...", "quantity": 1 }
+// AddItem expects: { "product_id": "...", "quantity": 1 }
 func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	key := resolveKey(ctx)
@@ -35,7 +34,6 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 
 	var req struct {
 		ProductID string `json:"product_id"`
-		VariantID string `json:"variant_id"`
 		Quantity  int    `json:"quantity"`
 	}
 
@@ -50,48 +48,48 @@ func (h *Handler) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetch existing item (merge quantity)
-	existing, _ := h.store.GetItem(ctx, key, req.VariantID)
+	existing, _ := h.store.GetItem(ctx, key, req.ProductID)
 	newQty := req.Quantity
 	if existing != nil {
 		newQty += existing.Quantity
 	}
 
-	// validate product + variant
-	prod, err := h.pclient.GetProductDetail(ctx, req.ProductID)
+	// validate product
+	prodResp, err := h.pclient.GetProductDetail(ctx, req.ProductID)
 	if err != nil {
 		http.Error(w, "product validation failed", http.StatusBadGateway)
 		return
 	}
 
-	variant, ok := client.VariantFromProduct(prod, req.VariantID)
+	// Extract product object
+	product, ok := prodResp["product"].(map[string]any)
 	if !ok {
-		http.Error(w, "variant not found", http.StatusBadRequest)
+		http.Error(w, "invalid product response", http.StatusBadGateway)
 		return
 	}
 
-	// stock check (best effort)
-	if stockRaw, ok := variant["stock"]; ok {
+	// stock check
+	if stockRaw, ok := product["stock"]; ok {
 		if stock := asInt(stockRaw); stock >= 0 && stock < newQty {
 			http.Error(w, "insufficient stock", http.StatusConflict)
 			return
 		}
 	}
 
-	// snapshot price
+	// snapshot price (Product service returns Integer Rupee, Cart needs Integer Paise for logic)
 	price := int64(0)
-	if p, ok := variant["price"]; ok {
+	if p, ok := product["price"]; ok {
 		price = asMoney(p)
 	}
 
 	item := model.CartItem{
 		ProductID: req.ProductID,
-		VariantID: req.VariantID,
 		Quantity:  newQty,
 		UnitPrice: price,
 		Currency:  "INR",
 	}
 
-	if err := h.store.SetItem(ctx, key, req.VariantID, item); err != nil {
+	if err := h.store.SetItem(ctx, key, req.ProductID, item); err != nil {
 		http.Error(w, "redis error", http.StatusInternalServerError)
 		return
 	}
@@ -110,7 +108,6 @@ func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 	var req struct {
 		ProductID string `json:"product_id"`
-		VariantID string `json:"variant_id"`
 		Quantity  int    `json:"quantity"`
 	}
 
@@ -125,12 +122,12 @@ func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Quantity == 0 {
-		_ = h.store.DeleteItem(ctx, key, req.VariantID)
+		_ = h.store.DeleteItem(ctx, key, req.ProductID)
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 		return
 	}
 
-	existing, err := h.store.GetItem(ctx, key, req.VariantID)
+	existing, err := h.store.GetItem(ctx, key, req.ProductID)
 	if err != nil || existing == nil {
 		http.Error(w, "item not found", http.StatusNotFound)
 		return
@@ -138,7 +135,7 @@ func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 
 	existing.Quantity = req.Quantity
 
-	if err := h.store.SetItem(ctx, key, req.VariantID, *existing); err != nil {
+	if err := h.store.SetItem(ctx, key, req.ProductID, *existing); err != nil {
 		http.Error(w, "redis error", http.StatusInternalServerError)
 		return
 	}
@@ -155,7 +152,7 @@ func (h *Handler) RemoveItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		VariantID string `json:"variant_id"`
+		ProductID string `json:"product_id"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -163,7 +160,7 @@ func (h *Handler) RemoveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = h.store.DeleteItem(ctx, key, req.VariantID)
+	_ = h.store.DeleteItem(ctx, key, req.ProductID)
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "deleted"})
 }
 
@@ -189,58 +186,44 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 		// 1. Fetch product snapshot (source of truth)
 		prodResp, err := h.pclient.GetProductDetail(ctx, it.ProductID)
 		if err != nil {
-			_ = h.store.DeleteItem(ctx, key, it.VariantID)
+			_ = h.store.DeleteItem(ctx, key, it.ProductID)
 			continue
 		}
 
 		productRaw, ok := prodResp["product"].(map[string]any)
 		if !ok {
+			_ = h.store.DeleteItem(ctx, key, it.ProductID)
 			continue
 		}
 
 		// unpublished product → auto remove
 		if pub, ok := productRaw["published"].(bool); ok && !pub {
-			_ = h.store.DeleteItem(ctx, key, it.VariantID)
+			_ = h.store.DeleteItem(ctx, key, it.ProductID)
 			continue
 		}
 
-		// 2. Resolve variant
-		variant, ok := client.VariantFromProduct(prodResp, it.VariantID)
-		if !ok {
-			_ = h.store.DeleteItem(ctx, key, it.VariantID)
-			continue
-		}
-
-		// 3. Normalize price
-		// 3. Normalize price (ALWAYS cents)
+		// 2. Normalize price (ALWAYS paise)
 		var unitPrice int64
-		var mrp int64
-
-		if v, ok := variant["price"]; ok {
-			// product service gives rupees → convert to paise
-			unitPrice = int64(toFloat(v) * 100)
+		if v, ok := productRaw["price"]; ok {
+			unitPrice = asMoney(v)
 		}
 
-		if v, ok := variant["mrp"]; ok {
-			mrp = int64(toFloat(v) * 100)
-		}
-
-		// 4. Enforce stock limits
-		if s, ok := variant["stock"]; ok {
-			maxQty := int(toFloat(s))
+		// 3. Enforce stock limits
+		if s, ok := productRaw["stock"]; ok {
+			maxQty := asInt(s)
 			if it.Quantity > maxQty {
 				it.Quantity = maxQty
 				if it.Quantity <= 0 {
-					_ = h.store.DeleteItem(ctx, key, it.VariantID)
+					_ = h.store.DeleteItem(ctx, key, it.ProductID)
 					continue
 				}
-				_ = h.store.SetItem(ctx, key, it.VariantID, it)
+				_ = h.store.SetItem(ctx, key, it.ProductID, it)
 			}
 		}
 
 		lineTotal := unitPrice * int64(it.Quantity)
 
-		// 5. Extract hero image
+		// 4. Extract hero image
 		image := ""
 		if media, ok := prodResp["media"].([]any); ok && len(media) > 0 {
 			if m, ok := media[0].(map[string]any); ok {
@@ -256,11 +239,6 @@ func (h *Handler) GetCart(w http.ResponseWriter, r *http.Request) {
 				"title": productRaw["title"],
 				"slug":  productRaw["slug"],
 				"image": image,
-			},
-			Variant: map[string]any{
-				"id":    variant["id"],
-				"price": unitPrice,
-				"mrp":   mrp,
 			},
 			Quantity:  it.Quantity,
 			UnitPrice: unitPrice,
@@ -332,20 +310,6 @@ func asMoney(v any) int64 {
 	case json.Number:
 		f, _ := x.Float64()
 		return int64(f * 100)
-	default:
-		return 0
-	}
-}
-
-func toFloat(v any) float64 {
-	switch t := v.(type) {
-	case float64:
-		return t
-	case int:
-		return float64(t)
-	case json.Number:
-		f, _ := t.Float64()
-		return f
 	default:
 		return 0
 	}

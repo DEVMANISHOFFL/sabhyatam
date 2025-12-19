@@ -24,10 +24,9 @@ type Order struct {
 }
 
 type OrderItem struct {
-	ID         string `json:"id"`
-	OrderID    string `json:"order_id"`
-	ProductID  string `json:"product_id"`
-	VariantID  string `json:"variant_id"`
-	Quantity   int    `json:"quantity"`
-	PriceCents int64  `json:"price_cents"`
+	ID        string `json:"id"`
+	OrderID   string `json:"order_id"`
+	ProductID string `json:"product_id"`
+	Quantity   int   `json:"quantity"`
+	PriceCents int64 `json:"price_cents"`
 }

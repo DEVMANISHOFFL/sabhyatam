@@ -58,10 +58,10 @@ func (s *PGStore) CreateDraftOrder(
 
 	var orderID string
 	err = tx.QueryRow(ctx, `
-		INSERT INTO orders (user_id, status, currency, total_amount_cents)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id
-	`,
+    INSERT INTO orders (user_id, status, currency, total_amount_cents)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id
+  `,
 		userID,
 		model.StatusPending,
 		"INR",
@@ -74,18 +74,16 @@ func (s *PGStore) CreateDraftOrder(
 
 	for _, it := range items {
 		_, err = tx.Exec(ctx, `
-			INSERT INTO order_items (
-				order_id,
-				product_id,
-				variant_id,
-				quantity,
-				price_cents
-			)
-			VALUES ($1, $2, $3, $4, $5)
-		`,
+      INSERT INTO order_items (
+        order_id,
+        product_id,
+        quantity,
+        price_cents
+      )
+      VALUES ($1, $2, $3, $4)
+    `,
 			orderID,
 			it.ProductID,
-			it.VariantID,
 			it.Quantity,
 			it.PriceCents,
 		)
@@ -121,11 +119,11 @@ func (s *PGStore) GetOrder(ctx context.Context, orderID string) (*model.Order, e
 	var o model.Order
 
 	row := s.db.QueryRow(ctx, `
-		SELECT id, user_id, status, currency,
-		       total_amount_cents, created_at, updated_at
-		FROM orders
-		WHERE id=$1
-	`, orderID)
+    SELECT id, user_id, status, currency,
+           total_amount_cents, created_at, updated_at
+    FROM orders
+    WHERE id=$1
+  `, orderID)
 
 	if err := row.Scan(
 		&o.ID,
@@ -140,11 +138,11 @@ func (s *PGStore) GetOrder(ctx context.Context, orderID string) (*model.Order, e
 	}
 
 	rows, err := s.db.Query(ctx, `
-		SELECT id, order_id, product_id,
-		       variant_id, quantity, price_cents
-		FROM order_items
-		WHERE order_id=$1
-	`, orderID)
+    SELECT id, order_id, product_id,
+           quantity, price_cents
+    FROM order_items
+    WHERE order_id=$1
+  `, orderID)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +154,6 @@ func (s *PGStore) GetOrder(ctx context.Context, orderID string) (*model.Order, e
 			&it.ID,
 			&it.OrderID,
 			&it.ProductID,
-			&it.VariantID,
 			&it.Quantity,
 			&it.PriceCents,
 		); err != nil {
@@ -185,14 +182,12 @@ func (s *PGStore) ReleaseOrder(ctx context.Context, orderID string) error {
 		return err
 	}
 
-	// Only pending_payment orders can be released
 	if status != "pending_payment" {
-		return nil // idempotent
+		return nil
 	}
 
-	// Fetch order items
 	rows, err := tx.Query(ctx,
-		`SELECT variant_id, quantity FROM order_items WHERE order_id = $1`,
+		`SELECT product_id, quantity FROM order_items WHERE order_id = $1`,
 		orderID,
 	)
 	if err != nil {
@@ -200,31 +195,30 @@ func (s *PGStore) ReleaseOrder(ctx context.Context, orderID string) error {
 	}
 	defer rows.Close()
 
+	// FIX: Updated struct to use ProductID instead of VariantID
 	type item struct {
-		VariantID string
+		ProductID string
 		Qty       int
 	}
 
 	var items []item
 	for rows.Next() {
 		var i item
-		if err := rows.Scan(&i.VariantID, &i.Qty); err != nil {
+		if err := rows.Scan(&i.ProductID, &i.Qty); err != nil {
 			return err
 		}
 		items = append(items, i)
 	}
 
-	// Release stock via product service
 	for _, it := range items {
-		if err := s.productClient.ReleaseStock(ctx, it.VariantID, it.Qty); err != nil {
+		if err := s.productClient.ReleaseStock(ctx, it.ProductID, it.Qty); err != nil {
 			return err
 		}
 	}
 
-	// Mark order cancelled
 	_, err = tx.Exec(ctx,
 		`UPDATE orders SET status = 'cancelled', updated_at = now()
-		 WHERE id = $1`,
+     WHERE id = $1`,
 		orderID,
 	)
 	if err != nil {
@@ -251,15 +245,12 @@ func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
 		return err
 	}
 
-	// Only PAID orders can be refunded
 	if status != "paid" {
-		return nil // idempotent: already refunded / cancelled / invalid
+		return nil
 	}
 
-	// Fetch order items
-	rows, err := tx.Query(
-		ctx,
-		`SELECT variant_id, quantity FROM order_items WHERE order_id = $1`,
+	rows, err := tx.Query(ctx,
+		`SELECT product_id, quantity FROM order_items WHERE order_id = $1`,
 		orderID,
 	)
 	if err != nil {
@@ -268,32 +259,30 @@ func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
 	defer rows.Close()
 
 	type item struct {
-		VariantID string
+		ProductID string
 		Qty       int
 	}
 
 	var items []item
 	for rows.Next() {
 		var it item
-		if err := rows.Scan(&it.VariantID, &it.Qty); err != nil {
+		if err := rows.Scan(&it.ProductID, &it.Qty); err != nil {
 			return err
 		}
 		items = append(items, it)
 	}
 
-	// Restore stock via product service
 	for _, it := range items {
-		if err := s.productClient.ReleaseStock(ctx, it.VariantID, it.Qty); err != nil {
+		if err := s.productClient.ReleaseStock(ctx, it.ProductID, it.Qty); err != nil {
 			return err
 		}
 	}
 
-	// Mark order as refunded
 	_, err = tx.Exec(
 		ctx,
 		`UPDATE orders
-		 SET status = 'refunded', updated_at = now()
-		 WHERE id = $1`,
+     SET status = 'refunded', updated_at = now()
+     WHERE id = $1`,
 		orderID,
 	)
 	if err != nil {

@@ -55,10 +55,10 @@ func NewRedisFromEnv() (*RedisStore, error) {
 func userKey(userID string) string  { return "cart:user:" + userID }
 func guestKey(sessID string) string { return "cart:guest:" + sessID }
 
-// SetItem - upsert quantity (overwrites)
-func (r *RedisStore) SetItem(ctx context.Context, key, variantID string, item model.CartItem) error {
+// SetItem - upsert quantity (overwrites) using productID
+func (r *RedisStore) SetItem(ctx context.Context, key, productID string, item model.CartItem) error {
 	b, _ := json.Marshal(item)
-	if err := r.cli.HSet(ctx, key, variantID, b).Err(); err != nil {
+	if err := r.cli.HSet(ctx, key, productID, b).Err(); err != nil {
 		return err
 	}
 	// refresh TTL
@@ -68,8 +68,8 @@ func (r *RedisStore) SetItem(ctx context.Context, key, variantID string, item mo
 	return r.cli.Expire(ctx, key, r.ttlGuest).Err()
 }
 
-func (r *RedisStore) DeleteItem(ctx context.Context, key, variantID string) error {
-	return r.cli.HDel(ctx, key, variantID).Err()
+func (r *RedisStore) DeleteItem(ctx context.Context, key, productID string) error {
+	return r.cli.HDel(ctx, key, productID).Err()
 }
 
 func (r *RedisStore) GetAll(ctx context.Context, key string) ([]model.CartItem, error) {
@@ -123,10 +123,10 @@ func isUserKey(k string) bool {
 func (s *RedisStore) GetItem(
 	ctx context.Context,
 	key string,
-	variantID string,
+	productID string,
 ) (*model.CartItem, error) {
 
-	val, err := s.cli.HGet(ctx, key, variantID).Result()
+	val, err := s.cli.HGet(ctx, key, productID).Result()
 	if err == redis.Nil {
 		return nil, nil // item not present
 	}

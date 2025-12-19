@@ -1,107 +1,99 @@
-import { getOrCreateSessionId } from './session'
-import { emitCartUpdated } from './cart-events' 
+import type { Cart, AddToCartInput } from "@/lib/types"
 
-const CART_BASE = 'http://localhost:8081/v1/cart'
+// FIX: Direct Backend URL to bypass Next.js Proxy (port 3000)
+const CART_URL = "http://localhost:8081/v1/cart"
 
-
-export type CartItem = {
-  product: {
-    id: string
-    title: string
-    slug: string
-    image: string
+// --- SESSION MANAGEMENT ---
+function getSessionId(): string {
+  if (typeof window === 'undefined') return "" // Server-side fallback
+  
+  let sid = localStorage.getItem("sabhyatam_session")
+  if (!sid) {
+    // Generate a new UUID if one doesn't exist
+    sid = crypto.randomUUID()
+    localStorage.setItem("sabhyatam_session", sid)
   }
-  variant: {
-    id: string
-    price: number
-    mrp?: number
-  }
-  quantity: number
-  line_total: number
+  return sid
 }
 
-export type CartResponse = {
-  items: CartItem[]
-  subtotal: number
+function getHeaders() {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  }
+  
+  // Attach the Session ID to every request
+  // This ensures the backend identifies the user correctly even without cookies
+  const sid = getSessionId()
+  if (sid) {
+    headers["X-SESSION-ID"] = sid
+  }
+  
+  return headers
 }
 
-export async function getCart(): Promise<CartResponse> {
-  const res = await fetch(`${CART_BASE}/`, {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'X-SESSION-ID': getOrCreateSessionId(),
-    },
-  })
-
+async function handleResponse(res: Response) {
   if (!res.ok) {
-    throw new Error('Failed to fetch cart')
+    const error = await res.json().catch(() => ({}))
+    throw new Error(error.error || error.message || "Cart operation failed")
   }
-
   return res.json()
 }
 
-export async function addToCart(input: {
-  product_id: string
-  variant_id: string
-  quantity: number
-}) {
-  const res = await fetch(`${CART_BASE}/add`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-SESSION-ID': getOrCreateSessionId(),
-    },
-    body: JSON.stringify(input),
+// --- API METHODS ---
+
+export async function addToCart(item: AddToCartInput): Promise<Cart> {
+  const res = await fetch(`${CART_URL}/add`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      product_id: item.product_id,
+      quantity: item.quantity,
+    }),
   })
-
-  if (!res.ok) {
-    throw new Error('Failed to add to cart')
-  }
-
-  const data = await res.json()
   
-  emitCartUpdated() 
-  
-  return data
+  await handleResponse(res)
+  // Fetch fresh cart to ensure UI sync
+  return getCart()
 }
 
-export async function updateCartItem(input: {
-  variant_id: string
-  quantity: number
-}) {
-  const res = await fetch(`${CART_BASE}/update`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-SESSION-ID': getOrCreateSessionId(),
-    },
-    body: JSON.stringify(input),
+export async function getCart(): Promise<Cart> {
+  const res = await fetch(`${CART_URL}/`, { 
+    cache: "no-store",
+    headers: getHeaders()
   })
-
+  
   if (!res.ok) {
-    throw new Error('Update failed')
+    // Return empty cart structure on error/404
+    return { id: "", items: [], subtotal: 0, tax: 0, total: 0 } as any
   }
-
-  emitCartUpdated()
+  return res.json()
 }
 
-export async function removeCartItem(variant_id: string) {
-  const res = await fetch(`${CART_BASE}/remove`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-SESSION-ID': getOrCreateSessionId(),
-    },
-    body: JSON.stringify({ variant_id }),
+export async function removeFromCart(productId: string) {
+  const res = await fetch(`${CART_URL}/remove`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ product_id: productId }),
   })
+  return handleResponse(res)
+}
 
-  if (!res.ok) {
-    throw new Error('Remove failed')
-  }
+export async function updateCartItem(productId: string, quantity: number) {
+  const res = await fetch(`${CART_URL}/update`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ 
+      product_id: productId, 
+      quantity: quantity 
+    }),
+  })
+  return handleResponse(res)
+}
 
-  emitCartUpdated()
+export async function clearCart() {
+  const res = await fetch(`${CART_URL}/clear`, {
+    method: "POST",
+    headers: getHeaders(),
+  })
+  return handleResponse(res)
 }

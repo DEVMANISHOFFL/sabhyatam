@@ -36,8 +36,6 @@ func isValidUUID(id string) bool {
 	return err == nil
 }
 
-// PREPARE ORDER (cart → draft order)
-// POST /v1/orders/prepare
 func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -50,7 +48,6 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Fetch cart (typed)
 	var (
 		cart *client.CartResponse
 		err  error
@@ -73,7 +70,6 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Convert cart → order items
 	var (
 		orderItems []model.OrderItem
 		totalCents int64
@@ -88,16 +84,16 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 
 		orderItems = append(orderItems, model.OrderItem{
 			ProductID:  it.Product.ID,
-			VariantID:  it.Variant.ID,
 			Quantity:   it.Quantity,
-			PriceCents: it.Variant.Price,
+			PriceCents: it.UnitPrice,
 		})
 
-		totalCents += it.Variant.Price * int64(it.Quantity)
-		if totalCents <= 0 {
-			http.Error(w, "invalid order total", http.StatusBadRequest)
-			return
-		}
+		totalCents += it.UnitPrice * int64(it.Quantity)
+	}
+
+	if totalCents <= 0 {
+		http.Error(w, "invalid order total", http.StatusBadRequest)
+		return
 	}
 
 	if len(orderItems) == 0 {
@@ -105,7 +101,6 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. Create draft order
 	var uid *string
 	if userID != "" {
 		uid = &userID
@@ -122,15 +117,13 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 4. Reserve stock (soft lock)
 	for _, it := range orderItems {
-		if err := h.pclient.ReserveStock(ctx, it.VariantID, it.Quantity); err != nil {
+		if err := h.pclient.ReserveStock(ctx, it.ProductID, it.Quantity); err != nil {
 			http.Error(w, "stock reservation failed", http.StatusConflict)
 			return
 		}
 	}
 
-	// 5. Respond
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"order_id":     orderID,
@@ -139,8 +132,6 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// CONFIRM ORDER (manual / fallback)
-// POST /v1/orders/confirm
 func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		OrderID string `json:"order_id"`
@@ -169,9 +160,8 @@ func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Deduct stock permanently
 	for _, it := range order.Items {
-		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
+		if err := h.pclient.DeductStock(ctx, it.ProductID, it.Quantity); err != nil {
 			http.Error(w, "stock deduction failed", http.StatusBadGateway)
 			return
 		}
@@ -185,8 +175,6 @@ func (h *Handler) ConfirmOrder(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"status": "paid"})
 }
 
-// POST /v1/orders/{orderID}/release
-// INTERNAL ONLY
 func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -204,27 +192,23 @@ func (h *Handler) ReleaseOrder(w http.ResponseWriter, r *http.Request) {
 
 	order, err := h.store.GetOrder(ctx, orderID)
 	if err != nil {
-		w.WriteHeader(http.StatusOK) // idempotent
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// only draft / pending can be released
 	if order.Status == string(model.StatusPaid) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	// release reserved stock
 	for _, it := range order.Items {
-		_ = h.pclient.ReleaseStock(ctx, it.VariantID, it.Quantity)
+		_ = h.pclient.ReleaseStock(ctx, it.ProductID, it.Quantity)
 	}
 
 	_ = h.store.UpdateOrderStatus(ctx, orderID, "cancelled")
 	w.WriteHeader(http.StatusOK)
 }
 
-// POST /v1/orders/{orderID}/refund
-// INTERNAL ONLY
 func (h *Handler) RefundOrder(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -251,16 +235,14 @@ func (h *Handler) RefundOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// restore stock
 	for _, it := range order.Items {
-		_ = h.pclient.ReleaseStock(ctx, it.VariantID, it.Quantity)
+		_ = h.pclient.ReleaseStock(ctx, it.ProductID, it.Quantity)
 	}
 
 	_ = h.store.UpdateOrderStatus(ctx, orderID, "refunded")
 	w.WriteHeader(http.StatusOK)
 }
 
-// POST /v1/orders/from-cart
 func (h *Handler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -296,11 +278,10 @@ func (h *Handler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
 	for _, it := range cart.Items {
 		items = append(items, model.OrderItem{
 			ProductID:  it.Product.ID,
-			VariantID:  it.Variant.ID,
 			Quantity:   it.Quantity,
-			PriceCents: it.Variant.Price,
+			PriceCents: it.UnitPrice,
 		})
-		total += it.Variant.Price * int64(it.Quantity)
+		total += it.UnitPrice * int64(it.Quantity)
 	}
 
 	orderID, err := h.store.CreateDraftOrder(ctx, nil, items, total)
@@ -315,8 +296,6 @@ func (h *Handler) CreateOrderFromCart(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// INTERNAL: mark order paid (called by payments)
-// POST /v1/orders/{orderID}/paid
 func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -344,7 +323,7 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, it := range order.Items {
-		if err := h.pclient.DeductStock(ctx, it.VariantID, it.Quantity); err != nil {
+		if err := h.pclient.DeductStock(ctx, it.ProductID, it.Quantity); err != nil {
 			http.Error(w, "stock deduction failed", http.StatusBadGateway)
 			return
 		}
@@ -358,7 +337,6 @@ func (h *Handler) MarkOrderPaid(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// INTERNAL: fetch order
 func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -381,8 +359,6 @@ func (h *Handler) GetOrderInternal(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(order)
 }
 
-// GET /v1/orders/{orderID}
-// Public-safe order fetch (no internal key)
 func (h *Handler) GetOrderPublic(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "orderID")
 
@@ -397,7 +373,6 @@ func (h *Handler) GetOrderPublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ⛔ Do NOT leak internals
 	_ = json.NewEncoder(w).Encode(map[string]any{
 		"id":        order.ID,
 		"status":    order.Status,

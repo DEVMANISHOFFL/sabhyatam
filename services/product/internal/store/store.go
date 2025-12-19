@@ -50,20 +50,19 @@ func (s *Store) ListAdminProducts(ctx context.Context, page, limit int, search s
 	}
 
 	// 2. Fetch
-	// FIX: Added COALESCE to nullable text columns (sku, short_desc, subcategory) to prevent scan errors
 	query := fmt.Sprintf(`
-		SELECT id, slug, title, 
-		       COALESCE(short_desc, ''), 
-		       category, 
-		       COALESCE(subcategory, ''), 
-		       price, mrp, stock, 
-		       COALESCE(sku, ''), 
-		       published, created_at
-		FROM products
-		%s
-		ORDER BY created_at DESC
-		LIMIT $%d OFFSET $%d
-	`, whereClause, argIdx, argIdx+1)
+    SELECT id, slug, title, 
+           COALESCE(short_desc, ''), 
+           category, 
+           COALESCE(subcategory, ''), 
+           price, mrp, stock, 
+           COALESCE(sku, ''), 
+           published, created_at
+    FROM products
+    %s
+    ORDER BY created_at DESC
+    LIMIT $%d OFFSET $%d
+  `, whereClause, argIdx, argIdx+1)
 
 	args = append(args, limit, offset)
 
@@ -117,11 +116,11 @@ func (s *Store) getMediaForProducts(ctx context.Context, productIDs []string) (m
 		return nil, nil
 	}
 	rows, err := s.db.Query(ctx, `
-		SELECT id, product_id, url, media_type 
-		FROM product_media 
-		WHERE product_id = ANY($1) 
-		ORDER BY (meta->>'order')::int ASC
-	`, productIDs)
+    SELECT id, product_id, url, media_type 
+    FROM product_media 
+    WHERE product_id = ANY($1) 
+    ORDER BY (meta->>'order')::int ASC
+  `, productIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +138,6 @@ func (s *Store) getMediaForProducts(ctx context.Context, productIDs []string) (m
 // --- STANDARD CRUD METHODS ---
 
 func (s *Store) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
-	// FIX: Added COALESCE to nullable text columns
 	row := s.db.QueryRow(ctx, `
         SELECT id, slug, title, 
                COALESCE(short_desc, ''), 
@@ -164,23 +162,29 @@ func (s *Store) GetProductByID(ctx context.Context, id string) (*model.Product, 
 
 	p.InStock = p.Stock > 0
 	_ = json.Unmarshal(attrs, &p.Attributes)
+
+	// FIX: Fetch Media for Single Product
+	mediaMap, err := s.getMediaForProducts(ctx, []string{p.ID})
+	if err == nil {
+		p.Media = mediaMap[p.ID]
+	}
+
 	return &p, nil
 }
 
 func (s *Store) ListProductsFiltered(ctx context.Context, filters map[string]string, sort string, limit, offset int) ([]model.Product, error) {
-	// FIX: Added COALESCE to subcategory and sku (if added later) to be safe
 	query := `
-	SELECT
-		p.id, p.slug, p.title, 
-		COALESCE(p.short_desc, ''), 
-		p.category,
-		p.price, p.mrp,
-		COALESCE((SELECT url FROM product_media WHERE product_id = p.id ORDER BY (meta->>'order')::int LIMIT 1), '') AS image_url,
-		COALESCE(p.subcategory, ''), 
-		p.attributes, p.tags, p.published, p.created_at, p.updated_at, p.stock
-	FROM products p
-	WHERE 1=1 AND p.deleted_at IS NULL AND p.published = true
-	`
+  SELECT
+    p.id, p.slug, p.title, 
+    COALESCE(p.short_desc, ''), 
+    p.category,
+    p.price, p.mrp,
+    COALESCE((SELECT url FROM product_media WHERE product_id = p.id ORDER BY (meta->>'order')::int LIMIT 1), '') AS image_url,
+    COALESCE(p.subcategory, ''), 
+    p.attributes, p.tags, p.published, p.created_at, p.updated_at, p.stock
+  FROM products p
+  WHERE 1=1 AND p.deleted_at IS NULL AND p.published = true
+  `
 	args := []interface{}{}
 	argIndex := 1
 
@@ -261,20 +265,19 @@ func (s *Store) CreateProduct(ctx context.Context, p *model.Product) (string, er
 	var id string
 	attrs, _ := json.Marshal(p.Attributes)
 
-	// Ensure SKU is unique if not provided
 	if p.SKU == "" {
 		p.SKU = fmt.Sprintf("SKU-%d", time.Now().UnixNano())
 	}
 
 	err := s.db.QueryRow(ctx, `
-		INSERT INTO products (
-			slug, title, short_desc, long_desc, category, subcategory, 
-			price, mrp, stock, sku,
-			attributes, tags, published
-		) 
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) 
-		RETURNING id
-	`,
+    INSERT INTO products (
+      slug, title, short_desc, long_desc, category, subcategory, 
+      price, mrp, stock, sku,
+      attributes, tags, published
+    ) 
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) 
+    RETURNING id
+  `,
 		p.Slug, p.Title, p.ShortDesc, p.LongDesc, p.Category, p.Subcat,
 		p.Price, p.MRP, p.Stock, p.SKU,
 		attrs, p.Tags, p.Published,
@@ -317,17 +320,17 @@ func (s *Store) DeleteProduct(ctx context.Context, id string) error {
 	return nil
 }
 
-// --- SIMPLIFIED STOCK MANAGEMENT (Directly on Products) ---
+// --- STOCK METHODS ---
 
 func (s *Store) ReserveStock(ctx context.Context, productID string, qty int) error {
 	if qty <= 0 {
 		return fmt.Errorf("invalid quantity")
 	}
 	res, err := s.db.Exec(ctx, `
-		UPDATE products 
-		SET stock = stock - $1, stock_reserved = stock_reserved + $1 
-		WHERE id = $2 AND stock >= $1
-	`, qty, productID)
+    UPDATE products 
+    SET stock = stock - $1, stock_reserved = stock_reserved + $1 
+    WHERE id = $2 AND stock >= $1
+  `, qty, productID)
 
 	if err != nil {
 		return err
@@ -343,10 +346,10 @@ func (s *Store) ReleaseStock(ctx context.Context, productID string, qty int) err
 		return fmt.Errorf("invalid quantity")
 	}
 	res, err := s.db.Exec(ctx, `
-		UPDATE products 
-		SET stock = stock + $1, stock_reserved = stock_reserved - $1 
-		WHERE id = $2 AND stock_reserved >= $1
-	`, qty, productID)
+    UPDATE products 
+    SET stock = stock + $1, stock_reserved = stock_reserved - $1 
+    WHERE id = $2 AND stock_reserved >= $1
+  `, qty, productID)
 
 	if err != nil {
 		return err
@@ -362,10 +365,10 @@ func (s *Store) DeductStock(ctx context.Context, productID string, qty int) erro
 		return fmt.Errorf("invalid quantity")
 	}
 	res, err := s.db.Exec(ctx, `
-		UPDATE products 
-		SET stock_reserved = stock_reserved - $1 
-		WHERE id = $2 AND stock_reserved >= $1
-	`, qty, productID)
+    UPDATE products 
+    SET stock_reserved = stock_reserved - $1 
+    WHERE id = $2 AND stock_reserved >= $1
+  `, qty, productID)
 
 	if err != nil {
 		return err
@@ -391,18 +394,18 @@ func (s *Store) DeleteMedia(ctx context.Context, id string) error {
 func (s *Store) GetProductBySlug(ctx context.Context, slug string) (*model.Product, error) {
 	var p model.Product
 	var attrs []byte
-	// FIX: Added COALESCE to nullable text columns
+
 	err := s.db.QueryRow(ctx, `
-		SELECT id, slug, title, 
-		       COALESCE(short_desc, ''), 
-		       category, 
-		       COALESCE(subcategory, ''), 
-		       price, mrp, stock, 
-		       COALESCE(sku, ''),
-		       attributes, tags, published, created_at, updated_at 
-		FROM products 
-		WHERE slug = $1 AND published = true AND deleted_at IS NULL
-	`, slug).Scan(
+    SELECT id, slug, title, 
+           COALESCE(short_desc, ''), 
+           category, 
+           COALESCE(subcategory, ''), 
+           price, mrp, stock, 
+           COALESCE(sku, ''),
+           attributes, tags, published, created_at, updated_at 
+    FROM products 
+    WHERE slug = $1 AND published = true AND deleted_at IS NULL
+  `, slug).Scan(
 		&p.ID, &p.Slug, &p.Title, &p.ShortDesc, &p.Category, &p.Subcat,
 		&p.Price, &p.MRP, &p.Stock, &p.SKU,
 		&attrs, &p.Tags, &p.Published, &p.CreatedAt, &p.UpdatedAt,
@@ -412,11 +415,17 @@ func (s *Store) GetProductBySlug(ctx context.Context, slug string) (*model.Produ
 	}
 	p.InStock = p.Stock > 0
 	_ = json.Unmarshal(attrs, &p.Attributes)
+
+	// FIX: Fetch Media for Single Product (Slug)
+	mediaMap, err := s.getMediaForProducts(ctx, []string{p.ID})
+	if err == nil {
+		p.Media = mediaMap[p.ID]
+	}
+
 	return &p, nil
 }
 
 func (s *Store) CountProductsFiltered(ctx context.Context, filters map[string]string) (int, error) {
-	// Logic Mirrors ListProductsFiltered but for count
 	query := `SELECT COUNT(*) FROM products p WHERE 1=1 AND p.deleted_at IS NULL AND p.published = true`
 	args := []interface{}{}
 	argIndex := 1
@@ -426,7 +435,6 @@ func (s *Store) CountProductsFiltered(ctx context.Context, filters map[string]st
 		args = append(args, v)
 		argIndex++
 	}
-	// ... add other filters as needed
 	var count int
 	err := s.db.QueryRow(ctx, query, args...).Scan(&count)
 	return count, err
@@ -447,4 +455,3 @@ func (s *Store) HasMediaOrder(ctx context.Context, productID string, order int) 
 	err := s.db.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM product_media WHERE product_id = $1 AND (meta->>'order')::int = $2)`, productID, order).Scan(&exists)
 	return exists, err
 }
-

@@ -16,9 +16,8 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 
 		r.Post("/update", h.UpdateItem)
 		r.Post("/remove", h.RemoveItem)
-		r.Post("/merge", h.MergeCarts) // expects {guest_id, user_id}
+		r.Post("/merge", h.MergeCarts)
 	})
-	// health
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		w.Write([]byte("ok"))

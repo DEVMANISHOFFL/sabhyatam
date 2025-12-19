@@ -227,7 +227,7 @@ export default function AdminProductsPage() {
                   const thumb = hasImage ? p.media[0].url : "/placeholder.svg";
                   
                   // FIX: Read price directly from product object, not variants
-                  const price = p.price 
+                  const price = p.price   
                     ? `₹${p.price.toLocaleString()}` 
                     : "—";
 

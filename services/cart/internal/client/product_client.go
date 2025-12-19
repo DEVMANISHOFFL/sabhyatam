@@ -43,19 +43,3 @@ func (p *ProductClient) GetProductDetail(ctx context.Context, productID string) 
 	}
 	return out, nil
 }
-
-// Helper to find variant inside product response
-func VariantFromProduct(product map[string]any, variantID string) (map[string]any, bool) {
-	if v, ok := product["variants"]; ok {
-		if arr, ok := v.([]any); ok {
-			for _, x := range arr {
-				if m, ok := x.(map[string]any); ok {
-					if id, ok := m["id"].(string); ok && id == variantID {
-						return m, true
-					}
-				}
-			}
-		}
-	}
-	return nil, false
-}

@@ -22,12 +22,9 @@ type CartItem struct {
 		Image string `json:"image"`
 	} `json:"product"`
 
-	Variant struct {
-		ID    string `json:"id"`
-		Price int64  `json:"price"`
-		MRP   int64  `json:"mrp"`
-	} `json:"variant"`
-
+	// Variant struct removed. Pricing is now direct or part of item.
+	// Based on your new Cart Service, price comes as UnitPrice
+	UnitPrice int64 `json:"unit_price"`
 	Quantity  int   `json:"quantity"`
 	LineTotal int64 `json:"line_total"`
 }
@@ -47,7 +44,6 @@ func NewCartClient() *CartClient {
 
 func (c *CartClient) GetCartForUser(ctx context.Context, userID string) (*CartResponse, error) {
 	req, _ := http.NewRequestWithContext(ctx, "GET", c.base+"/v1/cart/", nil)
-
 	req.Header.Set("X-USER-ID", userID)
 
 	resp, err := c.c.Do(req)
@@ -64,21 +60,16 @@ func (c *CartClient) GetCartForUser(ctx context.Context, userID string) (*CartRe
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return nil, err
 	}
-
 	return &out, nil
 }
 
 func (c *CartClient) GetCartForSession(ctx context.Context, sessionID string) (*CartResponse, error) {
 	req, _ := http.NewRequestWithContext(ctx, "GET", c.base+"/v1/cart/", nil)
-
-	// ✅ CRITICAL: forward session identity
 	req.Header.Set("X-SESSION-ID", sessionID)
-	resp, err := c.c.Do(req)
-	req.AddCookie(&http.Cookie{
-		Name:  "sabhyatam_session",
-		Value: sessionID,
-	})
+	// Cookie support
+	req.AddCookie(&http.Cookie{Name: "sabhyatam_session", Value: sessionID})
 
+	resp, err := c.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +83,5 @@ func (c *CartClient) GetCartForSession(ctx context.Context, sessionID string) (*
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return nil, err
 	}
-
 	return &out, nil
 }

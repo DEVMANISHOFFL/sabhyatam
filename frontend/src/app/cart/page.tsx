@@ -58,10 +58,13 @@ export default function CartPage() {
   }
 
   const items = cart?.items ?? []
-  const subtotal = cart?.subtotal ?? 0
   
-  // Fake discount logic for display (assuming 20% discount if not provided by backend)
-  // You can replace this if your backend provides MRP vs Selling Price
+  // FIX: Backend returns 'subtotal' in paise/cents (int64).
+  // Frontend 'formatPrice' expects Rupees/Dollars.
+  const rawSubtotal = cart?.subtotal ?? 0
+  const subtotal = rawSubtotal / 100 
+  
+  // Fake discount logic for display
   const estimatedMRP = Math.round(subtotal * 1.25) 
   const totalDiscount = estimatedMRP - subtotal
 
@@ -100,7 +103,8 @@ export default function CartPage() {
               {/* Items */}
               <div className="rounded-sm bg-white shadow-sm overflow-hidden divide-y divide-gray-100">
                 {items.map((item: any) => (
-                  <div key={item.variant.id} className="p-4 hover:bg-gray-50 transition">
+                  // FIX: Use item.product.id instead of variant.id
+                  <div key={item.product.id} className="p-4 hover:bg-gray-50 transition">
                      <CartItem item={item} onRefresh={load} />
                   </div>
                 ))}
