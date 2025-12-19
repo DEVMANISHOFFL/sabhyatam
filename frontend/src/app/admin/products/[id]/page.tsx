@@ -7,9 +7,6 @@ import {
   adminUpdateProduct,
   adminAddMedia,
   adminDeleteMedia,
-  adminCreateVariant,
-  adminUpdateVariant,
-  adminDeleteVariant,
   adminGetUploadUrl,
 } from "@/lib/admin-api"
 import type { AdminProductForm, ProductMedia } from "@/lib/types"
@@ -32,18 +29,31 @@ export default function AdminEditProductPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialize with default values to prevent "uncontrolled to controlled" errors
-  const [product, setProduct] = useState<AdminProductForm | null>(null)
+  // STATE DEFINITION
+  const [product, setProduct] = useState<
+    Omit<AdminProductForm, "price" | "mrp" | "stock"> & {
+      price: string | number
+      mrp: string | number
+      stock: string | number
+      in_stock: boolean
+    }
+  >({
+    title: "",
+    slug: "",
+    short_desc: "",
+    category: "",
+    subcategory: "",
+    price: "",
+    mrp: "",
+    stock: "",
+    in_stock: false,
+    published: false,
+    attributes: {},
+    tags: [],
+  } as any)
   
-  // Separate state for tags string editing (comma separated)
   const [tagsInput, setTagsInput] = useState("")
-  
   const [media, setMedia] = useState<ProductMedia[]>([])
-  const [variants, setVariants] = useState<any[]>([])
-
-  // Variant Form State
-  const [newVariantPrice, setNewVariantPrice] = useState("")
-  const [newVariantStock, setNewVariantStock] = useState("")
 
   useEffect(() => {
     if (!id) return
@@ -55,25 +65,25 @@ export default function AdminEditProductPage() {
       setLoading(true)
       const res = await adminGetProduct(productId)
       
-      // 1. Map API response to Form State securely
+      // Cast to 'any' to handle the backend case inconsistency safely
+      const rawData = res.product as any
+
       setProduct({
-        ...res.product,
-        // Ensure numbers are converted to strings/numbers for inputs, handle nulls
-        price: res.product.price ?? "",
-        mrp: res.product.mrp ?? "",
-        // Make sure attributes object exists
-        attributes: res.product.attributes || {},
-        // Map specific text fields if they differ
-        short_desc: res.product.short_desc || "", 
+        ...rawData,
+        price: rawData.price ?? "",
+        mrp: rawData.mrp ?? "",
+        // FIX: Check for 'Stock' (backend) OR 'stock' (standard)
+        stock: rawData.Stock ?? rawData.stock ?? "", 
+        in_stock: rawData.in_stock ?? false,
+        attributes: rawData.attributes || {},
+        short_desc: rawData.short_desc || "", 
       })
 
-      // 2. Handle Tags (Array -> String)
-      if (res.product.tags && Array.isArray(res.product.tags)) {
-        setTagsInput(res.product.tags.join(", "))
+      if (rawData.tags && Array.isArray(rawData.tags)) {
+        setTagsInput(rawData.tags.join(", "))
       }
 
       setMedia(res.media || [])
-      setVariants(res.variants || [])
     } catch (e) {
       console.error(e)
       setError("Failed to load product")
@@ -88,18 +98,26 @@ export default function AdminEditProductPage() {
 
     setSaving(true)
     try {
-      // Convert tags string back to array
       const tagsArray = tagsInput.split(",").map(t => t.trim()).filter(Boolean)
+      
+      // Ensure numerical values
+      const stockVal = product.stock === "" ? 0 : Number(product.stock)
+      const priceVal = product.price === "" ? 0 : Number(product.price)
+      const mrpVal = product.mrp === "" ? undefined : Number(product.mrp)
 
       await adminUpdateProduct(id, {
         ...product,
-        price: product.price === "" ? 0 : Number(product.price),
-        mrp: product.mrp === "" ? undefined : Number(product.mrp),
+        price: priceVal,
+        mrp: mrpVal,
+        stock: stockVal,
+        // Send the explicit toggle state
+        in_stock: product.in_stock,
         tags: tagsArray
       })
       alert("Product saved successfully")
     } catch (e: any) {
       setError(e.message || "Save failed")
+      alert("Error saving: " + e.message)
     } finally {
       setSaving(false)
     }
@@ -107,14 +125,13 @@ export default function AdminEditProductPage() {
 
   // --- Attributes Helper ---
   const updateAttribute = (key: string, value: string) => {
-    if (!product) return
-    setProduct({
-      ...product,
+    setProduct(prev => ({
+      ...prev,
       attributes: {
-        ...product.attributes,
+        ...prev.attributes,
         [key]: value
       }
-    })
+    }))
   }
 
   // --- File Upload Logic ---
@@ -165,21 +182,6 @@ export default function AdminEditProductPage() {
     setMedia(xs => xs.filter(m => m.id !== mediaId))
   }
 
-  async function addVariant() {
-    if (!id || !newVariantPrice || !newVariantStock) return
-    try {
-      const res = await adminCreateVariant(id, { 
-        price: Number(newVariantPrice), 
-        stock: Number(newVariantStock) 
-      })
-      setVariants(xs => [...xs, { id: res.id, price: Number(newVariantPrice), stock: Number(newVariantStock) }])
-      setNewVariantPrice("")
-      setNewVariantStock("")
-    } catch(e) {
-      alert("Failed to add variant")
-    }
-  }
-
   const noSpinnerClass = "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 
   if (!id) return <div>Invalid product</div>
@@ -199,7 +201,7 @@ export default function AdminEditProductPage() {
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{product.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{product.title || "Untitled Product"}</h1>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span className="font-mono bg-gray-100 px-1 rounded">{id.slice(0,8)}</span>
               <span>•</span>
@@ -305,143 +307,66 @@ export default function AdminEditProductPage() {
                 </div>
              </div>
              
-             {/* Occasion (JSON Array typically, but handling as string for simple edit) */}
+             {/* Occasion */}
              <div className="mt-4">
                <label className="block text-sm font-medium text-gray-700 mb-1">Occasion (JSON Array)</label>
-               {/* Simplified input assuming simple string for now, or you can add a specialized tag input */}
                <input 
                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
                  placeholder='e.g. ["Wedding", "Party"]'
-                 // This assumes Occasion is stored as a raw JSON string in this simplistic view, 
-                 // or you can map it similarly to Tags below.
                  value={JSON.stringify(product.attributes?.occasion || [])} 
                  disabled
                />
                <p className="text-xs text-gray-400 mt-1">Editing arrays directly requires advanced UI, currently read-only.</p>
              </div>
           </div>
-
-          {/* 3. Variants & Inventory */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Variants & Stock</h2>
-            </div>
-            
-            <div className="overflow-x-auto rounded-lg border border-gray-200 mb-4">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-700 font-medium">
-                  <tr>
-                    <th className="px-4 py-3">Variant ID</th>
-                    <th className="px-4 py-3">Price (₹)</th>
-                    <th className="px-4 py-3">Stock</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {variants.map(v => (
-                    <tr key={v.id} className="group hover:bg-gray-50">
-                      <td className="px-4 py-2 font-mono text-xs text-gray-500">{v.id.slice(0,8)}...</td>
-                      <td className="px-4 py-2">
-                        <input 
-                          type="number" 
-                          className={`w-24 border rounded px-2 py-1 text-right ${noSpinnerClass}`}
-                          value={v.price}
-                          onChange={e => setVariants(xs => xs.map(x => x.id === v.id ? { ...x, price: Number(e.target.value) } : x))}
-                        />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input 
-                          type="number" 
-                          className={`w-20 border rounded px-2 py-1 text-right ${noSpinnerClass}`}
-                          value={v.stock}
-                          onChange={e => setVariants(xs => xs.map(x => x.id === v.id ? { ...x, stock: Number(e.target.value) } : x))}
-                        />
-                      </td>
-                      <td className="px-4 py-2 text-right space-x-2">
-                        <button 
-                          onClick={() => adminUpdateVariant(v.id, { price: v.price, stock: v.stock })}
-                          className="text-blue-600 hover:underline text-xs"
-                        >
-                          Save
-                        </button>
-                        <button 
-                          onClick={async () => {
-                            if(!confirm("Delete variant?")) return;
-                            await adminDeleteVariant(v.id)
-                            setVariants(xs => xs.filter(x => x.id !== v.id))
-                          }}
-                          className="text-red-600 hover:underline text-xs"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  <tr className="bg-gray-50">
-                    <td className="px-4 py-2 text-gray-400 italic text-xs">New</td>
-                    <td className="px-4 py-2">
-                      <input 
-                        placeholder="Price" 
-                        type="number" 
-                        className={`w-24 border rounded px-2 py-1 text-right bg-white ${noSpinnerClass}`}
-                        value={newVariantPrice}
-                        onChange={e => setNewVariantPrice(e.target.value)}
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input 
-                        placeholder="Qty" 
-                        type="number" 
-                        className={`w-20 border rounded px-2 py-1 text-right bg-white ${noSpinnerClass}`}
-                        value={newVariantStock}
-                        onChange={e => setNewVariantStock(e.target.value)}
-                      />
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <button onClick={addVariant} className="text-xs bg-black text-white px-3 py-1 rounded hover:bg-gray-800">Add</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
 
         {/* RIGHT COLUMN: Media & Status */}
         <div className="space-y-6">
           
-          {/* 4. Status Card */}
+          {/* 3. Settings Card (Includes Price, MRP, Stock) */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
             <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Settings</h2>
             
+            {/* Published Toggle */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Published</span>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={product.published || false} onChange={e => setProduct({...product, published: e.target.checked})} />
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={product.published || false} 
+                  onChange={e => setProduct({...product, published: e.target.checked})} 
+                />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
               </label>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-               <label className="block text-xs font-medium text-gray-500 mb-1">Tags (comma separated)</label>
-               <input 
-                 className="w-full border rounded p-2 text-sm"
-                 placeholder="Saree, Silk, Red"
-                 value={tagsInput}
-                 onChange={e => setTagsInput(e.target.value)}
-               />
+            {/* In Stock Toggle */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-700">In Stock</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={product.in_stock || false} 
+                  onChange={e => setProduct({...product, in_stock: e.target.checked})} 
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
             </div>
 
+            {/* Price & Stock Inputs */}
             <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
                <div>
-                 <label className="block text-xs font-medium text-gray-500 mb-1">Base Price (₹)</label>
+                 <label className="block text-xs font-medium text-gray-500 mb-1">Price (₹)</label>
                  <input 
                    type="number" 
                    className={`w-full border rounded p-2 text-sm ${noSpinnerClass}`}
                    value={product.price}
                    onChange={e => setProduct({
                      ...product, 
-                     price: e.target.value === "" ? ("" as any) : Number(e.target.value)
+                     price: e.target.value === "" ? "" : Number(e.target.value)
                    })}
                  />
                </div>
@@ -453,14 +378,42 @@ export default function AdminEditProductPage() {
                    value={product.mrp}
                    onChange={e => setProduct({
                      ...product, 
-                     mrp: e.target.value === "" ? ("" as any) : Number(e.target.value)
+                     mrp: e.target.value === "" ? "" : Number(e.target.value)
                    })}
                  />
                </div>
+               <div className="col-span-2">
+                 <label className="block text-xs font-medium text-gray-500 mb-1">Total Stock (Qty)</label>
+                 <input 
+                   type="number" 
+                   className={`w-full border rounded p-2 text-sm ${noSpinnerClass}`}
+                   value={product.stock}
+                   onChange={e => {
+                     const val = e.target.value === "" ? "" : Number(e.target.value);
+                     setProduct({
+                       ...product, 
+                       stock: val,
+                       // Auto-enable "In Stock" if quantity > 0
+                       in_stock: (typeof val === 'number' && val > 0) ? true : product.in_stock
+                     })
+                   }}
+                 />
+               </div>
+            </div>
+
+            {/* Tags */}
+            <div className="pt-4 border-t border-gray-100">
+               <label className="block text-xs font-medium text-gray-500 mb-1">Tags (comma separated)</label>
+               <input 
+                 className="w-full border rounded p-2 text-sm"
+                 placeholder="Saree, Silk, Red"
+                 value={tagsInput}
+                 onChange={e => setTagsInput(e.target.value)}
+               />
             </div>
           </div>
 
-          {/* 5. Media Manager */}
+          {/* 4. Media Manager */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Media</h2>
             

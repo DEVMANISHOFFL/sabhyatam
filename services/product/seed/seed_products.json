@@ -6,6 +6,10 @@
     "long_desc": "Authentic Kanjivaram from Tamil Nadu, 100% mulberry silk, 5.5 meters. Includes unstitched blouse piece. Care: dry clean only.",
     "category": "Silk Sarees",
     "subcategory": "Kanjivaram",
+    "price": 49999.00,
+    "mrp": 59999.00,
+    "stock": 5,
+    "sku": "SB-KANJ-MAR-001",
     "attributes": {
       "fabric": "pure silk",
       "weave": "kanjivaram",
@@ -15,21 +19,24 @@
       "length_meters": 5.5,
       "care": "dry clean only",
       "border_style": "temple",
-      "pattern": "zari"
+      "pattern": "zari",
+      "color": "maroon"
     },
-    "tags": ["bridal","wedding","handloom"],
-    "vendor_id": null,
+    "tags": ["bridal", "wedding", "handloom"],
     "published": true,
-    "variants": [
-      {"sku":"SB-KANJ-MAR-001","price":49999.00,"mrp":59999.00,"stock":5,"attributes":{"color":"maroon"}},
-      {"sku":"SB-KANJ-GRN-001","price":47999.00,"mrp":57999.00,"stock":3,"attributes":{"color":"green"}}
-    ],
     "media": [
-      {"url":"https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}},
-      {"url":"https://cdn.sabhyatam.com/prod/kanj_maroon/zoom1.jpg","media_type":"image","meta":{"role":"zoom","order":2}}
+      {
+        "url": "https://cdn.sabhyatam.com/prod/kanj_maroon/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      },
+      {
+        "url": "https://cdn.sabhyatam.com/prod/kanj_maroon/zoom1.jpg",
+        "media_type": "image",
+        "meta": { "role": "zoom", "order": 2 }
+      }
     ]
   },
-
   {
     "title": "Banarasi Silk Saree - Wine Red with Floral Buta",
     "slug": "banarasi-silk-wine-red-floral-buta",
@@ -37,4751 +44,508 @@
     "long_desc": "Handloom Banarasi from Varanasi, silk blend, 5.5m. Traditional zari work with floral buta repeat.",
     "category": "Silk Sarees",
     "subcategory": "Banarasi",
-    "attributes": {"fabric":"silk","weave":"banarasi","origin":"Uttar Pradesh","occasion":["festive","wedding"],"length_meters":5.5,"care":"dry clean only"},
-    "tags":["banarasi","bridal"],
+    "price": 24999.00,
+    "mrp": 29999.00,
+    "stock": 8,
+    "sku": "SB-BNR-WIN-001",
+    "attributes": {
+      "fabric": "silk",
+      "weave": "banarasi",
+      "origin": "Uttar Pradesh",
+      "occasion": ["festive", "wedding"],
+      "length_meters": 5.5,
+      "care": "dry clean only",
+      "color": "wine red"
+    },
+    "tags": ["banarasi", "bridal"],
     "published": true,
-    "variants":[{"sku":"SB-BNR-WIN-001","price":24999.00,"mrp":29999.00,"stock":8,"attributes":{"color":"wine red"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/banarasi_wine/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Chanderi Cotton Silk Saree - Pastel Mint",
     "slug": "chanderi-cotton-silk-pastel-mint",
     "short_desc": "Lightweight Chanderi for daytime events; subtle zari border.",
     "long_desc": "Handwoven Chanderi from Madhya Pradesh, cotton-silk blend, breathable and elegant.",
-    "category":"Handloom Sarees",
-    "subcategory":"Chanderi",
-    "attributes":{"fabric":"cotton-silk","weave":"chanderi","origin":"Madhya Pradesh","occasion":["office","casual"],"length_meters":5.5,"care":"gentle wash"},
-    "tags":["chanderi","daily wear"],
+    "category": "Handloom Sarees",
+    "subcategory": "Chanderi",
+    "price": 6999.00,
+    "mrp": 7999.00,
+    "stock": 20,
+    "sku": "SB-CHD-MNT-001",
+    "attributes": {
+      "fabric": "cotton-silk",
+      "weave": "chanderi",
+      "origin": "Madhya Pradesh",
+      "occasion": ["office", "casual"],
+      "length_meters": 5.5,
+      "care": "gentle wash",
+      "color": "mint"
+    },
+    "tags": ["chanderi", "daily wear"],
     "published": true,
-    "variants":[{"sku":"SB-CHD-MNT-001","price":6999.00,"mrp":7999.00,"stock":20,"attributes":{"color":"mint"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/chanderi_mint/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Ikat Cotton Saree - Indigo Bandha",
     "slug": "ikat-cotton-indigo-bandha",
     "short_desc": "Traditional Ikat (Bandha) handloom with geometric motifs.",
     "long_desc": "Ikat from Odisha, 100% cotton, comfortable daily wear with artisanal tie-dye patterns.",
-    "category":"Handloom Sarees",
-    "subcategory":"Ikat",
-    "attributes":{"fabric":"cotton","weave":"ikat","origin":"Odisha","occasion":["casual"],"length_meters":5.5,"care":"gentle wash"},
-    "tags":["ikat","handloom"],
+    "category": "Handloom Sarees",
+    "subcategory": "Ikat",
+    "price": 3999.00,
+    "mrp": 4999.00,
+    "stock": 15,
+    "sku": "SB-IKT-IND-001",
+    "attributes": {
+      "fabric": "cotton",
+      "weave": "ikat",
+      "origin": "Odisha",
+      "occasion": ["casual"],
+      "length_meters": 5.5,
+      "care": "gentle wash",
+      "color": "indigo"
+    },
+    "tags": ["ikat", "handloom"],
     "published": true,
-    "variants":[{"sku":"SB-IKT-IND-001","price":3999.00,"mrp":4999.00,"stock":15,"attributes":{"color":"indigo"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/ikat_indigo/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Banarasi Organza Saree - Pastel Peach with Zari",
     "slug": "banarasi-organza-pastel-peach-zari",
     "short_desc": "Modern organza with Banarasi motifs — light & dreamy.",
     "long_desc": "Organza weave with gold zari motifs, ideal for parties and receptions.",
-    "category":"Designer Sarees",
-    "subcategory":"Organza",
-    "attributes":{"fabric":"organza","weave":"banarasi","origin":"Uttar Pradesh","occasion":["party"],"length_meters":5.5,"care":"dry clean"},
-    "tags":["organza","party"],
+    "category": "Designer Sarees",
+    "subcategory": "Organza",
+    "price": 12999.00,
+    "mrp": 14999.00,
+    "stock": 6,
+    "sku": "SB-ORG-PCP-001",
+    "attributes": {
+      "fabric": "organza",
+      "weave": "banarasi",
+      "origin": "Uttar Pradesh",
+      "occasion": ["party"],
+      "length_meters": 5.5,
+      "care": "dry clean",
+      "color": "peach"
+    },
+    "tags": ["organza", "party"],
     "published": true,
-    "variants":[{"sku":"SB-ORG-PCP-001","price":12999.00,"mrp":14999.00,"stock":6,"attributes":{"color":"peach"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/org_peach/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/org_peach/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Bandhani Georgette Saree - Marigold Yellow",
     "slug": "bandhani-georgette-marigold",
     "short_desc": "Vibrant Bandhani print on georgette, lightweight festival favorite.",
     "long_desc": "Bandhani from Gujarat, georgette fabric; breathable and flowy.",
-    "category":"Printed Sarees",
-    "subcategory":"Bandhani",
-    "attributes":{"fabric":"georgette","weave":"bandhani","origin":"Gujarat","occasion":["festival"],"length_meters":5.5,"care":"gentle wash"},
-    "tags":["bandhani","festival"],
+    "category": "Printed Sarees",
+    "subcategory": "Bandhani",
+    "price": 3499.00,
+    "mrp": 3999.00,
+    "stock": 25,
+    "sku": "SB-BDH-MRG-001",
+    "attributes": {
+      "fabric": "georgette",
+      "weave": "bandhani",
+      "origin": "Gujarat",
+      "occasion": ["festival"],
+      "length_meters": 5.5,
+      "care": "gentle wash",
+      "color": "marigold yellow"
+    },
+    "tags": ["bandhani", "festival"],
     "published": true,
-    "variants":[{"sku":"SB-BDH-MRG-001","price":3499.00,"mrp":3999.00,"stock":25,"attributes":{"color":"marigold yellow"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/bandhani_marigold/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/bandhani_marigold/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Tussar Silk Saree - Earthy Brown with Ajrakh Border",
     "slug": "tussar-ajrakh-earthy-brown",
     "short_desc": "Tussar silk with Ajrakh-inspired border; artisanal handwork.",
     "long_desc": "Tussar from central India; raw texture and elegant drape.",
-    "category":"Silk Sarees",
-    "subcategory":"Tussar",
-    "attributes":{"fabric":"tussar silk","weave":"tussar","origin":"Madhya Pradesh","occasion":["ethnic","casual"],"length_meters":5.5,"care":"dry clean"},
-    "tags":["tussar","ajrakh"],
+    "category": "Silk Sarees",
+    "subcategory": "Tussar",
+    "price": 8999.00,
+    "mrp": 9999.00,
+    "stock": 10,
+    "sku": "SB-TSS-BRN-001",
+    "attributes": {
+      "fabric": "tussar silk",
+      "weave": "tussar",
+      "origin": "Madhya Pradesh",
+      "occasion": ["ethnic", "casual"],
+      "length_meters": 5.5,
+      "care": "dry clean",
+      "color": "earth brown"
+    },
+    "tags": ["tussar", "ajrakh"],
     "published": true,
-    "variants":[{"sku":"SB-TSS-BRN-001","price":8999.00,"mrp":9999.00,"stock":10,"attributes":{"color":"earth brown"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/tussar_brown/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Kota Doria Cotton Saree - Sky Blue Checks",
     "slug": "kota-doria-sky-blue-checks",
     "short_desc": "Lightweight Kota Doria perfect for summer and office wear.",
     "long_desc": "Kota Doria from Rajasthan: breathable, delicate checks, easy maintenance.",
-    "category":"Cotton Sarees",
-    "subcategory":"Kota Doria",
-    "attributes":{"fabric":"cotton","weave":"kota","origin":"Rajasthan","occasion":["office","casual"],"length_meters":5.5,"care":"gentle wash"},
-    "tags":["kota","daily"],
+    "category": "Cotton Sarees",
+    "subcategory": "Kota Doria",
+    "price": 2999.00,
+    "mrp": 3499.00,
+    "stock": 30,
+    "sku": "SB-KTA-SKY-001",
+    "attributes": {
+      "fabric": "cotton",
+      "weave": "kota",
+      "origin": "Rajasthan",
+      "occasion": ["office", "casual"],
+      "length_meters": 5.5,
+      "care": "gentle wash",
+      "color": "sky blue"
+    },
+    "tags": ["kota", "daily"],
     "published": true,
-    "variants":[{"sku":"SB-KTA-SKY-001","price":2999.00,"mrp":3499.00,"stock":30,"attributes":{"color":"sky blue"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/kota_sky/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Mysore Silk Saree - Deep Teal with Contrast Border",
     "slug": "mysore-silk-deep-teal",
     "short_desc": "Smooth Mysore silk, perfect for neat drape and formal events.",
     "long_desc": "Pure Mysore silk with simple contrast border. Lightweight, subtle sheen.",
-    "category":"Silk Sarees",
-    "subcategory":"Mysore Silk",
-    "attributes":{"fabric":"silk","weave":"mysore","origin":"Karnataka","occasion":["formal"],"length_meters":5.5,"care":"dry clean"},
-    "tags":["mysore","formal"],
+    "category": "Silk Sarees",
+    "subcategory": "Mysore Silk",
+    "price": 11999.00,
+    "mrp": 13999.00,
+    "stock": 12,
+    "sku": "SB-MYS-TEA-001",
+    "attributes": {
+      "fabric": "silk",
+      "weave": "mysore",
+      "origin": "Karnataka",
+      "occasion": ["formal"],
+      "length_meters": 5.5,
+      "care": "dry clean",
+      "color": "deep teal"
+    },
+    "tags": ["mysore", "formal"],
     "published": true,
-    "variants":[{"sku":"SB-MYS-TEA-001","price":11999.00,"mrp":13999.00,"stock":12,"attributes":{"color":"deep teal"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/mysore_teal/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Printed Satin Saree - Floral Coral",
     "slug": "printed-satin-floral-coral",
     "short_desc": "Affordable satin printed saree for casual parties and gifting.",
     "long_desc": "Light satin, machine-printed floral motif, easy-care.",
-    "category":"Printed Sarees",
-    "subcategory":"Satin Print",
-    "attributes":{"fabric":"satin","weave":"print","origin":"Unknown","occasion":["party","casual"],"length_meters":5.5,"care":"machine wash"},
-    "tags":["printed","affordable"],
+    "category": "Printed Sarees",
+    "subcategory": "Satin Print",
+    "price": 1999.00,
+    "mrp": 2499.00,
+    "stock": 40,
+    "sku": "SB-PRT-CRL-001",
+    "attributes": {
+      "fabric": "satin",
+      "weave": "print",
+      "origin": "Unknown",
+      "occasion": ["party", "casual"],
+      "length_meters": 5.5,
+      "care": "machine wash",
+      "color": "coral"
+    },
+    "tags": ["printed", "affordable"],
     "published": true,
-    "variants":[{"sku":"SB-PRT-CRL-001","price":1999.00,"mrp":2499.00,"stock":40,"attributes":{"color":"coral"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/print_coral/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/print_coral/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
-
   {
     "title": "Designer Velvet Saree - Midnight Black with Embroidery",
     "slug": "velvet-midnight-embroidered",
     "short_desc": "Luxurious velvet saree with hand embroidery — evening statement piece.",
     "long_desc": "Velvet saree with bead & thread embroidery, lined blouse included.",
-    "category":"Designer Sarees",
-    "subcategory":"Velvet",
-    "attributes":{"fabric":"velvet","weave":"embroidery","origin":"Unknown","occasion":["party","reception"],"length_meters":5.5,"care":"dry clean only","blouse_included":true},
-    "tags":["designer","evening"],
+    "category": "Designer Sarees",
+    "subcategory": "Velvet",
+    "price": 21999.00,
+    "mrp": 25999.00,
+    "stock": 4,
+    "sku": "SB-VLT-BLK-001",
+    "attributes": {
+      "fabric": "velvet",
+      "weave": "embroidery",
+      "origin": "Unknown",
+      "occasion": ["party", "reception"],
+      "length_meters": 5.5,
+      "care": "dry clean only",
+      "blouse_included": true,
+      "color": "black"
+    },
+    "tags": ["designer", "evening"],
     "published": true,
-    "variants":[{"sku":"SB-VLT-BLK-001","price":21999.00,"mrp":25999.00,"stock":4,"attributes":{"color":"black"}}],
-    "media":[{"url":"https://cdn.sabhyatam.com/prod/velvet_black/hero.jpg","media_type":"image","meta":{"role":"hero","order":1}}]
+    "media": [
+      {
+        "url": "https://cdn.sabhyatam.com/prod/velvet_black/hero.jpg",
+        "media_type": "image",
+        "meta": { "role": "hero", "order": 1 }
+      }
+    ]
   },
   {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-1",
+    "title": "Banarasi Silk Saree – Emerald Green",
+    "slug": "banarasi-emerald-green-unique",
     "short_desc": "Premium banarasi silk saree in emerald green.",
     "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
     "category": "Silk Sarees",
     "subcategory": "Banarasi",
+    "price": 3120,
+    "mrp": 4150,
+    "stock": 6,
+    "sku": "SB-BAN-GRN-001",
     "attributes": {
       "fabric": "silk",
       "weave": "banarasi",
       "origin": "Uttar Pradesh",
-      "occasion": [
-        "festive"
-      ],
+      "occasion": ["festive"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "emerald green"
     },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["banarasi", "silk", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-1-A",
-        "price": 3120,
-        "mrp": 4150,
-        "stock": 6,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-1/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-2",
+    "title": "Chanderi Cotton-Silk Saree – Wine Red",
+    "slug": "chanderi-wine-red-unique",
     "short_desc": "Premium chanderi cotton-silk saree in wine red.",
     "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
     "category": "Handloom Sarees",
     "subcategory": "Chanderi",
+    "price": 3240,
+    "mrp": 4300,
+    "stock": 7,
+    "sku": "SB-CHA-RED-001",
     "attributes": {
       "fabric": "cotton-silk",
       "weave": "chanderi",
       "origin": "Madhya Pradesh",
-      "occasion": [
-        "party"
-      ],
+      "occasion": ["party"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "wine red"
     },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["chanderi", "cotton-silk", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-2-A",
-        "price": 3240,
-        "mrp": 4300,
-        "stock": 7,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-2/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-3",
+    "title": "Ikat Cotton Saree – Peacock Blue",
+    "slug": "ikat-peacock-blue-unique",
     "short_desc": "Premium ikat cotton saree in peacock blue.",
     "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
     "category": "Handloom Sarees",
     "subcategory": "Ikat",
+    "price": 3360,
+    "mrp": 4450,
+    "stock": 8,
+    "sku": "SB-IKA-BLU-001",
     "attributes": {
       "fabric": "cotton",
       "weave": "ikat",
       "origin": "Odisha",
-      "occasion": [
-        "casual"
-      ],
+      "occasion": ["casual"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "peacock blue"
     },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["ikat", "cotton", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-3-A",
-        "price": 3360,
-        "mrp": 4450,
-        "stock": 8,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-3/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-4",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-4-A",
-        "price": 3480,
-        "mrp": 4600,
-        "stock": 9,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-4/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-5",
+    "title": "Bandhani Georgette Saree – Mint Green",
+    "slug": "bandhani-mint-green-unique",
     "short_desc": "Premium bandhani georgette saree in mint green.",
     "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
     "category": "Printed Sarees",
     "subcategory": "Bandhani",
+    "price": 3600,
+    "mrp": 4750,
+    "stock": 10,
+    "sku": "SB-BAN-MINT-001",
     "attributes": {
       "fabric": "georgette",
       "weave": "bandhani",
       "origin": "Gujarat",
-      "occasion": [
-        "formal"
-      ],
+      "occasion": ["formal"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "mint green"
     },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["bandhani", "georgette", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-5-A",
-        "price": 3600,
-        "mrp": 4750,
-        "stock": 10,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-5/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-6",
+    "title": "Tussar Silk Saree – Indigo",
+    "slug": "tussar-indigo-unique",
     "short_desc": "Premium tussar tussar silk saree in indigo.",
     "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
     "category": "Silk Sarees",
     "subcategory": "Tussar",
+    "price": 3720,
+    "mrp": 4900,
+    "stock": 11,
+    "sku": "SB-TUS-IND-001",
     "attributes": {
       "fabric": "tussar silk",
       "weave": "tussar",
       "origin": "Madhya Pradesh",
-      "occasion": [
-        "reception"
-      ],
+      "occasion": ["reception"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "indigo"
     },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["tussar", "tussar silk", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-6-A",
-        "price": 3720,
-        "mrp": 4900,
-        "stock": 11,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-6/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-7",
+    "title": "Kota Cotton Saree – Mustard Yellow",
+    "slug": "kota-mustard-yellow-unique",
     "short_desc": "Premium kota cotton saree in mustard yellow.",
     "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
     "category": "Cotton Sarees",
     "subcategory": "Kota Doria",
+    "price": 3840,
+    "mrp": 5050,
+    "stock": 12,
+    "sku": "SB-KOT-YEL-001",
     "attributes": {
       "fabric": "cotton",
       "weave": "kota",
       "origin": "Rajasthan",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
+      "occasion": ["bridal", "wedding"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "mustard yellow"
     },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["kota", "cotton", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-7-A",
-        "price": 3840,
-        "mrp": 5050,
-        "stock": 12,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-7/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   },
   {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-8",
+    "title": "Mysore Silk Saree – Coral Pink",
+    "slug": "mysore-coral-pink-unique",
     "short_desc": "Premium mysore silk saree in coral pink.",
     "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
     "category": "Silk Sarees",
     "subcategory": "Mysore Silk",
+    "price": 3960,
+    "mrp": 5200,
+    "stock": 13,
+    "sku": "SB-MYS-COR-001",
     "attributes": {
       "fabric": "silk",
       "weave": "mysore",
       "origin": "Karnataka",
-      "occasion": [
-        "festive"
-      ],
+      "occasion": ["festive"],
       "length_meters": 5.5,
-      "care": "dry clean only"
+      "care": "dry clean only",
+      "color": "coral pink"
     },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
+    "tags": ["mysore", "silk", "handloom"],
     "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-8-A",
-        "price": 3960,
-        "mrp": 5200,
-        "stock": 13,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
     "media": [
       {
         "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-8/hero.jpg",
         "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-9",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-9-A",
-        "price": 4080,
-        "mrp": 5350,
-        "stock": 14,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-9/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-10",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-10-A",
-        "price": 4200,
-        "mrp": 5500,
-        "stock": 15,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-10/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-11",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-11-A",
-        "price": 4320,
-        "mrp": 5650,
-        "stock": 16,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-11/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-12",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-12-A",
-        "price": 4440,
-        "mrp": 5800,
-        "stock": 17,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-12/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-13",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-13-A",
-        "price": 4560,
-        "mrp": 5950,
-        "stock": 18,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-13/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-14",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-14-A",
-        "price": 4680,
-        "mrp": 6100,
-        "stock": 19,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-14/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-15",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-15-A",
-        "price": 4800,
-        "mrp": 6250,
-        "stock": 20,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-15/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-16",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-16-A",
-        "price": 4920,
-        "mrp": 6400,
-        "stock": 21,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-16/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-17",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-17-A",
-        "price": 5040,
-        "mrp": 6550,
-        "stock": 22,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-17/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-18",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-18-A",
-        "price": 5160,
-        "mrp": 6700,
-        "stock": 23,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-18/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-19",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-19-A",
-        "price": 5280,
-        "mrp": 6850,
-        "stock": 24,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-19/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-20",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-20-A",
-        "price": 5400,
-        "mrp": 7000,
-        "stock": 5,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-20/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-21",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-21-A",
-        "price": 5520,
-        "mrp": 7150,
-        "stock": 6,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-21/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-22",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-22-A",
-        "price": 5640,
-        "mrp": 7300,
-        "stock": 7,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-22/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-23",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-23-A",
-        "price": 5760,
-        "mrp": 7450,
-        "stock": 8,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-23/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-24",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-24-A",
-        "price": 5880,
-        "mrp": 7600,
-        "stock": 9,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-24/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-25",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-25-A",
-        "price": 6000,
-        "mrp": 7750,
-        "stock": 10,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-25/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-26",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-26-A",
-        "price": 6120,
-        "mrp": 7900,
-        "stock": 11,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-26/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-27",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-27-A",
-        "price": 6240,
-        "mrp": 8050,
-        "stock": 12,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-27/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-28",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-28-A",
-        "price": 6360,
-        "mrp": 8200,
-        "stock": 13,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-28/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-29",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-29-A",
-        "price": 6480,
-        "mrp": 8350,
-        "stock": 14,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-29/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-30",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-30-A",
-        "price": 6600,
-        "mrp": 8500,
-        "stock": 15,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-30/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-31",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-31-A",
-        "price": 6720,
-        "mrp": 8650,
-        "stock": 16,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-31/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-32",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-32-A",
-        "price": 6840,
-        "mrp": 8800,
-        "stock": 17,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-32/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-33",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-33-A",
-        "price": 6960,
-        "mrp": 8950,
-        "stock": 18,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-33/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-34",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-34-A",
-        "price": 7080,
-        "mrp": 9100,
-        "stock": 19,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-34/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-35",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-35-A",
-        "price": 7200,
-        "mrp": 9250,
-        "stock": 20,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-35/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-36",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-36-A",
-        "price": 7320,
-        "mrp": 9400,
-        "stock": 21,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-36/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-37",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-37-A",
-        "price": 7440,
-        "mrp": 9550,
-        "stock": 22,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-37/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-38",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-38-A",
-        "price": 7560,
-        "mrp": 9700,
-        "stock": 23,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-38/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-39",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-39-A",
-        "price": 7680,
-        "mrp": 9850,
-        "stock": 24,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-39/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-40",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-40-A",
-        "price": 7800,
-        "mrp": 10000,
-        "stock": 5,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-40/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-41",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-41-A",
-        "price": 7920,
-        "mrp": 10150,
-        "stock": 6,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-41/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-42",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-42-A",
-        "price": 8040,
-        "mrp": 10300,
-        "stock": 7,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-42/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-43",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-43-A",
-        "price": 8160,
-        "mrp": 10450,
-        "stock": 8,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-43/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-44",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-44-A",
-        "price": 8280,
-        "mrp": 10600,
-        "stock": 9,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-44/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-45",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-45-A",
-        "price": 8400,
-        "mrp": 10750,
-        "stock": 10,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-45/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-46",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-46-A",
-        "price": 8520,
-        "mrp": 10900,
-        "stock": 11,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-46/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-47",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-47-A",
-        "price": 8640,
-        "mrp": 11050,
-        "stock": 12,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-47/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-48",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-48-A",
-        "price": 8760,
-        "mrp": 11200,
-        "stock": 13,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-48/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-49",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-49-A",
-        "price": 8880,
-        "mrp": 11350,
-        "stock": 14,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-49/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-50",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-50-A",
-        "price": 9000,
-        "mrp": 11500,
-        "stock": 15,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-50/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-51",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-51-A",
-        "price": 9120,
-        "mrp": 11650,
-        "stock": 16,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-51/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-52",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-52-A",
-        "price": 9240,
-        "mrp": 11800,
-        "stock": 17,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-52/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-53",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-53-A",
-        "price": 9360,
-        "mrp": 11950,
-        "stock": 18,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-53/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-54",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-54-A",
-        "price": 9480,
-        "mrp": 12100,
-        "stock": 19,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-54/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-55",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-55-A",
-        "price": 9600,
-        "mrp": 12250,
-        "stock": 20,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-55/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-56",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-56-A",
-        "price": 9720,
-        "mrp": 12400,
-        "stock": 21,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-56/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-57",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-57-A",
-        "price": 9840,
-        "mrp": 12550,
-        "stock": 22,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-57/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-58",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-58-A",
-        "price": 9960,
-        "mrp": 12700,
-        "stock": 23,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-58/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-59",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-59-A",
-        "price": 10080,
-        "mrp": 12850,
-        "stock": 24,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-59/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-60",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-60-A",
-        "price": 10200,
-        "mrp": 13000,
-        "stock": 5,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-60/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-61",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-61-A",
-        "price": 10320,
-        "mrp": 13150,
-        "stock": 6,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-61/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-62",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-62-A",
-        "price": 10440,
-        "mrp": 13300,
-        "stock": 7,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-62/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-63",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-63-A",
-        "price": 10560,
-        "mrp": 13450,
-        "stock": 8,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-63/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-64",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-64-A",
-        "price": 10680,
-        "mrp": 13600,
-        "stock": 9,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-64/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-65",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-65-A",
-        "price": 10800,
-        "mrp": 13750,
-        "stock": 10,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-65/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-66",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-66-A",
-        "price": 10920,
-        "mrp": 13900,
-        "stock": 11,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-66/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-67",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-67-A",
-        "price": 11040,
-        "mrp": 14050,
-        "stock": 12,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-67/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-68",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-68-A",
-        "price": 11160,
-        "mrp": 14200,
-        "stock": 13,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-68/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-69",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-69-A",
-        "price": 11280,
-        "mrp": 14350,
-        "stock": 14,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-69/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-70",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-70-A",
-        "price": 11400,
-        "mrp": 14500,
-        "stock": 15,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-70/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-71",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-71-A",
-        "price": 11520,
-        "mrp": 14650,
-        "stock": 16,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-71/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-72",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-72-A",
-        "price": 11640,
-        "mrp": 14800,
-        "stock": 17,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-72/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-73",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-73-A",
-        "price": 11760,
-        "mrp": 14950,
-        "stock": 18,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-73/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-74",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-74-A",
-        "price": 11880,
-        "mrp": 15100,
-        "stock": 19,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-74/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-75",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-75-A",
-        "price": 12000,
-        "mrp": 15250,
-        "stock": 20,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-75/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-76",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-76-A",
-        "price": 12120,
-        "mrp": 15400,
-        "stock": 21,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-76/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-77",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-77-A",
-        "price": 12240,
-        "mrp": 15550,
-        "stock": 22,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-77/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-78",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-78-A",
-        "price": 12360,
-        "mrp": 15700,
-        "stock": 23,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-78/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-79",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-79-A",
-        "price": 12480,
-        "mrp": 15850,
-        "stock": 24,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-79/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-80",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-80-A",
-        "price": 12600,
-        "mrp": 16000,
-        "stock": 5,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-80/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-81",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-81-A",
-        "price": 12720,
-        "mrp": 16150,
-        "stock": 6,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-81/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-82",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-82-A",
-        "price": 12840,
-        "mrp": 16300,
-        "stock": 7,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-82/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-83",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-83-A",
-        "price": 12960,
-        "mrp": 16450,
-        "stock": 8,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-83/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-84",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-84-A",
-        "price": 13080,
-        "mrp": 16600,
-        "stock": 9,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-84/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-85",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-85-A",
-        "price": 13200,
-        "mrp": 16750,
-        "stock": 10,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-85/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-86",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-86-A",
-        "price": 13320,
-        "mrp": 16900,
-        "stock": 11,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-86/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-87",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-87-A",
-        "price": 13440,
-        "mrp": 17050,
-        "stock": 12,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-87/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-88",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-88-A",
-        "price": 13560,
-        "mrp": 17200,
-        "stock": 13,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-88/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-89",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-89-A",
-        "price": 13680,
-        "mrp": 17350,
-        "stock": 14,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-89/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-90",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-90-A",
-        "price": 13800,
-        "mrp": 17500,
-        "stock": 15,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-90/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI silk Saree – emerald green",
-    "slug": "banarasi-emerald-green-91",
-    "short_desc": "Premium banarasi silk saree in emerald green.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Banarasi",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-91-A",
-        "price": 13920,
-        "mrp": 17650,
-        "stock": 16,
-        "attributes": {
-          "color": "emerald green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-emerald-green-91/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "CHANDERI cotton-silk Saree – wine red",
-    "slug": "chanderi-wine-red-92",
-    "short_desc": "Premium chanderi cotton-silk saree in wine red.",
-    "long_desc": "Handcrafted chanderi saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Chanderi",
-    "attributes": {
-      "fabric": "cotton-silk",
-      "weave": "chanderi",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "chanderi",
-      "cotton-silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-CHA-92-A",
-        "price": 14040,
-        "mrp": 17800,
-        "stock": 17,
-        "attributes": {
-          "color": "wine red"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/chanderi-wine-red-92/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "IKAT cotton Saree – peacock blue",
-    "slug": "ikat-peacock-blue-93",
-    "short_desc": "Premium ikat cotton saree in peacock blue.",
-    "long_desc": "Handcrafted ikat saree from Odisha, 5.5 meters with blouse piece.",
-    "category": "Handloom Sarees",
-    "subcategory": "Ikat",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "ikat",
-      "origin": "Odisha",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "ikat",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-IKA-93-A",
-        "price": 14160,
-        "mrp": 17950,
-        "stock": 18,
-        "attributes": {
-          "color": "peacock blue"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/ikat-peacock-blue-93/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANARASI organza Saree – pastel peach",
-    "slug": "banarasi-pastel-peach-94",
-    "short_desc": "Premium banarasi organza saree in pastel peach.",
-    "long_desc": "Handcrafted banarasi saree from Uttar Pradesh, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Organza",
-    "attributes": {
-      "fabric": "organza",
-      "weave": "banarasi",
-      "origin": "Uttar Pradesh",
-      "occasion": [
-        "casual"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "banarasi",
-      "organza",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-94-A",
-        "price": 14280,
-        "mrp": 18100,
-        "stock": 19,
-        "attributes": {
-          "color": "pastel peach"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/banarasi-pastel-peach-94/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "BANDHANI georgette Saree – mint green",
-    "slug": "bandhani-mint-green-95",
-    "short_desc": "Premium bandhani georgette saree in mint green.",
-    "long_desc": "Handcrafted bandhani saree from Gujarat, 5.5 meters with blouse piece.",
-    "category": "Printed Sarees",
-    "subcategory": "Bandhani",
-    "attributes": {
-      "fabric": "georgette",
-      "weave": "bandhani",
-      "origin": "Gujarat",
-      "occasion": [
-        "office"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "bandhani",
-      "georgette",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-BAN-95-A",
-        "price": 14400,
-        "mrp": 18250,
-        "stock": 20,
-        "attributes": {
-          "color": "mint green"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/bandhani-mint-green-95/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "TUSSAR tussar silk Saree – indigo",
-    "slug": "tussar-indigo-96",
-    "short_desc": "Premium tussar tussar silk saree in indigo.",
-    "long_desc": "Handcrafted tussar saree from Madhya Pradesh, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Tussar",
-    "attributes": {
-      "fabric": "tussar silk",
-      "weave": "tussar",
-      "origin": "Madhya Pradesh",
-      "occasion": [
-        "formal"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "tussar",
-      "tussar silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-TUS-96-A",
-        "price": 14520,
-        "mrp": 18400,
-        "stock": 21,
-        "attributes": {
-          "color": "indigo"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/tussar-indigo-96/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KOTA cotton Saree – mustard yellow",
-    "slug": "kota-mustard-yellow-97",
-    "short_desc": "Premium kota cotton saree in mustard yellow.",
-    "long_desc": "Handcrafted kota saree from Rajasthan, 5.5 meters with blouse piece.",
-    "category": "Cotton Sarees",
-    "subcategory": "Kota Doria",
-    "attributes": {
-      "fabric": "cotton",
-      "weave": "kota",
-      "origin": "Rajasthan",
-      "occasion": [
-        "reception"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kota",
-      "cotton",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KOT-97-A",
-        "price": 14640,
-        "mrp": 18550,
-        "stock": 22,
-        "attributes": {
-          "color": "mustard yellow"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kota-mustard-yellow-97/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "MYSORE silk Saree – coral pink",
-    "slug": "mysore-coral-pink-98",
-    "short_desc": "Premium mysore silk saree in coral pink.",
-    "long_desc": "Handcrafted mysore saree from Karnataka, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Mysore Silk",
-    "attributes": {
-      "fabric": "silk",
-      "weave": "mysore",
-      "origin": "Karnataka",
-      "occasion": [
-        "bridal",
-        "wedding"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "mysore",
-      "silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-MYS-98-A",
-        "price": 14760,
-        "mrp": 18700,
-        "stock": 23,
-        "attributes": {
-          "color": "coral pink"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/mysore-coral-pink-98/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "EMBROIDERY velvet Saree – midnight black",
-    "slug": "embroidery-midnight-black-99",
-    "short_desc": "Premium embroidery velvet saree in midnight black.",
-    "long_desc": "Handcrafted embroidery saree from Unknown, 5.5 meters with blouse piece.",
-    "category": "Designer Sarees",
-    "subcategory": "Velvet",
-    "attributes": {
-      "fabric": "velvet",
-      "weave": "embroidery",
-      "origin": "Unknown",
-      "occasion": [
-        "festive"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "embroidery",
-      "velvet",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-EMB-99-A",
-        "price": 14880,
-        "mrp": 18850,
-        "stock": 24,
-        "attributes": {
-          "color": "midnight black"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/embroidery-midnight-black-99/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
-      }
-    ]
-  },
-  {
-    "title": "KANJIVARAM pure silk Saree – maroon",
-    "slug": "kanjivaram-maroon-100",
-    "short_desc": "Premium kanjivaram pure silk saree in maroon.",
-    "long_desc": "Handcrafted kanjivaram saree from Tamil Nadu, 5.5 meters with blouse piece.",
-    "category": "Silk Sarees",
-    "subcategory": "Kanjivaram",
-    "attributes": {
-      "fabric": "pure silk",
-      "weave": "kanjivaram",
-      "origin": "Tamil Nadu",
-      "occasion": [
-        "party"
-      ],
-      "length_meters": 5.5,
-      "care": "dry clean only"
-    },
-    "tags": [
-      "kanjivaram",
-      "pure silk",
-      "handloom"
-    ],
-    "vendor_id": null,
-    "published": true,
-    "variants": [
-      {
-        "sku": "SB-KAN-100-A",
-        "price": 15000,
-        "mrp": 19000,
-        "stock": 5,
-        "attributes": {
-          "color": "maroon"
-        }
-      }
-    ],
-    "media": [
-      {
-        "url": "https://cdn.sabhyatam.com/prod/kanjivaram-maroon-100/hero.jpg",
-        "media_type": "image",
-        "meta": {
-          "role": "hero",
-          "order": 1
-        }
+        "meta": { "role": "hero", "order": 1 }
       }
     ]
   }
 ]
-

@@ -52,7 +52,6 @@ export default function AdminProductsPage() {
       setProducts(res.items || [])
       setTotalCount(res.total || 0)
       
-      // Update global stats from backend response
       setStats({
         active: res.active_count || 0,
         lowStock: res.low_stock_count || 0
@@ -88,7 +87,6 @@ export default function AdminProductsPage() {
 
     try {
       await adminUpdateProduct(product.id, { published: next })
-      // Reload to update the "Active" global counter accurately
       load()
     } catch (e) {
       alert("Failed to update status")
@@ -144,7 +142,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* 2. Stats Cards (Now using backend data) */}
+      {/* 2. Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
@@ -227,8 +225,10 @@ export default function AdminProductsPage() {
                 products.map((p) => {
                   const hasImage = p.media && p.media.length > 0;
                   const thumb = hasImage ? p.media[0].url : "/placeholder.svg";
-                  const price = p.variants?.[0]?.price 
-                    ? `₹${p.variants[0].price.toLocaleString()}` 
+                  
+                  // FIX: Read price directly from product object, not variants
+                  const price = p.price 
+                    ? `₹${p.price.toLocaleString()}` 
                     : "—";
 
                   return (

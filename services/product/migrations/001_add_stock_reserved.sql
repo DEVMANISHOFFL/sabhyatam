@@ -1,2 +1,2 @@
-ALTER TABLE variants
+ALTER TABLE product_variants 
 ADD COLUMN IF NOT EXISTS stock_reserved INT NOT NULL DEFAULT 0;

@@ -41,7 +41,6 @@ func (s *Store) GetMediaByProductID(
 		if err := rows.Scan(
 			&m.ID,
 			&m.ProductID,
-			&m.VariantID,
 			&m.URL,
 			&m.MediaType,
 			&metaBytes,

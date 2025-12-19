@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
 
@@ -21,11 +20,8 @@ func (s *Store) SearchProducts(
 	args := []any{}
 	arg := 1
 
-	// --- 1. BUILD QUERY FILTERS ---
 	if p.Query != "" {
-		where = append(where,
-			fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", arg, arg),
-		)
+		where = append(where, fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", arg, arg))
 		args = append(args, "%"+p.Query+"%")
 		arg++
 	}
@@ -36,89 +32,32 @@ func (s *Store) SearchProducts(
 		arg++
 	}
 
-	if p.Fabric != "" {
-		where = append(where, fmt.Sprintf("p.attributes->>'fabric' = $%d", arg))
-		args = append(args, p.Fabric)
-		arg++
-	}
-
-	if p.Occasion != "" {
-		where = append(where,
-			fmt.Sprintf("p.attributes->'occasion' ? $%d", arg),
-		)
-		args = append(args, p.Occasion)
-		arg++
-	}
-
-	// --- PRICE FILTERS (variant-level) ---
+	// Price Filters (Direct on Product)
 	if p.MinPrice > 0 {
-		where = append(where, fmt.Sprintf(`
-			EXISTS (
-				SELECT 1
-				FROM product_variants v
-				WHERE v.product_id = p.id
-				AND v.price >= $%d
-			)
-		`, arg))
+		where = append(where, fmt.Sprintf("p.price >= $%d", arg))
 		args = append(args, p.MinPrice)
 		arg++
 	}
-
 	if p.MaxPrice > 0 {
-		where = append(where, fmt.Sprintf(`
-			EXISTS (
-				SELECT 1
-				FROM product_variants v
-				WHERE v.product_id = p.id
-				AND v.price <= $%d
-			)
-		`, arg))
+		where = append(where, fmt.Sprintf("p.price <= $%d", arg))
 		args = append(args, p.MaxPrice)
 		arg++
 	}
 
-	// --- 2. EXECUTE MAIN SEARCH QUERY ---
+	// --- Execute Query ---
 	offset := (p.Page - 1) * p.Limit
 
 	query := fmt.Sprintf(`
-SELECT
-	p.id,
-	p.title,
-	p.slug,
-	p.category,
-	(
-		SELECT v.id
-		FROM product_variants v
-		WHERE v.product_id = p.id
-		ORDER BY v.price ASC
-		LIMIT 1
-	) AS variant_id,
-	COALESCE((
-    SELECT (v.price)::INT
-    FROM product_variants v
-    WHERE v.product_id = p.id
-    ORDER BY v.price ASC
-    LIMIT 1
-), 0) AS price,
-		COALESCE((
-    SELECT url
-    FROM product_media
-    WHERE product_id = p.id
-    ORDER BY (meta->>'order')::int
-    LIMIT 1
-), '') AS image_url,
-	p.attributes
-FROM products p
-WHERE %s
-ORDER BY p.created_at DESC
-LIMIT $%d OFFSET $%d
-`,
-		strings.Join(where, " AND "),
-		arg,
-		arg+1,
-	)
+		SELECT
+			p.id, p.title, p.slug, p.category, p.price,
+			COALESCE((SELECT url FROM product_media WHERE product_id = p.id ORDER BY (meta->>'order')::int LIMIT 1), '') AS image_url,
+			p.attributes
+		FROM products p
+		WHERE %s
+		ORDER BY p.created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, strings.Join(where, " AND "), arg, arg+1)
 
-	// Note: We use a separate slice for query execution so 'args' stays clean for facets
 	rows, err := s.db.Query(ctx, query, append(args, p.Limit, offset)...)
 	if err != nil {
 		return nil, 0, nil, err
@@ -128,48 +67,18 @@ LIMIT $%d OFFSET $%d
 	var items []model.ProductCard
 	for rows.Next() {
 		var pc model.ProductCard
-		var variantID sql.NullString
-
-		if err := rows.Scan(
-			&pc.ID,
-			&pc.Title,
-			&pc.Slug,
-			&pc.Category,
-			&variantID,
-			&pc.Price,
-			&pc.ImageURL,
-			&pc.Attrs,
-		); err != nil {
+		if err := rows.Scan(&pc.ID, &pc.Title, &pc.Slug, &pc.Category, &pc.Price, &pc.ImageURL, &pc.Attrs); err != nil {
 			return nil, 0, nil, err
 		}
-
-		if variantID.Valid {
-			pc.VariantID = variantID.String
-		}
-
 		items = append(items, pc)
 	}
 
-	// --- 3. GET TOTAL COUNT ---
-	countQuery := fmt.Sprintf(`
-SELECT COUNT(*)
-FROM products p
-WHERE %s
-`, strings.Join(where, " AND "))
-
+	// Count
 	var total int
-	if err := s.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
-		return nil, 0, nil, err
-	}
+	s.db.QueryRow(ctx, fmt.Sprintf("SELECT COUNT(*) FROM products p WHERE %s", strings.Join(where, " AND ")), args...).Scan(&total)
 
-	// --- 4. FETCH FACETS (The Fix) ---
-	// We pass the same WHERE clause and ARGS to calculate dynamic filters
-	facets, err := s.SearchFacets(ctx, where, args)
-	if err != nil {
-		// Log error but generally safe to return partial data if facets fail
-		// For strictness, we can return the error
-		return nil, 0, nil, err
-	}
+	// Facets (Simplified)
+	facets, _ := s.SearchFacets(ctx, where, args)
 
 	return items, total, facets, nil
 }

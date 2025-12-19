@@ -46,15 +46,10 @@ func (h *Handler) RegisterRoutes(r *chi.Mux) {
 			r.Get("/media/upload-url", h.GetUploadURL)
 
 			// Products
-			r.Get("/products", h.adminListProductsHandler) 
+			r.Get("/products", h.adminListProductsHandler)
 			r.Post("/products", h.createProductHandler)
 			r.Put("/products/{id}", h.updateProductHandler)
 			r.Delete("/products/{id}", h.deleteProductHandler)
-
-			// Variants
-			r.Post("/products/{id}/variants", h.createVariantHandler)
-			r.Put("/variants/{variant_id}", h.updateVariantHandler)
-			r.Delete("/variants/{variant_id}", h.deleteVariantHandler)
 
 			// Stock Management
 			r.Route("/variants", func(r chi.Router) {
@@ -69,7 +64,6 @@ func (h *Handler) RegisterRoutes(r *chi.Mux) {
 		})
 	})
 }
-
 
 func (h *Handler) adminListProductsHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -100,7 +94,6 @@ func (h *Handler) adminListProductsHandler(w http.ResponseWriter, r *http.Reques
 		"low_stock_count": lowStockCount,
 	})
 }
-
 
 func (h *Handler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Query().Get("filename")
@@ -134,7 +127,6 @@ func (h *Handler) GetUploadURL(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-
 func (h *Handler) listProductsHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
@@ -153,6 +145,9 @@ func (h *Handler) listProductsHandler(w http.ResponseWriter, r *http.Request) {
 	limit := 12
 	if v := q.Get("page"); v != "" {
 		page, _ = strconv.Atoi(v)
+	}
+	if page < 1 {
+		page = 1
 	}
 	if v := q.Get("limit"); v != "" {
 		limit, _ = strconv.Atoi(v)
@@ -186,41 +181,22 @@ func (h *Handler) listProductsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getProductDetailHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-
 	product, err := h.store.GetProductByID(r.Context(), id)
 	if err != nil {
 		http.Error(w, "not found", 404)
 		return
 	}
+	media, _ := h.store.GetMediaByProductID(r.Context(), product.ID)
 
-	variants, err := h.store.GetVariantsByProductID(r.Context(), product.ID)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	media, err := h.store.GetMediaByProductID(r.Context(), product.ID)
-	if err != nil {
-		media = []model.Media{}
-	}
-	similar, err := h.store.GetSimilarProducts(r.Context(), product, 6)
-	if err != nil {
-		similar = []model.Product{}
-	}
-
-	resp := map[string]any{
-		"product":  product,
-		"variants": variants,
-		"media":    media,
-		"similar":  similar,
+	writeJSON(w, http.StatusOK, map[string]any{
+		"product": product,
+		"media":   media,
 		"seo": map[string]any{
 			"title":       product.Title + " | Sabhyatam",
 			"description": product.ShortDesc,
 			"canonical":   "https://sabhyatam.com/products/" + product.Slug,
 		},
-	}
-
-	writeJSON(w, http.StatusOK, resp)
+	})
 }
 
 func (h *Handler) createProductHandler(w http.ResponseWriter, r *http.Request) {
@@ -261,54 +237,6 @@ func (h *Handler) deleteProductHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	err := h.store.DeleteProduct(r.Context(), id)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	writeJSON(w, http.StatusOK, map[string]string{"status": "deleted"})
-}
-
-func (h *Handler) createVariantHandler(w http.ResponseWriter, r *http.Request) {
-	productID := chi.URLParam(r, "id")
-
-	var req model.Variant
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	id, err := h.store.CreateVariant(r.Context(), productID, &req)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	writeJSON(w, http.StatusCreated, map[string]string{"id": id})
-}
-
-func (h *Handler) updateVariantHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "variant_id")
-
-	var req model.Variant
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	err := h.store.UpdateVariant(r.Context(), id, &req)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-
-	writeJSON(w, http.StatusOK, map[string]string{"status": "updated"})
-}
-
-func (h *Handler) deleteVariantHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "variant_id")
-
-	err := h.store.DeleteVariant(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -382,65 +310,45 @@ func (h *Handler) deleteMediaHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) reserveStockHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "variant_id")
+	id := chi.URLParam(r, "id")
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
-	if body.Quantity <= 0 {
-		http.Error(w, "quantity must be > 0", http.StatusBadRequest)
-		return
-	}
-	if err := h.store.ReserveVariantStock(r.Context(), id, body.Quantity); err != nil {
-		http.Error(w, err.Error(), http.StatusConflict)
+	json.NewDecoder(r.Body).Decode(&body)
+
+	if err := h.store.ReserveStock(r.Context(), id, body.Quantity); err != nil {
+		http.Error(w, err.Error(), 409)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "reserved"})
 }
-
 func (h *Handler) releaseStockHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "variant_id")
+	id := chi.URLParam(r, "id")
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
-	if body.Quantity <= 0 {
-		http.Error(w, "quantity must be > 0", http.StatusBadRequest)
-		return
-	}
-	if err := h.store.ReleaseVariantStock(r.Context(), id, body.Quantity); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	json.NewDecoder(r.Body).Decode(&body)
+
+	if err := h.store.ReleaseStock(r.Context(), id, body.Quantity); err != nil {
+		http.Error(w, err.Error(), 409)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "released"})
 }
 
 func (h *Handler) deductStockHandler(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "variant_id")
+	id := chi.URLParam(r, "id")
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "invalid body", http.StatusBadRequest)
-		return
-	}
-	if body.Quantity <= 0 {
-		http.Error(w, "quantity must be > 0", http.StatusBadRequest)
-		return
-	}
-	if err := h.store.DeductVariantStock(r.Context(), id, body.Quantity); err != nil {
-		http.Error(w, err.Error(), http.StatusConflict)
+	json.NewDecoder(r.Body).Decode(&body)
+
+	if err := h.store.DeductStock(r.Context(), id, body.Quantity); err != nil {
+		http.Error(w, err.Error(), 409)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "deducted"})
 }
-
 func (h *Handler) searchProductsHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
@@ -500,12 +408,10 @@ func (h *Handler) getProductBySlugHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	variants, _ := h.store.GetVariantsByProductID(r.Context(), product.ID)
 	media, _ := h.store.GetMediaByProductID(r.Context(), product.ID)
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"product":  product,
-		"variants": variants,
-		"media":    media,
+		"product": product,
+		"media":   media,
 	})
 }

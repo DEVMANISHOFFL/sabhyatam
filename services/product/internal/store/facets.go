@@ -8,43 +8,6 @@ import (
 	"github.com/devmanishoffl/sabhyatam-product/internal/model"
 )
 
-func (s *Store) FetchFacets(ctx context.Context) (model.FacetCounts, error) {
-	facets := model.FacetCounts{}
-
-	queries := map[string]string{
-		"fabric": `
-			SELECT attributes->>'fabric', COUNT(*)
-			FROM products
-			WHERE published = true
-			GROUP BY 1
-		`,
-		"occasion": `
-			SELECT jsonb_array_elements_text(attributes->'occasion'), COUNT(*)
-			FROM products
-			WHERE published = true
-			GROUP BY 1
-		`,
-	}
-
-	for name, q := range queries {
-		rows, err := s.db.Query(ctx, q)
-		if err != nil {
-			return nil, err
-		}
-		defer rows.Close()
-
-		facets[name] = map[string]int{}
-		for rows.Next() {
-			var key string
-			var count int
-			rows.Scan(&key, &count)
-			facets[name][key] = count
-		}
-	}
-
-	return facets, nil
-}
-
 func (s *Store) SearchFacets(
 	ctx context.Context,
 	where []string,
@@ -61,26 +24,22 @@ func (s *Store) SearchFacets(
 
 	queries := map[string]string{
 		"fabric": fmt.Sprintf(`
-			SELECT p.attributes->>'fabric' AS key, COUNT(DISTINCT p.id)
+			SELECT p.attributes->>'fabric' AS key, COUNT(p.id)
 			FROM products p
-			JOIN product_variants v ON v.product_id = p.id
 			WHERE %s AND p.attributes ? 'fabric'
 			GROUP BY key
 		`, baseWhere),
 
 		"weave": fmt.Sprintf(`
-			SELECT p.attributes->>'weave' AS key, COUNT(DISTINCT p.id)
+			SELECT p.attributes->>'weave' AS key, COUNT(p.id)
 			FROM products p
-			JOIN product_variants v ON v.product_id = p.id
 			WHERE %s AND p.attributes ? 'weave'
 			GROUP BY key
 		`, baseWhere),
 
 		"occasion": fmt.Sprintf(`
-			SELECT jsonb_array_elements_text(p.attributes->'occasion') AS key,
-			       COUNT(DISTINCT p.id)
+			SELECT jsonb_array_elements_text(p.attributes->'occasion') AS key, COUNT(p.id)
 			FROM products p
-			JOIN product_variants v ON v.product_id = p.id
 			WHERE %s AND p.attributes ? 'occasion'
 			GROUP BY key
 		`, baseWhere),
@@ -89,16 +48,12 @@ func (s *Store) SearchFacets(
 	for facet, q := range queries {
 		rows, err := s.db.Query(ctx, q, args...)
 		if err != nil {
-			return nil, err
+			continue
 		}
-
 		for rows.Next() {
 			var key string
 			var count int
-			if err := rows.Scan(&key, &count); err != nil {
-				rows.Close()
-				return nil, err
-			}
+			rows.Scan(&key, &count)
 			facets[facet][key] = count
 		}
 		rows.Close()

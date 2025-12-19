@@ -24,6 +24,8 @@ interface ProductListResponse {
   low_stock_count?: number
 }
 
+
+
 export async function adminFetch<T>(
   path: string,
   options: RequestInit = {}
@@ -164,3 +166,5 @@ export async function adminGetUploadUrl(filename: string, contentType: string) {
     }
   )
 }
+
+

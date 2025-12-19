@@ -7,6 +7,7 @@ export type AdminProduct = {
   price: number
   mrp?: number
   in_stock: boolean
+  stock: number
   published: boolean
   short_desc?: string;
   media?: ProductMedia[];
