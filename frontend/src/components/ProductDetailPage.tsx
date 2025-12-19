@@ -18,10 +18,11 @@ import { emitCartUpdated } from "@/lib/cart-events"
 import { fetchProducts } from "@/lib/api"
 import type { ProductCard } from "@/lib/types"
 
+// Types matching your backend response
 type MediaItem = {
   id: string
   url: string
-  meta: { role: "hero" | "gallery" }
+  meta: { role: "hero" | "gallery"; order?: number }
 }
 
 type Variant = {
@@ -34,7 +35,6 @@ type Variant = {
 type Product = {
   id: string
   title: string
-  category?: string // ✅ ADDED: Category is at the root level
   short_desc?: string
   attributes?: Record<string, any>
 }
@@ -46,6 +46,9 @@ type ProductDetailPageProps = {
 }
 
 export default function ProductDetailPage({ product, variants, media }: ProductDetailPageProps) {
+  // 🛡️ CRITICAL FIX: Prevent crash if product is missing
+  if (!product) return null
+
   const [adding, setAdding] = useState(false)
   const [openSection, setOpenSection] = useState<string | null>("details")
   const [similarProducts, setSimilarProducts] = useState<ProductCard[]>([])
@@ -62,9 +65,11 @@ export default function ProductDetailPage({ product, variants, media }: ProductD
   const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0
 
   // Images - Sort Hero first
-  const sortedImages = [...safeMedia].sort((a, b) => 
-    (a.meta?.role === "hero" ? -1 : 1)
-  )
+  const sortedImages = [...safeMedia].sort((a, b) => {
+    if (a.meta?.role === "hero") return -1
+    if (b.meta?.role === "hero") return 1
+    return 0
+  })
 
   const formatINR = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -79,12 +84,9 @@ export default function ProductDetailPage({ product, variants, media }: ProductD
 
     const loadSimilar = async () => {
       try {
-        // ✅ FIX: Check root 'category' first (matches seed data), then attribute, then fallback
-        const category = product.category || product.attributes?.category
+        // Use category from attributes, fallback to 'saree'
+        const category = product.attributes?.category || "saree"
         
-        // If we still don't have a category, we can't fetch similar items efficiently
-        if (!category) return;
-
         const res = await fetchProducts({
           page: 1,
           limit: 5, 
@@ -164,7 +166,7 @@ export default function ProductDetailPage({ product, variants, media }: ProductD
               <div className="flex justify-between items-start">
                 <div>
                   <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-2">
-                    {product.category || product.attributes?.category || "Sabhyatam Exclusive"}
+                    {product.attributes?.category || "Sabhyatam Exclusive"}
                   </h2>
                   <h1 className="text-2xl md:text-3xl font-serif text-gray-900 leading-tight mb-2">
                     {product.title}
@@ -279,7 +281,7 @@ export default function ProductDetailPage({ product, variants, media }: ProductD
                 )}
               </div>
 
-              {/* 2. Care Guide (Static for now) */}
+              {/* 2. Care Guide */}
               <div className="border-b border-gray-200">
                 <button 
                   onClick={() => toggleSection('care')}
@@ -332,7 +334,7 @@ export default function ProductDetailPage({ product, variants, media }: ProductD
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-serif text-gray-900">Similar Products</h2>
               <Link 
-                href={`/search?category=${product.category || product.attributes?.category}`} 
+                href={`/search?category=${product.attributes?.category}`} 
                 className="text-sm font-medium text-gray-600 hover:text-black flex items-center gap-1"
               >
                 View All <ArrowRight className="w-4 h-4" />

@@ -21,6 +21,7 @@ func (s *Store) SearchProducts(
 	args := []any{}
 	arg := 1
 
+	// --- 1. BUILD QUERY FILTERS ---
 	if p.Query != "" {
 		where = append(where,
 			fmt.Sprintf("(p.title ILIKE $%d OR p.tags::text ILIKE $%d)", arg, arg),
@@ -76,6 +77,7 @@ func (s *Store) SearchProducts(
 		arg++
 	}
 
+	// --- 2. EXECUTE MAIN SEARCH QUERY ---
 	offset := (p.Page - 1) * p.Limit
 
 	query := fmt.Sprintf(`
@@ -116,6 +118,7 @@ LIMIT $%d OFFSET $%d
 		arg+1,
 	)
 
+	// Note: We use a separate slice for query execution so 'args' stays clean for facets
 	rows, err := s.db.Query(ctx, query, append(args, p.Limit, offset)...)
 	if err != nil {
 		return nil, 0, nil, err
@@ -147,6 +150,7 @@ LIMIT $%d OFFSET $%d
 		items = append(items, pc)
 	}
 
+	// --- 3. GET TOTAL COUNT ---
 	countQuery := fmt.Sprintf(`
 SELECT COUNT(*)
 FROM products p
@@ -158,5 +162,14 @@ WHERE %s
 		return nil, 0, nil, err
 	}
 
-	return items, total, nil, nil
+	// --- 4. FETCH FACETS (The Fix) ---
+	// We pass the same WHERE clause and ARGS to calculate dynamic filters
+	facets, err := s.SearchFacets(ctx, where, args)
+	if err != nil {
+		// Log error but generally safe to return partial data if facets fail
+		// For strictness, we can return the error
+		return nil, 0, nil, err
+	}
+
+	return items, total, facets, nil
 }

@@ -8,18 +8,29 @@ export type AdminProduct = {
   mrp?: number
   in_stock: boolean
   published: boolean
+  short_desc?: string;
+  media?: ProductMedia[];
+  variants?: AdminVariant[];
+  attributes?: Record<string, any>  
+  tags?: string[]
 }
 
-export type ProductMedia = {
-  id: string
-  url: string
-  media_type: "image"
-  meta: {
-    role: "hero" | "gallery"
-    order: number
-  }
+export interface ProductMedia {
+  id: string;
+  url: string;
+  media_type: "image" | "video";
+  meta?: {
+    role?: "hero" | "gallery";
+    order?: number;
+  };
 }
 
+export interface AdminVariant {
+  id: string;
+  price: number;
+  stock: number;
+  attributes?: Record<string, any>;
+}
 export type AdminProductForm = Omit<
   AdminProduct,
   "price" | "mrp"

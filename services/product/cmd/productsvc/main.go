@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/devmanishoffl/sabhyatam-product/internal/api"
 	"github.com/devmanishoffl/sabhyatam-product/internal/config"
+	"github.com/devmanishoffl/sabhyatam-product/internal/gateway"
 	"github.com/devmanishoffl/sabhyatam-product/internal/store"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
@@ -59,7 +61,16 @@ func main() {
 		_, _ = w.Write([]byte("ok"))
 	})
 
-	api.RegisterRoutes(r, db)
+	bucketName := os.Getenv("AWS_BUCKET_NAME")
+	if bucketName == "" {
+		log.Println("WARNING: AWS_BUCKET_NAME is not set. Image uploads will fail.")
+	}
+
+	s3Gw := gateway.NewS3Gateway(bucketName)
+
+	h := api.NewHandler(db, s3Gw)
+
+	h.RegisterRoutes(r)
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
 	srv := &http.Server{

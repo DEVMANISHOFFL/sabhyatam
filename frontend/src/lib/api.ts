@@ -84,3 +84,20 @@ export async function fetchProducts(
     }
   )
 }
+
+export async function searchProducts(
+  params: ProductSearchParams
+): Promise<ProductSearchResponse> {
+  return api<ProductSearchResponse>("/v1/products/search", {
+    q: params.q,
+    category: params.category,
+    fabric: params.fabric,
+    occasion: params.occasion,
+    color: params.color,
+    min_price: params.min_price,
+    max_price: params.max_price,
+    sort: params.sort,
+    page: params.page,
+    limit: params.limit,
+  })
+}

@@ -9,17 +9,8 @@ import {
 } from "@/lib/admin-api"
 import type { AdminProduct } from "@/lib/types"
 import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Download, 
-  Package,
-  AlertCircle,
-  CheckCircle2
+  Plus, Search, Filter, Edit, Trash2, Eye, Download, 
+  Package, AlertCircle, CheckCircle2, ChevronLeft, ChevronRight
 } from "lucide-react"
 
 export default function AdminProductsPage() {
@@ -27,19 +18,51 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  // Future: Local state for search/filter to implement later
+  // --- Pagination & Search State ---
+  const [page, setPage] = useState(1)
+  const [limit] = useState(10)
+  const [totalCount, setTotalCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [searchQuery, setSearchQuery] = useState("")
+
+  // --- NEW: Global Stats State ---
+  const [stats, setStats] = useState({ active: 0, lowStock: 0 })
 
   useEffect(() => {
     load()
-  }, [])
+  }, [page])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (page === 1) load()
+      else setPage(1)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   async function load() {
     try {
       setLoading(true)
-      const res = await adminListProducts()
-      setProducts(res.items)
-    } catch {
+      const res = await adminListProducts({ 
+        page, 
+        limit, 
+        q: searchQuery 
+      })
+
+      setProducts(res.items || [])
+      setTotalCount(res.total || 0)
+      
+      // Update global stats from backend response
+      setStats({
+        active: res.active_count || 0,
+        lowStock: res.low_stock_count || 0
+      })
+      
+      const calculatedPages = res.total ? Math.ceil(res.total / limit) : 0
+      setTotalPages(calculatedPages)
+
+    } catch (e) {
+      console.error(e)
       setError("Failed to load products")
     } finally {
       setLoading(false)
@@ -47,10 +70,10 @@ export default function AdminProductsPage() {
   }
 
   async function remove(id: string) {
-    if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return
+    if (!confirm("Are you sure you want to delete this product?")) return
     try {
       await adminDeleteProduct(id)
-      setProducts(xs => xs.filter(p => p.id !== id))
+      load() 
     } catch (e) {
       alert("Failed to delete product")
     }
@@ -65,8 +88,9 @@ export default function AdminProductsPage() {
 
     try {
       await adminUpdateProduct(product.id, { published: next })
+      // Reload to update the "Active" global counter accurately
+      load()
     } catch (e) {
-      // Revert if failed
       alert("Failed to update status")
       setProducts(xs =>
         xs.map(x => (x.id === product.id ? { ...x, published: !next } : x))
@@ -74,21 +98,15 @@ export default function AdminProductsPage() {
     }
   }
 
-  // Derived Stats for the Dashboard Header
-  const totalProducts = products.length
-  const activeProducts = products.filter(p => p.published).length
-  // Assuming variants exist, otherwise 0. logic for future expansion
-  const lowStockProducts = products.filter(p => 
-    (p.variants?.reduce((acc, v) => acc + v.stock, 0) || 0) < 5
-  ).length
+  const handlePrev = () => {
+    if (page > 1) setPage(p => p - 1)
+  }
 
-  // Filtered products based on search (Client-side for now)
-  const filteredProducts = products.filter(p => 
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.category?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const handleNext = () => {
+    if (page < totalPages) setPage(p => p + 1)
+  }
 
-  if (loading) return (
+  if (loading && products.length === 0) return (
     <div className="flex h-96 items-center justify-center">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-black" />
     </div>
@@ -111,7 +129,6 @@ export default function AdminProductsPage() {
           <p className="text-sm text-gray-500">Manage your catalog, inventory, and pricing.</p>
         </div>
         <div className="flex gap-2">
-          {/* Future: Export Feature */}
           <button className="flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export</span>
@@ -127,7 +144,7 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* 2. Stats Cards (Future-ready) */}
+      {/* 2. Stats Cards (Now using backend data) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-4">
@@ -136,7 +153,7 @@ export default function AdminProductsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Total Products</p>
-              <h3 className="text-2xl font-bold text-gray-900">{totalProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">{totalCount}</h3>
             </div>
           </div>
         </div>
@@ -147,7 +164,7 @@ export default function AdminProductsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Active Now</p>
-              <h3 className="text-2xl font-bold text-gray-900">{activeProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">{stats.active}</h3>
             </div>
           </div>
         </div>
@@ -158,13 +175,13 @@ export default function AdminProductsPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">Low Stock</p>
-              <h3 className="text-2xl font-bold text-gray-900">{lowStockProducts}</h3>
+              <h3 className="text-2xl font-bold text-gray-900">{stats.lowStock}</h3>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Toolbar (Search & Filter) */}
+      {/* 3. Toolbar */}
       <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -181,7 +198,6 @@ export default function AdminProductsPage() {
             <Filter className="h-4 w-4" />
             <span>Filters</span>
           </button>
-          {/* Future: Category dropdown */}
         </div>
       </div>
 
@@ -199,14 +215,16 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredProducts.length === 0 ? (
+              {products.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center">
-                    <p className="text-gray-500">No products found matching your search.</p>
+                    <p className="text-gray-500">
+                      {loading ? "Loading..." : "No products found."}
+                    </p>
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((p) => {
+                products.map((p) => {
                   const hasImage = p.media && p.media.length > 0;
                   const thumb = hasImage ? p.media[0].url : "/placeholder.svg";
                   const price = p.variants?.[0]?.price 
@@ -254,17 +272,14 @@ export default function AdminProductsPage() {
 
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-3">
-                          {/* View (Future: Frontend Link) */}
                           <Link href={`/product/${p.slug}`} target="_blank" className="text-gray-400 hover:text-blue-600">
                             <Eye className="h-4 w-4" />
                           </Link>
                           
-                          {/* Edit */}
                           <Link href={`/admin/products/${p.id}`} className="text-gray-400 hover:text-black">
                             <Edit className="h-4 w-4" />
                           </Link>
                           
-                          {/* Delete */}
                           <button onClick={() => remove(p.id)} className="text-gray-400 hover:text-red-600">
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -278,14 +293,29 @@ export default function AdminProductsPage() {
           </table>
         </div>
         
-        {/* 5. Pagination (Placeholder for future) */}
+        {/* 5. Pagination */}
         <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProducts.length}</span> of <span className="font-medium">{filteredProducts.length}</span> results
+             Page <span className="font-medium">{page}</span> of <span className="font-medium">{totalPages || 1}</span> 
+             <span className="ml-2 text-gray-400">({totalCount} items)</span>
           </div>
           <div className="flex gap-2">
-            <button disabled className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-400 opacity-50">Previous</button>
-            <button disabled className="rounded-md border border-gray-300 px-3 py-1 text-sm font-medium text-gray-400 opacity-50">Next</button>
+            <button 
+              onClick={handlePrev}
+              disabled={page <= 1 || loading}
+              className="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </button>
+            <button 
+              onClick={handleNext}
+              disabled={page >= totalPages || loading}
+              className="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>

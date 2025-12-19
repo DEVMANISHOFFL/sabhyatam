@@ -4,6 +4,12 @@ import type { AdminProduct, ProductMedia } from "./types"
 const BASE = process.env.NEXT_PUBLIC_API_BASE!
 const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY!
 
+interface ProductListParams {
+  page?: number
+  limit?: number
+  q?: string
+}
+
 export type AdminVariant = {
   id: string
   price: number
@@ -11,6 +17,12 @@ export type AdminVariant = {
   attributes?: Record<string, any>
 }
 
+interface ProductListResponse {
+  items: AdminProduct[]
+  total: number
+  active_count?: number
+  low_stock_count?: number
+}
 
 export async function adminFetch<T>(
   path: string,
@@ -37,12 +49,16 @@ export async function adminFetch<T>(
 }
 
 
-export async function adminListProducts(): Promise<{
-  items: AdminProduct[]
-}> {
-  return adminFetch("/v1/products")
-}
+export async function adminListProducts(params: ProductListParams = {}) {
+  const query = new URLSearchParams()
+  if (params.page) query.set("page", params.page.toString())
+  if (params.limit) query.set("limit", params.limit.toString())
+  if (params.q) query.set("q", params.q)
 
+  return adminFetch<ProductListResponse>(`/v1/admin/products?${query.toString()}`, {
+    method: "GET",
+  })
+}
 
 /* PRODUCTS */
 export async function adminGetProduct(id: string): Promise<{
@@ -137,5 +153,14 @@ export function adminDeleteVariant(variantId: string) {
   return adminFetch(
     `/v1/admin/variants/${variantId}`,
     { method: "DELETE" }
+  )
+}
+
+export async function adminGetUploadUrl(filename: string, contentType: string) {
+  return adminFetch<{ upload_url: string; public_url: string }>(
+    `/v1/admin/media/upload-url?filename=${encodeURIComponent(filename)}&content_type=${encodeURIComponent(contentType)}`,
+    {
+      method: "GET",
+    }
   )
 }

@@ -4,8 +4,8 @@ import "time"
 
 type Product struct {
 	ID         string                 `json:"id"`
-	Price      int                    `json:"price"`
-	ImageURL   string                 `json:"image_url"`
+	Price      int                    `json:"price"`     // Computed field (often from first variant)
+	ImageURL   string                 `json:"image_url"` // Computed field (often from first media)
 	MRP        *int                   `json:"mrp,omitempty"`
 	Slug       string                 `json:"slug"`
 	Title      string                 `json:"title"`
@@ -19,6 +19,8 @@ type Product struct {
 	CreatedAt  time.Time              `json:"created_at"`
 	UpdatedAt  time.Time              `json:"updated_at"`
 	InStock    bool                   `json:"in_stock"`
+	Variants   []Variant              `json:"variants,omitempty"`
+	Media      []Media                `json:"media,omitempty"`
 }
 
 type Variant struct {
@@ -30,7 +32,7 @@ type Variant struct {
 	Stock      int            `json:"stock"`
 	Attributes map[string]any `json:"attributes"`
 }
-
+	
 type Media struct {
 	ID        string                 `json:"id"`
 	ProductID string                 `json:"product_id"`

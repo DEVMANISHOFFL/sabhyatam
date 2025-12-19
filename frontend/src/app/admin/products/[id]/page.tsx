@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useParams } from "next/navigation"
 import {
   adminGetProduct,
@@ -10,9 +10,17 @@ import {
   adminCreateVariant,
   adminUpdateVariant,
   adminDeleteVariant,
+  adminGetUploadUrl,
 } from "@/lib/admin-api"
 import type { AdminProductForm, ProductMedia } from "@/lib/types"
-import { ArrowLeft, Plus, Save, Trash2, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react"
+import { 
+  ArrowLeft, 
+  Save, 
+  Trash2, 
+  ExternalLink, 
+  Loader2, 
+  CloudUpload 
+} from "lucide-react"
 import Link from "next/link"
 
 export default function AdminEditProductPage() {
@@ -21,16 +29,17 @@ export default function AdminEditProductPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Initialize with null or safe defaults
+  // Initialize with default values to prevent "uncontrolled to controlled" errors
   const [product, setProduct] = useState<AdminProductForm | null>(null)
+  
+  // Separate state for tags string editing (comma separated)
+  const [tagsInput, setTagsInput] = useState("")
+  
   const [media, setMedia] = useState<ProductMedia[]>([])
   const [variants, setVariants] = useState<any[]>([])
-
-  // Media Form State
-  const [mediaUrl, setMediaUrl] = useState("")
-  const [isAddingMedia, setIsAddingMedia] = useState(false)
 
   // Variant Form State
   const [newVariantPrice, setNewVariantPrice] = useState("")
@@ -45,15 +54,28 @@ export default function AdminEditProductPage() {
     try {
       setLoading(true)
       const res = await adminGetProduct(productId)
+      
+      // 1. Map API response to Form State securely
       setProduct({
         ...res.product,
-        // Ensure we handle potentially null/undefined values safely for inputs
-        price: res.product.price ?? "", 
+        // Ensure numbers are converted to strings/numbers for inputs, handle nulls
+        price: res.product.price ?? "",
         mrp: res.product.mrp ?? "",
+        // Make sure attributes object exists
+        attributes: res.product.attributes || {},
+        // Map specific text fields if they differ
+        short_desc: res.product.short_desc || "", 
       })
+
+      // 2. Handle Tags (Array -> String)
+      if (res.product.tags && Array.isArray(res.product.tags)) {
+        setTagsInput(res.product.tags.join(", "))
+      }
+
       setMedia(res.media || [])
       setVariants(res.variants || [])
-    } catch {
+    } catch (e) {
+      console.error(e)
       setError("Failed to load product")
     } finally {
       setLoading(false)
@@ -66,11 +88,14 @@ export default function AdminEditProductPage() {
 
     setSaving(true)
     try {
+      // Convert tags string back to array
+      const tagsArray = tagsInput.split(",").map(t => t.trim()).filter(Boolean)
+
       await adminUpdateProduct(id, {
         ...product,
-        // Convert back to number or undefined for API
         price: product.price === "" ? 0 : Number(product.price),
         mrp: product.mrp === "" ? undefined : Number(product.mrp),
+        tags: tagsArray
       })
       alert("Product saved successfully")
     } catch (e: any) {
@@ -80,22 +105,58 @@ export default function AdminEditProductPage() {
     }
   }
 
-  async function addImage() {
-    if (!id || !mediaUrl) return
-    setIsAddingMedia(true)
+  // --- Attributes Helper ---
+  const updateAttribute = (key: string, value: string) => {
+    if (!product) return
+    setProduct({
+      ...product,
+      attributes: {
+        ...product.attributes,
+        [key]: value
+      }
+    })
+  }
+
+  // --- File Upload Logic ---
+  async function handleFileUpload(file: File) {
+    if (!id) return
     try {
-      const m = await adminAddMedia(id, {
-        url: mediaUrl,
-        media_type: "image",
-        meta: { role: media.length === 0 ? "hero" : "gallery", order: media.length + 1 },
+      setUploading(true)
+      const { upload_url, public_url } = await adminGetUploadUrl(file.name, file.type)
+
+      const uploadRes = await fetch(upload_url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
       })
-      setMedia(xs => [...xs, m])
-      setMediaUrl("")
+
+      if (!uploadRes.ok) throw new Error("S3 Upload failed")
+
+      const m = await adminAddMedia(id, {
+        url: public_url,
+        media_type: "image",
+        meta: { 
+          role: media.length === 0 ? "hero" : "gallery", 
+          order: media.length + 1 
+        },
+      })
+      setMedia((xs) => [...xs, m])
     } catch (e: any) {
-      alert(e.message || "Failed to add image")
+      alert("Upload Error: " + e.message)
     } finally {
-      setIsAddingMedia(false)
+      setUploading(false)
     }
+  }
+
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files[0]
+    if (file) handleFileUpload(file)
+  }, [id, media.length])
+
+  const onFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) handleFileUpload(file)
   }
 
   async function removeImage(mediaId: string) {
@@ -119,7 +180,6 @@ export default function AdminEditProductPage() {
     }
   }
 
-  // Common CSS for "No Spinner" inputs
   const noSpinnerClass = "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 
   if (!id) return <div>Invalid product</div>
@@ -143,22 +203,20 @@ export default function AdminEditProductPage() {
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span className="font-mono bg-gray-100 px-1 rounded">{id.slice(0,8)}</span>
               <span>•</span>
-              <a href={`/product/${product.slug}`} target="_blank" className="flex items-center gap-1 hover:text-blue-600">
+              <Link href={`/product/${product.slug}`} target="_blank" className="flex items-center gap-1 hover:text-blue-600">
                 View Live <ExternalLink className="h-3 w-3" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={saveProduct}
-            disabled={saving}
-            className="flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition shadow-sm"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Changes
-          </button>
-        </div>
+        <button 
+          onClick={saveProduct}
+          disabled={saving}
+          className="flex items-center gap-2 bg-black text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition shadow-sm"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Save Changes
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -174,7 +232,7 @@ export default function AdminEditProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   className="w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none focus:ring-2 focus:ring-black/5"
-                  value={product.title}
+                  value={product.title || ""}
                   onChange={e => setProduct({ ...product, title: e.target.value })}
                 />
               </div>
@@ -183,7 +241,7 @@ export default function AdminEditProductPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
                   <input
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none bg-gray-50 font-mono text-gray-600"
-                    value={product.slug}
+                    value={product.slug || ""}
                     onChange={e => setProduct({ ...product, slug: e.target.value })}
                   />
                 </div>
@@ -191,23 +249,79 @@ export default function AdminEditProductPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                   <input
                     className="w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none"
-                    value={product.category}
+                    value={product.category || ""}
                     onChange={e => setProduct({ ...product, category: e.target.value })}
                   />
                 </div>
               </div>
+              
+              {/* Short Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
                 <textarea
-                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none min-h-[120px]"
-                  value={product.description ?? ""}
-                  onChange={e => setProduct({ ...product, description: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none min-h-[80px]"
+                  value={product.short_desc || ""}
+                  onChange={e => setProduct({ ...product, short_desc: e.target.value })}
                 />
               </div>
             </div>
           </div>
 
-          {/* 2. Variants & Inventory */}
+          {/* 2. Attributes (Specific Fields) */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+             <h2 className="text-lg font-semibold text-gray-900 mb-4">Attributes</h2>
+             <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fabric</label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
+                    value={product.attributes?.fabric || ""}
+                    onChange={e => updateAttribute("fabric", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Weave</label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
+                    value={product.attributes?.weave || ""}
+                    onChange={e => updateAttribute("weave", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
+                    value={product.attributes?.color || ""}
+                    onChange={e => updateAttribute("color", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Origin</label>
+                  <input
+                    className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
+                    value={product.attributes?.origin || ""}
+                    onChange={e => updateAttribute("origin", e.target.value)}
+                  />
+                </div>
+             </div>
+             
+             {/* Occasion (JSON Array typically, but handling as string for simple edit) */}
+             <div className="mt-4">
+               <label className="block text-sm font-medium text-gray-700 mb-1">Occasion (JSON Array)</label>
+               {/* Simplified input assuming simple string for now, or you can add a specialized tag input */}
+               <input 
+                 className="w-full rounded-lg border border-gray-300 p-2.5 text-sm"
+                 placeholder='e.g. ["Wedding", "Party"]'
+                 // This assumes Occasion is stored as a raw JSON string in this simplistic view, 
+                 // or you can map it similarly to Tags below.
+                 value={JSON.stringify(product.attributes?.occasion || [])} 
+                 disabled
+               />
+               <p className="text-xs text-gray-400 mt-1">Editing arrays directly requires advanced UI, currently read-only.</p>
+             </div>
+          </div>
+
+          {/* 3. Variants & Inventory */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Variants & Stock</h2>
@@ -263,7 +377,6 @@ export default function AdminEditProductPage() {
                       </td>
                     </tr>
                   ))}
-                  {/* Add Row */}
                   <tr className="bg-gray-50">
                     <td className="px-4 py-2 text-gray-400 italic text-xs">New</td>
                     <td className="px-4 py-2">
@@ -297,27 +410,28 @@ export default function AdminEditProductPage() {
         {/* RIGHT COLUMN: Media & Status */}
         <div className="space-y-6">
           
-          {/* 3. Status Card */}
+          {/* 4. Status Card */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Publishing</h2>
+            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Settings</h2>
             
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">Published</span>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={product.published} onChange={e => setProduct({...product, published: e.target.checked})} />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                <input type="checkbox" className="sr-only peer" checked={product.published || false} onChange={e => setProduct({...product, published: e.target.checked})} />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-700">In Stock</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={product.in_stock} onChange={e => setProduct({...product, in_stock: e.target.checked})} />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
+            <div className="pt-4 border-t border-gray-100">
+               <label className="block text-xs font-medium text-gray-500 mb-1">Tags (comma separated)</label>
+               <input 
+                 className="w-full border rounded p-2 text-sm"
+                 placeholder="Saree, Silk, Red"
+                 value={tagsInput}
+                 onChange={e => setTagsInput(e.target.value)}
+               />
             </div>
 
-            {/* Display Base Price & MRP */}
             <div className="pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
                <div>
                  <label className="block text-xs font-medium text-gray-500 mb-1">Base Price (₹)</label>
@@ -325,7 +439,6 @@ export default function AdminEditProductPage() {
                    type="number" 
                    className={`w-full border rounded p-2 text-sm ${noSpinnerClass}`}
                    value={product.price}
-                   // Logic: If string is empty, keep it empty. Otherwise parse number.
                    onChange={e => setProduct({
                      ...product, 
                      price: e.target.value === "" ? ("" as any) : Number(e.target.value)
@@ -347,53 +460,46 @@ export default function AdminEditProductPage() {
             </div>
           </div>
 
-          {/* 4. Media Manager */}
+          {/* 5. Media Manager */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Media Gallery</h2>
+            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Media</h2>
             
-            <div className="flex gap-2 mb-4">
-              <input
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs outline-none"
-                placeholder="https://..."
-                value={mediaUrl}
-                onChange={e => setMediaUrl(e.target.value)}
-              />
-              <button 
-                onClick={addImage} 
-                disabled={isAddingMedia}
-                className="bg-gray-100 hover:bg-gray-200 p-2 rounded-lg text-gray-600 transition"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+            <div 
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={onDrop}
+              className={`mb-4 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-8 text-center transition hover:bg-gray-100 ${uploading ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
+            >
+              <label htmlFor="file-upload" className="cursor-pointer">
+                {uploading ? (
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin text-gray-400" />
+                ) : (
+                  <CloudUpload className="mx-auto h-8 w-8 text-gray-400" />
+                )}
+                <div className="mt-2 text-sm text-gray-600">
+                  <span className="font-semibold text-black hover:underline">Click to upload</span> or drag and drop
+                </div>
+                <input 
+                  id="file-upload" 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={onFileSelect}
+                  disabled={uploading}
+                />
+              </label>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               {media.map((m, i) => (
                 <div key={m.id} className="group relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                   <img src={m.url} alt="" className="w-full h-full object-cover" />
-                  
-                  {/* Overlay Actions */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-                    <button onClick={() => removeImage(m.id)} className="p-1.5 bg-white text-red-600 rounded-full hover:bg-red-50">
+                    <button onClick={() => removeImage(m.id)} type="button" className="p-1.5 bg-white text-red-600 rounded-full hover:bg-red-50">
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </div>
-
-                  {/* Badges */}
-                  {i === 0 && (
-                    <div className="absolute top-1 left-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">
-                      Hero
-                    </div>
-                  )}
                 </div>
               ))}
-              
-              {media.length === 0 && (
-                <div className="col-span-3 py-8 text-center border-2 border-dashed border-gray-200 rounded-lg text-gray-400 text-xs">
-                  <ImageIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  No images added
-                </div>
-              )}
             </div>
           </div>
 
