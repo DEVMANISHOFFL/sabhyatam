@@ -24,7 +24,12 @@ services:
         condition: service_healthy
     environment:
       PRODUCTSVC_PORT: "8080"
-     
+      DATABASE_URL: {DATABASE_URL}
+      ADMIN_KEY: {ADMIN_KEY}
+      AWS_REGION: {AWS_REGION}
+      AWS_BUCKET_NAME: {AWS_BUCKET_NAME}
+      AWS_ACCESS_KEY_ID: {AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: {AWS_SECRET_ACCESS_KEY}
 
 
     ports:
