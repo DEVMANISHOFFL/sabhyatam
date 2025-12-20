@@ -19,6 +19,7 @@ func NewPG(databaseURL string) (*PGStore, error) {
 	if databaseURL == "" {
 		databaseURL = os.Getenv("DATABASE_URL")
 		if databaseURL == "" {
+			// Fallback for local development
 			databaseURL = "postgres://postgres:postgres@localhost:5432/sabhyatam?sslmode=disable"
 		}
 	}
@@ -58,11 +59,12 @@ func (s *PGStore) CreateDraftOrder(
 	}()
 
 	var orderID string
+	// 1. Insert Order
 	err = tx.QueryRow(ctx, `
-    INSERT INTO orders (user_id, status, currency, total_amount_cents)
-    VALUES ($1, $2, $3, $4)
-    RETURNING id
-  `,
+		INSERT INTO orders (user_id, status, currency, total_amount_cents)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id
+	`,
 		userID,
 		model.StatusPending,
 		"INR",
@@ -73,16 +75,18 @@ func (s *PGStore) CreateDraftOrder(
 		return "", err
 	}
 
+	// 2. Insert Items
+	// Note: We omit 'variant_id' here. Ensure your DB column is nullable!
 	for _, it := range items {
 		_, err = tx.Exec(ctx, `
-      INSERT INTO order_items (
-        order_id,
-        product_id,
-        quantity,
-        price_cents
-      )
-      VALUES ($1, $2, $3, $4)
-    `,
+			INSERT INTO order_items (
+				order_id,
+				product_id,
+				quantity,
+				price_cents
+			)
+			VALUES ($1, $2, $3, $4)
+		`,
 			orderID,
 			it.ProductID,
 			it.Quantity,
@@ -119,36 +123,39 @@ func (s *PGStore) UpdateOrderStatus(
 func (s *PGStore) GetOrder(ctx context.Context, orderID string) (*model.Order, error) {
 	var o model.Order
 
+	// 1. Fetch Order Details (Including total_amount_cents)
 	row := s.db.QueryRow(ctx, `
-    SELECT id, user_id, status, currency,
-           total_amount_cents, created_at, updated_at
-    FROM orders
-    WHERE id=$1
-  `, orderID)
+		SELECT id, user_id, status, currency,
+		       total_amount_cents, created_at, updated_at
+		FROM orders
+		WHERE id=$1
+	`, orderID)
 
 	if err := row.Scan(
 		&o.ID,
 		&o.UserID,
 		&o.Status,
 		&o.Currency,
-		&o.TotalAmountCents,
+		&o.Subtotal, // ✅ FIXED: Maps to model.Subtotal (was TotalAmountCents)
 		&o.CreatedAt,
 		&o.UpdatedAt,
 	); err != nil {
 		return nil, err
 	}
 
+	// 2. Fetch Items
 	rows, err := s.db.Query(ctx, `
-    SELECT id, order_id, product_id,
-           quantity, price_cents
-    FROM order_items
-    WHERE order_id=$1
-  `, orderID)
+		SELECT id, order_id, product_id,
+		       quantity, price_cents
+		FROM order_items
+		WHERE order_id=$1
+	`, orderID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	o.Items = []model.OrderItem{} // Initialize as empty array
 	for rows.Next() {
 		var it model.OrderItem
 		if err := rows.Scan(
@@ -196,7 +203,6 @@ func (s *PGStore) ReleaseOrder(ctx context.Context, orderID string) error {
 	}
 	defer rows.Close()
 
-	// FIX: Updated struct to use ProductID instead of VariantID
 	type item struct {
 		ProductID string
 		Qty       int
@@ -219,7 +225,7 @@ func (s *PGStore) ReleaseOrder(ctx context.Context, orderID string) error {
 
 	_, err = tx.Exec(ctx,
 		`UPDATE orders SET status = 'cancelled', updated_at = now()
-     WHERE id = $1`,
+		 WHERE id = $1`,
 		orderID,
 	)
 	if err != nil {
@@ -282,8 +288,8 @@ func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
 	_, err = tx.Exec(
 		ctx,
 		`UPDATE orders
-     SET status = 'refunded', updated_at = now()
-     WHERE id = $1`,
+		 SET status = 'refunded', updated_at = now()
+		 WHERE id = $1`,
 		orderID,
 	)
 	if err != nil {
@@ -292,10 +298,10 @@ func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
 
 	return tx.Commit(ctx)
 }
+
 func (s *PGStore) ListOrders(ctx context.Context, page, limit int, status string) ([]model.Order, int, error) {
 	offset := (page - 1) * limit
 
-	// Base Query
 	whereClause := ""
 	args := []any{}
 	argId := 1
@@ -315,14 +321,13 @@ func (s *PGStore) ListOrders(ctx context.Context, page, limit int, status string
 
 	// 2. Select
 	query := fmt.Sprintf(`
-        SELECT id, user_id, status, currency, total_amount_cents, created_at, updated_at
-        FROM orders
-        %s
-        ORDER BY created_at DESC
-        LIMIT $%d OFFSET $%d
-    `, whereClause, argId, argId+1)
+		SELECT id, user_id, status, currency, total_amount_cents, created_at, updated_at
+		FROM orders
+		%s
+		ORDER BY created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, whereClause, argId, argId+1)
 
-	// Add limit/offset to args
 	args = append(args, limit, offset)
 
 	rows, err := s.db.Query(ctx, query, args...)
@@ -340,12 +345,13 @@ func (s *PGStore) ListOrders(ctx context.Context, page, limit int, status string
 			&o.UserID,
 			&o.Status,
 			&o.Currency,
-			&o.TotalAmountCents,
+			&o.Subtotal, // ✅ FIXED: Maps to model.Subtotal
 			&o.CreatedAt,
 			&o.UpdatedAt,
 		); err != nil {
 			return nil, 0, err
 		}
+		o.Items = []model.OrderItem{} // Ensure items is not nil
 		orders = append(orders, o)
 	}
 
@@ -366,26 +372,22 @@ func (s *PGStore) GetOrdersByUserID(ctx context.Context, userID string) ([]model
 	defer rows.Close()
 
 	var orders []model.Order
-	// Map to quickly find order by ID when attaching items later
 	orderMap := make(map[string]*model.Order)
 	var orderIDs []string
 
 	for rows.Next() {
 		var o model.Order
-		// Ensure Items is initialized as empty slice [] instead of nil
 		o.Items = []model.OrderItem{}
 
 		if err := rows.Scan(
 			&o.ID, &o.UserID, &o.Status, &o.Currency,
-			&o.TotalAmountCents, &o.CreatedAt, &o.UpdatedAt,
+			&o.Subtotal, // ✅ FIXED: Maps to model.Subtotal
+			&o.CreatedAt, &o.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
 
 		orders = append(orders, o)
-		// We store pointers to the indices in the slice so we can modify them
-		// Note: We need to re-map this after the loop or just access by index if we prefer.
-		// Actually, simpler approach: just fetch items for all these IDs.
 		orderIDs = append(orderIDs, o.ID)
 	}
 	rows.Close()
@@ -394,12 +396,12 @@ func (s *PGStore) GetOrdersByUserID(ctx context.Context, userID string) ([]model
 		return []model.Order{}, nil
 	}
 
-	// Re-build map pointing to the actual elements in the slice
+	// Re-map pointers after appending to slice
 	for i := range orders {
 		orderMap[orders[i].ID] = &orders[i]
 	}
 
-	// 2. Fetch Items for these orders (Bulk fetch)
+	// 2. Fetch Items (Bulk)
 	itemRows, err := s.db.Query(ctx, `
 		SELECT id, order_id, product_id, quantity, price_cents
 		FROM order_items
@@ -420,7 +422,6 @@ func (s *PGStore) GetOrdersByUserID(ctx context.Context, userID string) ([]model
 			return nil, err
 		}
 
-		// Attach item to the correct order
 		if order, exists := orderMap[oID]; exists {
 			order.Items = append(order.Items, it)
 		}

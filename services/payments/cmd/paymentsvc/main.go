@@ -13,6 +13,7 @@ import (
 	"github.com/devmanishoffl/sabhyatam-payments/internal/store"
 	"github.com/devmanishoffl/sabhyatam-payments/internal/worker"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors" // Ensure you have this import
 )
 
 func main() {
@@ -42,17 +43,31 @@ func main() {
 	)
 	go timeoutWorker.Run(ctx)
 
-	// Payment gateway
-	gw := gateway.NewRazorpay()
+	// Payment gateway (FIXED: Handles both return values)
+	gw, err := gateway.NewRazorpay()
+	if err != nil {
+		log.Fatalf("Failed to initialize Gateway: %v. Check RAZORPAY_KEY_ID in .env", err)
+	}
 
 	// HTTP handler
 	handler := api.NewHandler(pgStore, gw, ordersClient)
 
 	r := chi.NewRouter()
-	r.Use(api.CORSMiddleware)
+
+	// Add CORS (Vital for frontend communication)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-USER-ID", "X-ORDER-ID", "Idempotency-Key"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	api.RegisterRoutes(r, handler)
 
 	log.Println("paymentsvc listening on :8083")
-	log.Fatal(http.ListenAndServe(":8083", r))
+	if err := http.ListenAndServe(":8083", r); err != nil {
+		log.Fatal(err)
+	}
 }

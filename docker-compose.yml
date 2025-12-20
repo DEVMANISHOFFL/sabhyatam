@@ -180,6 +180,8 @@ services:
         condition: service_started
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ORDERS_SVC_BASE: http://orders:8082
     ports:

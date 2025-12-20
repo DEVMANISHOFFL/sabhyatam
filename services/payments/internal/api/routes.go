@@ -10,4 +10,6 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 	r.Post("/v1/payments/intent", h.CreatePaymentIntent)
 	r.Post("/v1/payments/verify", h.VerifyPayment)
 
+	r.Post("/v1/payments/verify", h.VerifyPayment)
+
 }

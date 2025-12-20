@@ -15,4 +15,6 @@ type CreatePaymentResponse struct {
 type Gateway interface {
 	CreatePayment(ctx context.Context, req CreatePaymentRequest) (*CreatePaymentResponse, error)
 	VerifyWebhook(body []byte, signature string) error
+
+	VerifySignature(gatewayOrderID, paymentID, signature string) error
 }
