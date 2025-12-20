@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { getCart } from '@/lib/cart'
 import CartItem from '@/components/CartItem'
 import { formatPrice } from '@/lib/utils'
@@ -17,6 +18,7 @@ export default function CartPage() {
   const [cart, setCart] = useState<any | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   async function load() {
     try {
@@ -59,10 +61,8 @@ export default function CartPage() {
 
   const items = cart?.items ?? []
   
-  // FIX: Backend returns 'subtotal' in paise/cents (int64).
-  // Frontend 'formatPrice' expects Rupees/Dollars.
-  const rawSubtotal = cart?.subtotal ?? 0
-  const subtotal = rawSubtotal / 100 
+  // ✅ FIX: Removed '/ 100' since backend is sending Rupees
+  const subtotal = cart?.subtotal ?? 0
   
   // Fake discount logic for display
   const estimatedMRP = Math.round(subtotal * 1.25) 
@@ -99,18 +99,14 @@ export default function CartPage() {
             
             {/* LEFT: Cart Items List */}
             <div className="flex-1 space-y-4">
-              
-              {/* Items */}
               <div className="rounded-sm bg-white shadow-sm overflow-hidden divide-y divide-gray-100">
                 {items.map((item: any) => (
-                  // FIX: Use item.product.id instead of variant.id
                   <div key={item.product.id} className="p-4 hover:bg-gray-50 transition">
                      <CartItem item={item} onRefresh={load} />
                   </div>
                 ))}
               </div>
               
-              {/* Offers / Coupon (Visual Only) */}
               <div className="rounded-sm bg-white p-4 shadow-sm flex items-center gap-3">
                  <Tag className="h-5 w-5 text-gray-600" />
                  <div className="flex-1">
@@ -119,7 +115,6 @@ export default function CartPage() {
                  </div>
                  <button className="text-sm font-bold text-pink-600 uppercase">Apply</button>
               </div>
-
             </div>
 
             {/* RIGHT: Price Summary */}
@@ -151,7 +146,7 @@ export default function CartPage() {
                 </div>
 
                 <button
-                  onClick={() => (location.href = '/checkout')}
+                  onClick={() => router.push('/checkout')}
                   className="group relative w-full overflow-hidden rounded bg-black py-4 font-bold text-white shadow transition hover:bg-gray-900"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
@@ -165,7 +160,6 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Trust Strip */}
               <div className="grid grid-cols-3 gap-2 text-center text-[10px] text-gray-500">
                  <div className="bg-white p-2 rounded shadow-sm">
                     <Truck className="h-4 w-4 mx-auto mb-1 text-gray-400" />

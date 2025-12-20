@@ -3,79 +3,117 @@
 import { updateCartItem, removeFromCart } from '@/lib/cart'
 import { formatPrice } from '@/lib/utils'
 import { useState } from 'react'
+import { Loader2, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 
 export default function CartItem({ item, onRefresh }: any) {
   const [loading, setLoading] = useState(false)
 
+  if (!item || !item.product) return null
+
   const productId = item.product.id
 
-  async function updateQty(qty: number) {
+  async function updateQty(newQty: number) {
+    if (newQty < 1) return
     setLoading(true)
-    await updateCartItem(productId, qty)
-    setLoading(false)
-    onRefresh()
+    try {
+      await updateCartItem(productId, newQty)
+      onRefresh()
+    } catch (error) {
+      console.error("Failed to update quantity", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function remove() {
     setLoading(true)
-    await removeFromCart(productId)
-    setLoading(false)
-    onRefresh()
+    try {
+      await removeFromCart(productId)
+      onRefresh()
+    } catch (error) {
+      console.error("Failed to remove item", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const displayPrice = (val: number) => formatPrice(val / 100)
+  // ✅ FIX: Removed '/ 100' assuming backend sends Rupees
+  const displayPrice = (amount: number) => {
+    return formatPrice(amount) 
+  }
 
-  // 🛠️ ROBUST IMAGE FINDER
-  // Checks for:
-  // 1. item.product.image (if backend flattens it)
-  // 2. item.product.media[0].url (standard backend response)
-  // 3. item.image_url (legacy)
-  // 4. Placeholder
   const imageUrl = 
-    item.product.image || 
-    (item.product.media && item.product.media.length > 0 ? item.product.media[0].url : null) ||
+    item.product?.image || 
+    item.product?.media?.[0]?.url ||
     item.image_url ||
     "/placeholder.svg"
 
   return (
-    <div className="flex gap-4 border-b py-4">
-      <div className="h-28 w-20 shrink-0 overflow-hidden rounded border border-gray-200 bg-gray-100">
+    <div className="flex gap-4 border-b border-gray-100 py-6 last:border-0">
+      {/* Product Image */}
+      <div className="h-24 w-20 shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
         <img
           src={imageUrl}
-          alt={item.product.title}
+          alt={item.product.title || "Product"}
           className="h-full w-full object-cover"
         />
       </div>
 
-      <div className="flex-1">
-        <h3 className="font-medium text-gray-900">{item.product.title}</h3>
-        <p className="text-sm text-gray-500">{displayPrice(item.unit_price)}</p>
+      {/* Details */}
+      <div className="flex flex-1 flex-col justify-between">
+        <div className="flex justify-between gap-2">
+          <div>
+            <Link 
+              href={`/product/${item.product.slug}`}
+              className="font-medium text-gray-900 hover:text-blue-600 transition line-clamp-2"
+            >
+              {item.product.title}
+            </Link>
+            <p className="mt-1 text-sm text-gray-500">
+              {displayPrice(item.unit_price)}
+            </p>
+          </div>
+          <div className="font-bold text-gray-900">
+            {displayPrice(item.line_total)}
+          </div>
+        </div>
 
-        <div className="flex items-center gap-2 mt-3">
+        {/* Controls */}
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center rounded-md border border-gray-200">
+            <button 
+              className="flex h-8 w-8 items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => updateQty(item.quantity - 1)} 
+              disabled={loading || item.quantity <= 1}
+            >
+              −
+            </button>
+            <span className="flex h-8 w-10 items-center justify-center text-sm font-medium border-x border-gray-200">
+              {loading ? (
+                <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
+              ) : (
+                item.quantity
+              )}
+            </span>
+            <button 
+              className="flex h-8 w-8 items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+              onClick={() => updateQty(item.quantity + 1)} 
+              disabled={loading}
+            >
+              +
+            </button>
+          </div>
+
           <button 
-            className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50 transition"
-            onClick={() => updateQty(item.quantity - 1)} 
-            disabled={loading || item.quantity <= 1}
-          >
-            −
-          </button>
-          <span className="w-8 text-center font-medium">{item.quantity}</span>
-          <button 
-            className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50 transition"
-            onClick={() => updateQty(item.quantity + 1)} 
+            onClick={remove} 
             disabled={loading}
+            className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50 transition"
           >
-            +
-          </button>
-
-          <button onClick={remove} className="ml-4 text-xs font-medium text-red-600 hover:text-red-800 hover:underline transition">
-            Remove
+            <Trash2 className="h-3.5 w-3.5" />
+            REMOVE
           </button>
         </div>
-      </div>
-
-      <div className="font-semibold text-gray-900">
-        {displayPrice(item.line_total)}
       </div>
     </div>
   )

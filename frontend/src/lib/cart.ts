@@ -1,7 +1,7 @@
 import type { Cart, AddToCartInput } from "@/lib/types"
-import { emitCartUpdated } from "@/lib/cart-events" // 1. Import the event emitter
+import { emitCartUpdated } from "@/lib/cart-events"
 
-// FIX: Direct Backend URL to bypass Next.js Proxy (port 3000)
+// DIRECT Backend URL (Bypassing Next.js Proxy for speed/debugging)
 const CART_URL = "http://localhost:8081/v1/cart"
 
 // --- SESSION MANAGEMENT ---
@@ -16,14 +16,35 @@ function getSessionId(): string {
   return sid
 }
 
+// --- HEADERS HELPER (Fixed for Auth) ---
 function getHeaders() {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   }
+
+  // 1. Add Session ID (Always needed for Guest/Cart tracking)
   const sid = getSessionId()
   if (sid) {
     headers["X-SESSION-ID"] = sid
   }
+
+  // 2. Add Auth Token & User ID (If logged in)
+  // We grab this directly from localStorage to ensure sync with Auth Context
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem("sabhyatam_token")
+    const userStr = localStorage.getItem("sabhyatam_user")
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        headers["Authorization"] = `Bearer ${token}`
+        headers["X-USER-ID"] = user.id
+      } catch (e) {
+        console.warn("Failed to parse user from local storage", e)
+      }
+    }
+  }
+
   return headers
 }
 
@@ -49,9 +70,7 @@ export async function addToCart(item: AddToCartInput): Promise<Cart> {
   
   await handleResponse(res)
   
-  // 2. Emit event so Header updates immediately
   emitCartUpdated()
-  
   return getCart()
 }
 
@@ -62,6 +81,7 @@ export async function getCart(): Promise<Cart> {
   })
   
   if (!res.ok) {
+    // Return empty cart structure on error/404
     return { id: "", items: [], subtotal: 0, item_count: 0, currency: "INR" } as any
   }
   return res.json()
@@ -76,9 +96,7 @@ export async function removeFromCart(productId: string) {
   
   const data = await handleResponse(res)
   
-  // 3. Emit event on remove
   emitCartUpdated()
-  
   return data
 }
 
@@ -94,9 +112,7 @@ export async function updateCartItem(productId: string, quantity: number) {
   
   const data = await handleResponse(res)
   
-  // 4. Emit event on update
   emitCartUpdated()
-  
   return data
 }
 
@@ -108,8 +124,6 @@ export async function clearCart() {
   
   const data = await handleResponse(res)
   
-  // 5. Emit event on clear
   emitCartUpdated()
-  
   return data
 }
