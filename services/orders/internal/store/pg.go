@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
@@ -290,4 +291,63 @@ func (s *PGStore) RefundOrder(ctx context.Context, orderID string) error {
 	}
 
 	return tx.Commit(ctx)
+}
+func (s *PGStore) ListOrders(ctx context.Context, page, limit int, status string) ([]model.Order, int, error) {
+	offset := (page - 1) * limit
+
+	// Base Query
+	whereClause := ""
+	args := []any{}
+	argId := 1
+
+	if status != "" {
+		whereClause = fmt.Sprintf("WHERE status = $%d", argId)
+		args = append(args, status)
+		argId++
+	}
+
+	// 1. Count
+	var total int
+	countQuery := "SELECT COUNT(*) FROM orders " + whereClause
+	if err := s.db.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
+	// 2. Select
+	query := fmt.Sprintf(`
+        SELECT id, user_id, status, currency, total_amount_cents, created_at, updated_at
+        FROM orders
+        %s
+        ORDER BY created_at DESC
+        LIMIT $%d OFFSET $%d
+    `, whereClause, argId, argId+1)
+
+	// Add limit/offset to args
+	args = append(args, limit, offset)
+
+	rows, err := s.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	orders := []model.Order{}
+
+	for rows.Next() {
+		var o model.Order
+		if err := rows.Scan(
+			&o.ID,
+			&o.UserID,
+			&o.Status,
+			&o.Currency,
+			&o.TotalAmountCents,
+			&o.CreatedAt,
+			&o.UpdatedAt,
+		); err != nil {
+			return nil, 0, err
+		}
+		orders = append(orders, o)
+	}
+
+	return orders, total, nil
 }

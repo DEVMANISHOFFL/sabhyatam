@@ -2,6 +2,7 @@ import FilterSidebar from "@/components/search/FilterSidebar"
 import Link from "next/link"
 import { formatPrice } from "@/lib/utils"
 import { searchProducts } from "@/lib/api"
+import { X, RefreshCcw } from "lucide-react" // Import icons
 
 function SimpleProductCard({ item }: { item: any }) {
   return (
@@ -52,7 +53,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   // 1. Fetch Data
   const data = await searchProducts({
-    q: query, // FIX: Uncommented
+    q: query,
     category: params.category,
     fabric: params.fabric,
     occasion: params.occasion,
@@ -66,6 +67,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const { items, facets, total } = data
 
+  // Check if any filters are active to show the Reset button
+  const hasFilters = query || params.category || params.fabric || params.weave || params.occasion || params.color
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header Banner */}
@@ -74,9 +78,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">
             {query ? `Results for "${query}"` : "All Products"}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 mb-4">
             {total} items found
           </p>
+
+          {/* RESET BUTTON */}
+          {hasFilters && (
+            <Link 
+              href="/search"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-full text-xs font-bold uppercase tracking-wider text-gray-700 hover:bg-black hover:text-white hover:border-black transition-all"
+            >
+              <X className="w-3 h-3" /> Clear Filters
+            </Link>
+          )}
         </div>
       </div>
 
@@ -91,8 +105,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             {items.length === 0 ? (
               <div className="text-center py-20 bg-gray-50 rounded-lg">
                 <p className="text-gray-500 mb-4">No products found matching your criteria.</p>
-                <Link href="/" className="text-black underline font-medium hover:text-gray-600">
-                  Clear filters & try again
+                <Link href="/search" className="inline-flex items-center gap-2 text-black underline font-medium hover:text-gray-600">
+                   <RefreshCcw className="w-3 h-3" /> Clear filters & try again
                 </Link>
               </div>
             ) : (

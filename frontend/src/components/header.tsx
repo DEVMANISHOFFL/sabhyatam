@@ -1,14 +1,34 @@
-"use client"
+"use client";
 
-import { useCartCount } from "@/lib/use-cart-count"
-import { Search, ShoppingCart, User, Menu, Heart, MapPin, UserCog } from "lucide-react"
-import Link from "next/link"
-import { useState } from "react"
-import SearchOverlay from "@/components/SearchOverlay" // Import the new component
+import Link from "next/link";
+import { useState } from "react";
+import { 
+  Search, 
+  ShoppingCart, 
+  User, 
+  Menu, 
+  Heart, 
+  MapPin, 
+  UserCog, 
+  LogOut 
+} from "lucide-react";
+
+import { useCartCount } from "@/lib/use-cart-count";
+import SearchOverlay from "@/components/SearchOverlay";
+import { useAuth } from "@/app/context/auth-context";
 
 export default function Header() {
-  const [showSearch, setShowSearch] = useState(false) // State for overlay
-  const cartCount = useCartCount()
+  const [showSearch, setShowSearch] = useState(false);
+  const cartCount = useCartCount();
+  
+  // Access auth state
+  const { user, signOut } = useAuth();
+
+  // Determine if user is admin (matches logic in AdminLayout)
+  const isAdmin = 
+    user?.app_metadata?.role === "admin" || 
+    user?.user_metadata?.role === "admin" || 
+    user?.email === "admin@sabhyatam.com";
 
   return (
     <>
@@ -29,15 +49,9 @@ export default function Header() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <Link href="/offers" className="hover:text-pink-400 transition-colors hidden md:block">
-                  Offers
-                </Link>
-                <Link href="/track" className="hover:text-pink-400 transition-colors hidden md:block">
-                  Track Order
-                </Link>
-                <Link href="/help" className="hover:text-pink-400 transition-colors">
-                  Help
-                </Link>
+                <Link href="/offers" className="hover:text-pink-400 transition-colors hidden md:block">Offers</Link>
+                <Link href="/track" className="hover:text-pink-400 transition-colors hidden md:block">Track Order</Link>
+                <Link href="/help" className="hover:text-pink-400 transition-colors">Help</Link>
               </div>
             </div>
           </div>
@@ -58,19 +72,12 @@ export default function Header() {
                   Sabhyatam
                 </span>
               </Link>
-              
-              <div className="hidden lg:block ml-2">
-                  <button className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-pink-700 transition uppercase tracking-wide">
-                    <Menu className="h-4 w-4" />
-                    Categories
-                  </button>
-              </div>
             </div>
 
             {/* Center: Search Bar (Desktop Trigger) */}
             <div className="hidden flex-1 max-w-xl md:block">
               <div 
-                onClick={() => setShowSearch(true)} // Open Overlay on Click
+                onClick={() => setShowSearch(true)} 
                 className="relative group cursor-text"
               >
                 <div className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-4 text-sm text-gray-500 hover:border-pink-300 transition-colors">
@@ -91,17 +98,33 @@ export default function Header() {
                 <Search className="h-5 w-5" />
               </button>
 
-              <Link href="/admin/products" className="hidden md:block">
-                <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                  <UserCog className="h-5 w-5" />
-                  <span className="text-[10px] font-medium uppercase tracking-wide">Admin</span>
-                </button>
-              </Link>
+              {/* DYNAMIC: Show Admin only if authorized */}
+              {isAdmin && (
+                <Link href="/admin/products" className="hidden md:block">
+                  <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
+                    <UserCog className="h-5 w-5" />
+                    <span className="text-[10px] font-medium uppercase tracking-wide">Admin</span>
+                  </button>
+                </Link>
+              )}
 
-              <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                <User className="h-5 w-5" />
-                <span className="text-[10px] font-medium uppercase tracking-wide">Profile</span>
-              </button>
+              {/* DYNAMIC: Logout vs Login */}
+              {user ? (
+                <button 
+                  onClick={() => signOut()} 
+                  className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-red-600 transition"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-[10px] font-medium uppercase tracking-wide">Logout</span>
+                </button>
+              ) : (
+                <Link href="/login">
+                  <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
+                    <User className="h-5 w-5" />
+                    <span className="text-[10px] font-medium uppercase tracking-wide">Login</span>
+                  </button>
+                </Link>
+              )}
 
               <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
                 <Heart className="h-5 w-5" />
@@ -124,8 +147,8 @@ export default function Header() {
         </div>
       </header>
       
-      {/* 3. Search Overlay */}
+      {/* Search Overlay */}
       {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
     </>
-  )
+  );
 }

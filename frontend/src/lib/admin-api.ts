@@ -25,6 +25,29 @@ interface ProductListResponse {
 }
 
 
+const ADMIN_ORDER_URL = "http://localhost:8082/v1/admin/orders"
+
+export type OrderItem = {
+  product_id: string
+  product_title: string // Assuming backend hydrates this or we fetch it
+  product_image?: string
+  quantity: number
+  price_cents: number
+}
+
+export type AdminOrder = {
+  id: string
+  user_id: string
+  customer_name?: string
+  customer_email?: string
+  customer_phone?: string
+  shipping_address?: any
+  status: "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled"
+  total_amount_cents: number
+  currency: string
+  created_at: string
+  items: OrderItem[]
+}
 
 export async function adminFetch<T>(
   path: string,
@@ -168,3 +191,29 @@ export async function adminGetUploadUrl(filename: string, contentType: string) {
 }
 
 
+export async function getAdminOrders(params: { page: number; limit: number; status?: string }) {
+  const url = new URL(ADMIN_ORDER_URL)
+  url.searchParams.set("page", params.page.toString())
+  url.searchParams.set("limit", params.limit.toString())
+  if (params.status && params.status !== "all") url.searchParams.set("status", params.status)
+
+  const res = await fetch(url.toString(), { cache: "no-store" })
+  if (!res.ok) throw new Error("Failed to load orders")
+  return res.json() // Expects { items: [], total: 100, page: 1 }
+}
+
+export async function getAdminOrderDetail(id: string) {
+  const res = await fetch(`${ADMIN_ORDER_URL}/${id}`, { cache: "no-store" })
+  if (!res.ok) throw new Error("Order not found")
+  return res.json() as Promise<AdminOrder>
+}
+
+export async function updateOrderStatus(id: string, status: string) {
+  const res = await fetch(`${ADMIN_ORDER_URL}/${id}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  })
+  if (!res.ok) throw new Error("Failed to update status")
+  return res.json()
+}

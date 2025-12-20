@@ -1,17 +1,24 @@
+version: '3.8'
+
 services:
+  # ------------------------------------
+  # CORE INFRA
+  # ------------------------------------
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sabhyatam
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
+    networks:
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sabhyatam"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 3s
       timeout: 5s
       retries: 10
@@ -21,7 +28,12 @@ services:
     container_name: redis
     ports:
       - "6380:6379"
+    networks:
+      - app-network
 
+  # ------------------------------------
+  # PRODUCT MIGRATION + SEED
+  # ------------------------------------
   product-migrate:
     build:
       context: ./services/product
@@ -30,21 +42,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - app-network
     restart: "no"
 
-  product-seed:
-    build:
-      context: ./services/product
-      dockerfile: Dockerfile.seed
-    depends_on:
-      product-migrate:
-        condition: service_completed_successfully
-    environment:
-      DB: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
-    command: ["node", "import_seed.js"]
-    restart: "no"
 
+  # ------------------------------------
+  # ORDERS MIGRATION
+  # ------------------------------------
   orders-migrate:
     image: postgres:15
     depends_on:
@@ -52,14 +58,18 @@ services:
         condition: service_healthy
     volumes:
       - ./services/orders/migration:/migrations
+    networks:
+      - app-network
     entrypoint: >
       sh -c "
-      until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done &&
-      psql postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
-      -f /migrations/001_create_orders.sql
+      until pg_isready -h postgres -p 5432 -U ${POSTGRES_USER}; do sleep 1; done &&
+      psql ${DATABASE_URL} -f /migrations/001_create_orders.sql
       "
     restart: "no"
 
+  # ------------------------------------
+  # PAYMENTS MIGRATION
+  # ------------------------------------
   payments-migrate:
     image: postgres:15
     depends_on:
@@ -67,25 +77,85 @@ services:
         condition: service_healthy
     volumes:
       - ./services/payments/migration:/migrations
+    networks:
+      - app-network
     entrypoint: >
       sh -c "
-      until pg_isready -h postgres -p 5432 -U postgres; do sleep 1; done &&
-      psql postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
-      -f /migrations/001_create_payments.sql
+      until pg_isready -h postgres -p 5432 -U ${POSTGRES_USER}; do sleep 1; done &&
+      psql ${DATABASE_URL} -f /migrations/001_create_payments.sql
       "
     restart: "no"
 
+  # ------------------------------------
+  # AUTH DATABASE
+  # ------------------------------------
+  auth-db:
+    image: postgres:15-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    volumes:
+      - auth_pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_NAME}"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
 
+  # ------------------------------------
+  # AUTH MIGRATION (NEW, CONSISTENT)
+  # ------------------------------------
+  auth-migrate:
+    image: postgres:15
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    volumes:
+      - ./services/auth/internal/migrations:/migrations
+    networks:
+      - app-network
+    entrypoint: >
+      sh -c "
+      until pg_isready -h auth-db -p 5432 -U ${AUTH_DB_USER}; do sleep 1; done &&
+      psql ${AUTH_DATABASE_URL} -f /migrations/001_init_auth.sql
+      "
+    restart: "no"
+
+  # ------------------------------------
+  # AUTH SERVICE
+  # ------------------------------------
+  auth:
+    build:
+      context: ./services/auth
+    container_name: auth
+    ports:
+      - "${PORT_AUTH}:8083"
+    environment:
+      PORT: 8083
+      DATABASE_URL: ${AUTH_DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      auth-migrate:
+        condition: service_completed_successfully
+    networks:
+      - app-network
+
+  # ------------------------------------
+  # CORE SERVICES
+  # ------------------------------------
   product:
     build: ./services/product
     container_name: product
-    depends_on:
-      product-seed:
-        condition: service_completed_successfully
     env_file:
       - ./services/product/.env
     ports:
-      - "8080:8080"
+      - "${PORT_PRODUCT}:8080"
+    networks:
+      - app-network
 
   cart:
     build: ./services/cart
@@ -98,13 +168,17 @@ services:
       redis:
         condition: service_started
     ports:
-      - "8081:8081"
+      - "${PORT_CART}:8081"
+    networks:
+      - app-network
 
   orders:
     build: ./services/orders
     container_name: orders
     env_file:
       - ./services/orders/.env
+    environment:
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
     depends_on:
       orders-migrate:
         condition: service_completed_successfully
@@ -113,9 +187,9 @@ services:
       cart:
         condition: service_started
     ports:
-      - "8082:8082"
-    environment:
-      - INTERNAL_SERVICE_KEY=sabhyatam-internal-2025
+      - "${PORT_ORDERS}:8082"
+    networks:
+      - app-network
 
   payments:
     build: ./services/payments
@@ -126,13 +200,18 @@ services:
       orders:
         condition: service_started
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/sabhyatam?sslmode=disable
-      INTERNAL_SERVICE_KEY: sabhyatam-internal-2025
+      DATABASE_URL: ${DATABASE_URL}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
       ORDERS_SVC_BASE: http://orders:8082
     ports:
-      - "8083:8083"
-
-
+      - "${PORT_PAYMENTS}:8084"
+    networks:
+      - app-network
 
 volumes:
   pgdata:
+  auth_pg_data:
+
+networks:
+  app-network:
+    driver: bridge

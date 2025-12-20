@@ -60,38 +60,40 @@ export default function AdminEditProductPage() {
     load(id)
   }, [id])
 
-  async function load(productId: string) {
-    try {
-      setLoading(true)
-      const res = await adminGetProduct(productId)
-      
-      // Cast to 'any' to handle the backend case inconsistency safely
-      const rawData = res.product as any
+async function load(productId: string) {
+  try {
+    setLoading(true);
+    const res = await adminGetProduct(productId);
+    
+    const rawData = res.product as any;
 
-      setProduct({
-        ...rawData,
-        price: rawData.price ?? "",
-        mrp: rawData.mrp ?? "",
-        // FIX: Check for 'Stock' (backend) OR 'stock' (standard)
-        stock: rawData.Stock ?? rawData.stock ?? "", 
-        in_stock: rawData.in_stock ?? false,
-        attributes: rawData.attributes || {},
-        short_desc: rawData.short_desc || "", 
-      })
+    setProduct({
+      ...rawData,
+      price: rawData.price ?? "",
+      mrp: rawData.mrp ?? "",
+      stock: rawData.Stock ?? rawData.stock ?? "", 
+      in_stock: rawData.in_stock ?? false,
+      attributes: rawData.attributes || {},
+      short_desc: rawData.short_desc || "", 
+    });
 
-      if (rawData.tags && Array.isArray(rawData.tags)) {
-        setTagsInput(rawData.tags.join(", "))
-      }
-
-      setMedia(res.media || [])
-    } catch (e) {
-      console.error(e)
-      setError("Failed to load product")
-    } finally {
-      setLoading(false)
+    if (rawData.tags && Array.isArray(rawData.tags) ) {
+      setTagsInput(rawData.tags.join(", "));
     }
+
+    // FIX: Check for both 'media' and 'Media'
+    setMedia(res.media || (res as any).Media || []); 
+
+  } catch (e) {
+    console.error(e);
+    setError("Failed to load product");
+  } finally {
+    setLoading(false);
   }
 
+  const res = await adminGetProduct(productId);
+console.log("FULL API RESPONSE:", res); // Open browser console (F12) to inspect this
+}
   async function saveProduct(e: React.FormEvent) {
     e.preventDefault()
     if (!id || !product) return
@@ -433,7 +435,7 @@ export default function AdminEditProductPage() {
                 </div>
                 <input 
                   id="file-upload" 
-                  type="file" 
+                  type="file"   
                   className="hidden" 
                   accept="image/*"
                   onChange={onFileSelect}

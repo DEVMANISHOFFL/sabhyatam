@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/devmanishoffl/sabhyatam-orders/internal/client"
 	"github.com/devmanishoffl/sabhyatam-orders/internal/model"
@@ -380,5 +381,36 @@ func (h *Handler) GetOrderPublic(w http.ResponseWriter, r *http.Request) {
 		"currency":  order.Currency,
 		"items":     order.Items,
 		"createdAt": order.CreatedAt,
+	})
+}
+
+func (h *Handler) AdminListOrders(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+
+	status := r.URL.Query().Get("status") // Read ?status=paid
+
+	page, _ := strconv.Atoi(q.Get("page"))
+	if page < 1 {
+		page = 1
+	}
+
+	limit, _ := strconv.Atoi(q.Get("limit"))
+	if limit < 1 || limit > 100 {
+		limit = 15
+	}
+
+	orders, total, err := h.store.ListOrders(r.Context(), page, limit, status)
+	if err != nil {
+		http.Error(w, "failed to fetch orders: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return response matching your frontend's expected format (items + total)
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(map[string]any{
+		"items": orders,
+		"total": total,
+		"page":  page,
+		"limit": limit,
 	})
 }

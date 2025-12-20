@@ -1,3 +1,6 @@
+
+import { User as SupabaseUser } from "@supabase/supabase-js";
+
 // --- PRODUCT TYPES ---
 
 export type AdminProduct = {
@@ -86,4 +89,13 @@ export type ProductSearchParams = {
   fabric?: string
   occasion?: string
   color?: string
+}
+
+// Extend the default User type to include your custom metadata
+export interface User extends SupabaseUser {
+  app_metadata: {
+    role?: "admin" | "customer";
+    provider?: string;
+    [key: string]: any;
+  };
 }

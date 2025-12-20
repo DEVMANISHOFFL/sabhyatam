@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"os"
 )
 
 type ctxKey string
@@ -55,6 +57,27 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// internal/api/middleware.go
+
+func AdminMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// simple check: match against an env variable
+		adminKey := os.Getenv("ADMIN_KEY")
+		if adminKey == "" {
+			// Fallback or log warning if env not set
+			log.Println("WARNING: ADMIN_KEY not set")
+		}
+
+		// Check header (e.g., "X-ADMIN-KEY")
+		if r.Header.Get("X-ADMIN-KEY") != adminKey {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 

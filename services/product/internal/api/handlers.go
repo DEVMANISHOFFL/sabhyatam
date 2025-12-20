@@ -32,17 +32,14 @@ func (h *Handler) RegisterRoutes(r *chi.Mux) {
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(middleware.StripSlashes)
 
-		// Public Routes
 		r.Get("/products/search", h.searchProductsHandler)
 		r.Get("/products/slug/{slug}", h.getProductBySlugHandler)
 		r.Get("/products/{id}", h.getProductDetailHandler)
 		r.Get("/products", h.listProductsHandler)
 
-		// Admin Routes
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(AdminOnly)
 
-			// Media Upload (Presigned URL)
 			r.Get("/media/upload-url", h.GetUploadURL)
 
 			// Products
@@ -51,14 +48,12 @@ func (h *Handler) RegisterRoutes(r *chi.Mux) {
 			r.Put("/products/{id}", h.updateProductHandler)
 			r.Delete("/products/{id}", h.deleteProductHandler)
 
-			// Stock Management
-			r.Route("/variants", func(r chi.Router) {
-				r.Post("/{variant_id}/reserve", h.reserveStockHandler)
-				r.Post("/{variant_id}/release", h.releaseStockHandler)
-				r.Post("/{variant_id}/deduct", h.deductStockHandler)
+			r.Route("/products/{id}/stock", func(r chi.Router) {
+				r.Post("/reserve", h.reserveStockHandler)
+				r.Post("/release", h.releaseStockHandler)
+				r.Post("/deduct", h.deductStockHandler)
 			})
 
-			// Media Data
 			r.Post("/products/{id}/media", h.createMediaHandler)
 			r.Delete("/media/{media_id}", h.deleteMediaHandler)
 		})
@@ -311,10 +306,14 @@ func (h *Handler) deleteMediaHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) reserveStockHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
 
 	if err := h.store.ReserveStock(r.Context(), id, body.Quantity); err != nil {
 		http.Error(w, err.Error(), 409)
@@ -322,12 +321,17 @@ func (h *Handler) reserveStockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "reserved"})
 }
+
 func (h *Handler) releaseStockHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
 
 	if err := h.store.ReleaseStock(r.Context(), id, body.Quantity); err != nil {
 		http.Error(w, err.Error(), 409)
@@ -338,10 +342,14 @@ func (h *Handler) releaseStockHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) deductStockHandler(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	var body struct {
 		Quantity int `json:"quantity"`
 	}
-	json.NewDecoder(r.Body).Decode(&body)
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
 
 	if err := h.store.DeductStock(r.Context(), id, body.Quantity); err != nil {
 		http.Error(w, err.Error(), 409)
@@ -349,6 +357,7 @@ func (h *Handler) deductStockHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "deducted"})
 }
+
 func (h *Handler) searchProductsHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 
@@ -415,3 +424,5 @@ func (h *Handler) getProductBySlugHandler(w http.ResponseWriter, r *http.Request
 		"media":   media,
 	})
 }
+
+

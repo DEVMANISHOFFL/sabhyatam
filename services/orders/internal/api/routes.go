@@ -14,11 +14,14 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 		r.Post("/{orderID}/refund", h.RefundOrder)
 		r.Post("/orders/from-cart", h.CreateOrderFromCart)
 		r.Get("/{orderID}/public", h.GetOrderPublic)
-
 		r.Get("/internal/orders/{orderID}", h.GetOrderInternal)
-
 		r.Post("/{orderID}/paid", h.MarkOrderPaid)
 		r.Post("/{orderID}/release", h.ReleaseOrder)
+	})
+
+	r.Route("/v1/admin", func(r chi.Router) {
+		r.Use(AdminMiddleware)
+		r.Get("/orders", h.AdminListOrders)
 	})
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {

@@ -116,7 +116,7 @@ func (s *Store) getMediaForProducts(ctx context.Context, productIDs []string) (m
 		return nil, nil
 	}
 	rows, err := s.db.Query(ctx, `
-    SELECT id, product_id, url, media_type 
+    SELECT id, product_id, url, media_type, meta 
     FROM product_media 
     WHERE product_id = ANY($1) 
     ORDER BY (meta->>'order')::int ASC
@@ -129,7 +129,9 @@ func (s *Store) getMediaForProducts(ctx context.Context, productIDs []string) (m
 	result := make(map[string][]model.Media)
 	for rows.Next() {
 		var m model.Media
-		rows.Scan(&m.ID, &m.ProductID, &m.URL, &m.MediaType)
+		var metaBytes []byte
+		rows.Scan(&m.ID, &m.ProductID, &m.URL, &m.MediaType, &metaBytes)
+		json.Unmarshal(metaBytes, &m.Meta)
 		result[m.ProductID] = append(result[m.ProductID], m)
 	}
 	return result, nil
