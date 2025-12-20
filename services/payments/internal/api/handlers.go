@@ -225,3 +225,48 @@ func (h *Handler) MockPaymentSuccess(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+// payments/internal/api/handlers.go
+
+// ... existing code ...
+
+func (h *Handler) VerifyPayment(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		OrderID        string `json:"order_id"`
+		PaymentID      string `json:"payment_id"`       // razorpay_payment_id
+		GatewayOrderID string `json:"gateway_order_id"` // razorpay_order_id
+		Signature      string `json:"signature"`        // razorpay_signature
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Verify Signature
+	// The signature is generated using "order_id|payment_id"
+	data := body.GatewayOrderID + "|" + body.PaymentID
+	err := h.gateway.VerifyWebhook([]byte(data), body.Signature)
+	if err != nil {
+		http.Error(w, "payment verification failed", http.StatusUnauthorized)
+		return
+	}
+
+	// 2. Mark Payment as Captured in DB
+	_, err = h.store.MarkCapturedByGatewayOrder(r.Context(), body.GatewayOrderID, body.PaymentID)
+	if err != nil {
+		log.Printf("Failed to mark captured: %v", err)
+		// Don't fail the request if it's already captured, just proceed to notify orders
+	}
+
+	// 3. Notify Orders Service to Mark Paid
+	err = h.orders.MarkOrderPaid(r.Context(), body.OrderID)
+	if err != nil {
+		log.Printf("Failed to notify orders service: %v", err)
+		http.Error(w, "payment verified but order update failed", http.StatusBadGateway)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}

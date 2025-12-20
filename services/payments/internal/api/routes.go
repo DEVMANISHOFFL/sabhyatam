@@ -8,5 +8,6 @@ func RegisterRoutes(r chi.Router, h *Handler) {
 	r.Post("/v1/payments/mock-success", h.MockPaymentSuccess)
 
 	r.Post("/v1/payments/intent", h.CreatePaymentIntent)
+	r.Post("/v1/payments/verify", h.VerifyPayment)
 
 }

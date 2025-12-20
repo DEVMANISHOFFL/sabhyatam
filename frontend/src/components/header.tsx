@@ -6,10 +6,10 @@ import {
   Search, 
   ShoppingCart, 
   User, 
+  LayoutDashboard,
   Menu, 
   Heart, 
   MapPin, 
-  UserCog, 
   LogOut 
 } from "lucide-react";
 
@@ -102,22 +102,34 @@ export default function Header() {
               {isAdmin && (
                 <Link href="/admin/products" className="hidden md:block">
                   <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                    <UserCog className="h-5 w-5" />
+                    <LayoutDashboard className="h-5 w-5" />
                     <span className="text-[10px] font-medium uppercase tracking-wide">Admin</span>
                   </button>
                 </Link>
               )}
 
-              {/* DYNAMIC: Logout vs Login */}
+              {/* DYNAMIC: Profile & Logout vs Login */}
               {user ? (
-                <button 
-                  onClick={() => signOut()} 
-                  className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-red-600 transition"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="text-[10px] font-medium uppercase tracking-wide">Logout</span>
-                </button>
+                <>
+                  {/* Profile Link */}
+                  <Link href="/profile" className="hidden md:block">
+                    <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
+                      <User className="h-5 w-5" />
+                      <span className="text-[10px] font-medium uppercase tracking-wide">Profile</span>
+                    </button>
+                  </Link>
+
+                  {/* Logout Button */}
+                  <button 
+                    onClick={() => signOut()} 
+                    className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-red-600 transition"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span className="text-[10px] font-medium uppercase tracking-wide">Logout</span>
+                  </button>
+                </>
               ) : (
+                /* Login Link */
                 <Link href="/login">
                   <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
                     <User className="h-5 w-5" />

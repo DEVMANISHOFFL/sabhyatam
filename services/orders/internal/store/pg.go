@@ -351,3 +351,80 @@ func (s *PGStore) ListOrders(ctx context.Context, page, limit int, status string
 
 	return orders, total, nil
 }
+
+func (s *PGStore) GetOrdersByUserID(ctx context.Context, userID string) ([]model.Order, error) {
+	// 1. Fetch Orders
+	rows, err := s.db.Query(ctx, `
+		SELECT id, user_id, status, currency, total_amount_cents, created_at, updated_at
+		FROM orders
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []model.Order
+	// Map to quickly find order by ID when attaching items later
+	orderMap := make(map[string]*model.Order)
+	var orderIDs []string
+
+	for rows.Next() {
+		var o model.Order
+		// Ensure Items is initialized as empty slice [] instead of nil
+		o.Items = []model.OrderItem{}
+
+		if err := rows.Scan(
+			&o.ID, &o.UserID, &o.Status, &o.Currency,
+			&o.TotalAmountCents, &o.CreatedAt, &o.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, o)
+		// We store pointers to the indices in the slice so we can modify them
+		// Note: We need to re-map this after the loop or just access by index if we prefer.
+		// Actually, simpler approach: just fetch items for all these IDs.
+		orderIDs = append(orderIDs, o.ID)
+	}
+	rows.Close()
+
+	if len(orders) == 0 {
+		return []model.Order{}, nil
+	}
+
+	// Re-build map pointing to the actual elements in the slice
+	for i := range orders {
+		orderMap[orders[i].ID] = &orders[i]
+	}
+
+	// 2. Fetch Items for these orders (Bulk fetch)
+	itemRows, err := s.db.Query(ctx, `
+		SELECT id, order_id, product_id, quantity, price_cents
+		FROM order_items
+		WHERE order_id = ANY($1)
+	`, orderIDs)
+	if err != nil {
+		return nil, err
+	}
+	defer itemRows.Close()
+
+	for itemRows.Next() {
+		var it model.OrderItem
+		var oID string
+
+		if err := itemRows.Scan(
+			&it.ID, &oID, &it.ProductID, &it.Quantity, &it.PriceCents,
+		); err != nil {
+			return nil, err
+		}
+
+		// Attach item to the correct order
+		if order, exists := orderMap[oID]; exists {
+			order.Items = append(order.Items, it)
+		}
+	}
+
+	return orders, nil
+}

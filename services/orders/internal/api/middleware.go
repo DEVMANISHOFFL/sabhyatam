@@ -32,6 +32,7 @@ func getSessionID(ctx context.Context) string {
 	return ""
 }
 
+// Keep this one! It processes the User ID for your logic
 func UserSessionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -48,34 +49,15 @@ func UserSessionMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func CORSMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-USER-ID, X-SESSION-ID")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-// internal/api/middleware.go
+// --- DELETED CORSMiddleware function entirely ---
 
 func AdminMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// simple check: match against an env variable
 		adminKey := os.Getenv("ADMIN_KEY")
 		if adminKey == "" {
-			// Fallback or log warning if env not set
 			log.Println("WARNING: ADMIN_KEY not set")
 		}
 
-		// Check header (e.g., "X-ADMIN-KEY")
 		if r.Header.Get("X-ADMIN-KEY") != adminKey {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return

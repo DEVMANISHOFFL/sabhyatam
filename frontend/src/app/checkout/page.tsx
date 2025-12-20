@@ -11,10 +11,10 @@ import {
   Lock,
   ArrowRight,
   ShoppingBag,
-  Truck
+  Truck,
+  Loader2
 } from 'lucide-react'
 
-// 1. Import Auth Hook & Cart
 import { useAuth } from '../context/auth-context'
 import { getCart } from '@/lib/cart'
 
@@ -24,22 +24,22 @@ export default function CheckoutPage() {
   const [paying, setPaying] = useState(false)
   const router = useRouter()
   
-  // 2. Get User & Token from Context
   const { user, token, isLoading: authLoading } = useAuth()
 
-  /**
-   * MOCK PAYMENT GATEWAY
-   */
+  // --- 1. MOCK GATEWAY SIMULATION ---
   async function openGateway(payment: any) {
+    // Simulate gateway delay
     await new Promise(r => setTimeout(r, 1500))
 
+    // Call Mock Success Endpoint on Port 8083
     const res = await fetch(
-      'http://localhost:8084/v1/payments/mock-success',
+      'http://localhost:8083/v1/payments/mock-success',
       {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Secure call with JWT
+          "Authorization": `Bearer ${token}`, 
+          "X-USER-ID": user?.id || "", 
         },
         body: JSON.stringify({
           order_id: payment.order_id,
@@ -48,17 +48,16 @@ export default function CheckoutPage() {
     )
 
     if (!res.ok) throw new Error('Mock payment failed')
+    
+    // Redirect to Success Page
     router.push(`/order/success?order_id=${payment.order_id}`)
   }
 
-  /**
-   * PAY HANDLER
-   */
+  // --- 2. MAIN PAYMENT HANDLER ---
   async function handlePay() {
     try {
       if (paying) return
 
-      // Enforce Login
       if (!user || !token) {
         alert("Please login to complete your purchase.")
         router.push("/login")
@@ -67,14 +66,17 @@ export default function CheckoutPage() {
 
       setPaying(true)
 
-      // 1️⃣ PREPARE ORDER
+      // A. PREPARE ORDER (Orders Service: Port 8082)
       const orderRes = await fetch(
         'http://localhost:8082/v1/orders/prepare',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Pass JWT for middleware
+            'Authorization': `Bearer ${token}`,
+            'X-USER-ID': user.id,
+            // Use the correct key that matches cart.ts
+            'X-SESSION-ID': localStorage.getItem("sabhyatam_session") || "", 
           },
           body: JSON.stringify({
             shipping_address: {
@@ -83,8 +85,7 @@ export default function CheckoutPage() {
               state: "Tamil Nadu",
               postal_code: "631501",
               country: "IN",
-              // FIX: Access phone from metadata
-              phone: user?.user_metadata?.phone || "9876543210" 
+              phone: user.user_metadata?.phone || "9876543210" 
             }
           })
         }
@@ -97,14 +98,15 @@ export default function CheckoutPage() {
 
       const order = await orderRes.json()
 
-      // 2️⃣ CREATE PAYMENT INTENT
+      // B. CREATE PAYMENT INTENT (Payments Service: Port 8083)
       const payRes = await fetch(
-        'http://localhost:8084/v1/payments/intent',
+        'http://localhost:8083/v1/payments/intent', // Corrected Port: 8083
         {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'X-USER-ID': user.id 
           },
           body: JSON.stringify({
             order_id: order.order_id,
@@ -119,16 +121,18 @@ export default function CheckoutPage() {
       const payment = await payRes.json()
       payment.order_id = order.order_id
 
-      // 3️⃣ OPEN GATEWAY
+      // C. OPEN GATEWAY
       await openGateway(payment)
 
     } catch (err: any) {
+      console.error("Checkout Error:", err)
       alert(`Checkout failed: ${err.message}`)
     } finally {
       setPaying(false)
     }
   }
 
+  // --- 3. LOAD CART ---
   useEffect(() => {
     async function load() {
       try {
@@ -143,7 +147,7 @@ export default function CheckoutPage() {
     load()
   }, [])
 
-  // ⏳ Unified Loading State (prevents flicker on refresh)
+  // --- 4. RENDER LOADING ---
   if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-[#111217] flex items-center justify-center">
@@ -155,6 +159,7 @@ export default function CheckoutPage() {
     )
   }
 
+  // --- 5. RENDER EMPTY CART ---
   const items = Array.isArray(cart?.items) ? cart.items : []
 
   if (items.length === 0) {
@@ -172,6 +177,7 @@ export default function CheckoutPage() {
     )
   }
 
+  // --- 6. RENDER CHECKOUT UI ---
   return (
     <div className="min-h-screen bg-[#f1f3f6] pb-20">
       
@@ -203,8 +209,7 @@ export default function CheckoutPage() {
                    <h3 className="text-gray-400 font-bold text-[10px] uppercase tracking-wider">Account</h3>
                    {user ? (
                      <p className="text-sm font-bold text-black">
-                       {/* FIX: Use user_metadata for name */}
-                       {user.user_metadata?.full_name} <span className="text-gray-500 font-normal ml-1">({user.email})</span>
+                       {user.user_metadata?.full_name || user.email} <span className="text-gray-500 font-normal ml-1">({user.email})</span>
                      </p>
                    ) : (
                      <p className="text-sm text-red-500 font-medium">Not logged in</p>
@@ -233,7 +238,6 @@ export default function CheckoutPage() {
                   <div className="flex items-start gap-3">
                      <MapPin className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
                      <div className="text-sm">
-                        {/* FIX: Use user_metadata for name and phone */}
                         <p className="font-bold text-gray-900">{user?.user_metadata?.full_name || "Guest"}</p>
                         <p className="text-gray-600 mt-1">123, Silk Weaver's Lane, Kanchipuram, TN - 631501</p>
                         <p className="text-gray-900 mt-2 font-bold uppercase text-[10px] tracking-widest text-blue-700">
@@ -268,7 +272,6 @@ export default function CheckoutPage() {
                           <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
                           <div className="mt-2 flex items-center gap-2">
                              <span className="font-bold text-gray-900">₹{(item.line_total / 100).toLocaleString('en-IN')}</span>
-                             {/* Mock Discount logic for display */}
                              <span className="text-xs text-gray-400 line-through">₹{Math.floor((item.line_total / 100) * 1.25)}</span>
                              <span className="text-xs text-green-600 font-bold">20% Off</span>
                           </div>
@@ -342,7 +345,7 @@ export default function CheckoutPage() {
                 {!user ? (
                   "Login to Continue"
                 ) : paying ? (
-                  <>Processing <span className="animate-pulse">...</span></>
+                  <>Processing <Loader2 className="animate-spin h-4 w-4" /></>
                 ) : (
                   <>PAY ₹{(cart.subtotal / 100).toFixed(0)} <ArrowRight className="h-4 w-4" /></>
                 )}

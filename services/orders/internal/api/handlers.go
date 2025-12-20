@@ -37,6 +37,7 @@ func isValidUUID(id string) bool {
 	return err == nil
 }
 
+// ✅ FIXED: Smart Cart Lookup (User -> Fallback to Session)
 func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -54,19 +55,37 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 		err  error
 	)
 
+	// 1. Logic: Try User Cart First
 	if userID != "" {
 		cart, err = h.cartClient.GetCartForUser(ctx, userID)
+		userCartEmpty := (err != nil) || (cart == nil) || (len(cart.Items) == 0)
+
+		// 2. Logic: If User Cart is empty or failed, TRY SESSION CART
+		// This fixes the "Guest -> Login" flow where items are still in the session
+		if userCartEmpty {
+			if sessionID != "" {
+				log.Println("User cart empty, falling back to Session Cart:", sessionID)
+				sessionCart, sErr := h.cartClient.GetCartForSession(ctx, sessionID)
+				// Only switch if session cart actually has items
+				if sErr == nil && sessionCart != nil && len(sessionCart.Items) > 0 {
+					cart = sessionCart
+					err = nil // Clear error because we found a valid cart
+				}
+			}
+		}
 	} else {
+		// 3. Logic: No User ID, just check Session
 		cart, err = h.cartClient.GetCartForSession(ctx, sessionID)
 	}
-	log.Printf("Cart received: %+v", cart)
+
+	log.Printf("Final Cart used: %+v", cart)
 
 	if err != nil {
 		http.Error(w, "failed to fetch cart: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 
-	if len(cart.Items) == 0 {
+	if cart == nil || len(cart.Items) == 0 {
 		http.Error(w, "cart is empty", http.StatusBadRequest)
 		return
 	}
@@ -77,7 +96,7 @@ func (h *Handler) PrepareOrder(w http.ResponseWriter, r *http.Request) {
 	)
 
 	for _, it := range cart.Items {
-		log.Printf("Cart item: %+v", it)
+		// log.Printf("Cart item: %+v", it)
 
 		if it.Quantity <= 0 {
 			continue
@@ -413,4 +432,29 @@ func (h *Handler) AdminListOrders(w http.ResponseWriter, r *http.Request) {
 		"page":  page,
 		"limit": limit,
 	})
+}
+
+func (h *Handler) GetMyOrders(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("X-USER-ID")
+
+	if userID == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	orders, err := h.store.GetOrdersByUserID(r.Context(), userID)
+	if err != nil {
+		log.Printf("Failed to fetch user orders: %v", err)
+		http.Error(w, "failed to fetch orders", http.StatusInternalServerError)
+		return
+	}
+
+	if orders == nil {
+		orders = []model.Order{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(orders); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Package, ArrowRight, Loader2, ShoppingBag } from 'lucide-react'
+import { CheckCircle2, Package, ArrowRight, Loader2 } from 'lucide-react'
 
 export default function OrderSuccessPage() {
   const searchParams = useSearchParams()
@@ -20,7 +20,7 @@ export default function OrderSuccessPage() {
     pollingRef.current = true
 
     let attempts = 0
-    const MAX_ATTEMPTS = 10
+    const MAX_ATTEMPTS = 20 // Increased attempts to give backend time
 
     const poll = async () => {
       try {
@@ -29,40 +29,39 @@ export default function OrderSuccessPage() {
           { cache: 'no-store' }
         )
 
-        // Order not visible yet → keep polling
+        // If order not found (404), wait and retry
         if (res.status === 404) {
           attempts++
           if (attempts < MAX_ATTEMPTS) {
-            setTimeout(poll, 1500)
+            setTimeout(poll, 1000)
             return
           }
           router.replace('/order/failed')
           return
         }
 
-        await fetch('http://localhost:8083/v1/payments/mock-success', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ order_id: orderId }), 
-        })
-
         const data = await res.json()
 
-        if (data.status === 'pending_payment') {
-          setTimeout(poll, 1500)
-          return
-        }
+        // ✅ FIX 1: Removed the 'mock-success' POST call. 
+        // The CheckoutPage already triggered payment. We just wait for status to update.
 
-        if (data.status !== 'paid' && data.status !== 'processing') {
-          router.replace('/order/failed')
-          return
+        // If still pending, wait and retry
+        if (data.status === 'pending_payment' || data.status === 'pending') {
+          attempts++
+          if (attempts < MAX_ATTEMPTS) {
+            setTimeout(poll, 1000)
+            return
+          }
+          // If it stays pending too long, show what we have (or redirect)
         }
 
         setOrder(data)
         setLoading(false)
       } catch (err) {
-        console.error(err)
-        router.replace('/order/failed')
+        console.error("Polling error:", err)
+        // Don't redirect immediately on network error, maybe retry? 
+        // For now, stopping loading to show state is safer than redirecting blindly.
+        setLoading(false) 
       }
     }
 
@@ -73,9 +72,18 @@ export default function OrderSuccessPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 space-y-4">
         <Loader2 className="h-10 w-10 animate-spin text-pink-600" />
-        <h2 className="text-xl font-medium text-gray-900">Finalizing your order...</h2>
+        <h2 className="text-xl font-medium text-gray-900">Verifying your order...</h2>
         <p className="text-sm text-gray-500">Please do not close this window.</p>
       </div>
+    )
+  }
+
+  // Safety check if polling finished but order is null (failed fetch)
+  if (!order) {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <p>Order details could not be loaded.</p>
+        </div>
     )
   }
 
@@ -99,11 +107,14 @@ export default function OrderSuccessPage() {
             <div className="flex justify-between items-center mb-4 border-b border-gray-200 pb-4">
                <div>
                  <p className="text-xs text-gray-500 uppercase tracking-wider">Order ID</p>
-                 <p className="font-mono font-bold text-gray-900">{order.id.slice(0, 8).toUpperCase()}</p>
+                 <p className="font-mono font-bold text-gray-900">{order.id?.slice(0, 8).toUpperCase()}</p>
                </div>
                <div className="text-right">
                  <p className="text-xs text-gray-500 uppercase tracking-wider">Amount</p>
-                 <p className="font-bold text-gray-900">₹{(order.amount_cents / 100).toLocaleString('en-IN')}</p>
+                 <p className="font-bold text-gray-900">
+                    {/* ✅ FIX 2: Use 'subtotal' instead of 'amount_cents' based on backend API */}
+                    ₹{((order.subtotal || 0) / 100).toLocaleString('en-IN')}
+                 </p>
                </div>
             </div>
             

@@ -99,3 +99,52 @@ export interface User extends SupabaseUser {
     [key: string]: any;
   };
 }
+
+// --- USER & PROFILE TYPES ---
+
+export interface Address {
+  id: string
+  user_id?: string
+  full_name: string
+  phone: string
+  line1: string
+  city: string
+  state: string
+  pincode: string
+  is_default: boolean
+}
+
+export interface UserProfile {
+  id: string
+  email: string // Read-only
+  full_name: string
+  phone: string
+}
+
+export interface UpdateProfileInput {
+  full_name?: string
+  phone?: string
+}
+
+// --- ORDER TYPES ---
+
+export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+
+export interface OrderItem {
+  product_id: string
+  product_title: string
+  product_image?: string
+  quantity: number
+  unit_price: number
+  line_total: number
+}
+
+export interface Order {
+  id: string
+  created_at: string
+  status: string
+  total_amount: number
+  currency: string
+  items: OrderItem[]
+  shipping_address?: Address
+}
