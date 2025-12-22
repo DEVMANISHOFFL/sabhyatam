@@ -429,3 +429,19 @@ func (s *PGStore) GetOrdersByUserID(ctx context.Context, userID string) ([]model
 
 	return orders, nil
 }
+
+func (s *PGStore) IsOrderItemReviewEligible(ctx context.Context, id string) (bool, error) {
+	var Fulfillment_Status string
+	err := s.db.QueryRow(ctx, `
+        select o.fulfillment_status
+        from order_items oi
+        join orders o on o.id = oi.order_id
+        where oi.id = $1
+    `, id).Scan(&Fulfillment_Status)
+
+	if err != nil {
+		return false, err
+	}
+
+	return Fulfillment_Status == "delivered", nil
+}

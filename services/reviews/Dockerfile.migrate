@@ -1,0 +1,14 @@
+FROM postgres:15
+
+WORKDIR /migrations
+
+COPY migrations/*.sql .
+
+CMD until pg_isready -h postgres -p 5432 -U postgres; do \
+  echo "Waiting for postgres..."; \
+  sleep 2; \
+  done && \
+  for f in *.sql; do \
+  echo "Running $f"; \
+  psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"; \
+  done

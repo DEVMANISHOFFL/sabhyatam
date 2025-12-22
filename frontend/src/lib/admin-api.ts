@@ -35,6 +35,18 @@ export type OrderItem = {
   price_cents: number
 }
 
+export type AdminReview = {
+  ID: string
+  UserID: string
+  OrderItemID: string
+  ProductID: string
+  Rating: number
+  Title: string
+  Body: string
+  Status: "pending" | "approved" | "rejected"
+  CreatedAt: string
+}
+
 export type AdminOrder = {
   id: string
   user_id: string
@@ -216,4 +228,39 @@ export async function updateOrderStatus(id: string, status: string) {
   })
   if (!res.ok) throw new Error("Failed to update status")
   return res.json()
+}
+
+/* REVIEWS API */
+const REVIEWS_PROXY_URL = "/api/reviews/v1/admin/reviews"
+
+export async function adminGetPendingReviews() {
+  const res = await fetch(`${REVIEWS_PROXY_URL}/pending`, {
+    headers: {
+      "Content-Type": "application/json",
+      "X-ADMIN-KEY": ADMIN_KEY, // Uses the env var defined at the top
+    },
+    cache: "no-store",
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text || "Failed to fetch pending reviews")
+  }
+
+  return res.json() as Promise<AdminReview[]>
+}
+
+export async function adminApproveReview(id: string) {
+  const res = await fetch(`${REVIEWS_PROXY_URL}/${id}/approve`, {
+    method: "POST",
+    headers: {
+      "X-ADMIN-KEY": ADMIN_KEY,
+    },
+  })
+
+  if (!res.ok) {
+    throw new Error("Failed to approve review")
+  }
+  
+  return true
 }

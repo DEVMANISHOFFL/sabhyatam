@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,9 +15,13 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 		// 1. List/Create Routes
 		r.Get("/me", h.GetMyOrders)
 		r.Post("/prepare", h.PrepareOrder)
-		r.Post("/confirm", h.ConfirmOrder) // Used by legacy/admin flow
+		r.Post("/confirm", h.ConfirmOrder)
 		r.Post("/from-cart", h.CreateOrderFromCart)
 
+		r.Get(
+			"/internal/order-items/{orderItemID}/review-eligibility",
+			h.CheckReviewEligibility,
+		)
 		// 2. Single Order Routes
 		// IMPORTANT: We use {id} here because handlers.go uses chi.URLParam(r, "id")
 		r.Route("/{id}", func(r chi.Router) {
@@ -41,4 +46,19 @@ func RegisterRoutes(r *chi.Mux, h *Handler) {
 		w.WriteHeader(200)
 		w.Write([]byte("ok"))
 	})
+
+	r.Get("/internal/order-items/{id}/review-eligibility", func(w http.ResponseWriter, r *http.Request) {
+		orderItemID := chi.URLParam(r, "id")
+
+		eligible, err := h.store.IsOrderItemReviewEligible(r.Context(), orderItemID)
+		if err != nil {
+			http.Error(w, "not eligible", http.StatusForbidden)
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]bool{
+			"eligible": eligible,
+		})
+	})
+
 }

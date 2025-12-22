@@ -42,6 +42,13 @@ export type ProductCard = {
   slug: string
   title: string
   category: string
+  attributes?: {
+    fabric?: string;
+    weave?: string;
+    color?: string;
+    occasion?: string;
+    [key: string]: any; // Allows for other flexible attributes
+  };
   price: number
   image_url: string | null
   in_stock: boolean

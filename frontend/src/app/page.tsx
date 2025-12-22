@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -14,10 +15,52 @@ import {
   ArrowRight,
   ShoppingBag,
   Heart,
-  ChevronDown // Added for dropdown indicator
+  ChevronDown,
+  Video, // Added for Bento Grid
+  Sparkles, // Added for Bento Grid
+  PlayCircle // Added for Bento Grid
 } from "lucide-react"
 
 import { CATEGORIES } from "@/lib/categories"
+import DebugToken from "@/components/Test"
+
+// --- UTILS ---
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+
+
+
+const getProductMeta = (product: ProductCard) => {
+  const seed = typeof product.id === 'number' 
+    ? product.id 
+    : product.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+
+  const realStock = (product as any).stock ?? (product as any).inventory_count
+  const simulatedStock = (seed % 45) // Range: 0 to 44
+  const stock = realStock ?? simulatedStock
+  
+  const isOutOfStock = stock <= 0
+  const isLowStock = stock > 0 && stock < 15
+  const stockProgress = isOutOfStock ? 0 : Math.min(100, Math.max(10, (stock / 50) * 100))
+
+  const realMRP = (product as any).original_price ?? (product as any).mrp
+  const simulatedMRP = Math.round(product.price * (1 + ((seed % 30) + 10) / 100))
+  const mrp = realMRP ?? simulatedMRP
+
+  const discountPercent = Math.round(((mrp - product.price) / mrp) * 100)
+
+  return { stock, isOutOfStock, isLowStock, stockProgress, mrp, discountPercent }
+}
+
+
+
 
 export default function HomePage() {
   const [products, setProducts] = useState<ProductCard[]>([])
@@ -29,11 +72,7 @@ export default function HomePage() {
 
   async function loadProducts() {
     try {
-      const res = await fetchProducts({
-        page: 1,
-        limit: 24,
-        sort: "latest",
-      })
+      const res = await fetchProducts({ page: 1, limit: 24, sort: "latest" })
       setProducts(res.items ?? [])
     } catch (err) {
       console.error("failed to load products", err)
@@ -43,7 +82,6 @@ export default function HomePage() {
     }
   }
 
-  // Loading Skeleton
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -65,17 +103,15 @@ export default function HomePage() {
             <span className="hidden md:inline text-gray-600">|</span>
             <div className="hidden md:flex items-center gap-1 cursor-pointer hover:text-gray-300 transition">
               <MapPin className="w-3 h-3" />
-              <span>Deliver to: <span className="font-bold">492001</span></span>
+              <span>Deliver to: <span className="font-bold">India</span></span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* 2. TEXT-BASED CATEGORY NAV (Mega-menu style) */}
+<DebugToken />
+      {/* 2. CATEGORY NAV */}
       <nav className="sticky top-[64px] z-30 bg-white border-b border-gray-100 shadow-sm transition-all">
         <div className="container mx-auto px-4">
-          
-          {/* Desktop: Centered Links with Hover Dropdowns */}
           <ul className="hidden lg:flex items-center justify-center gap-8">
             {CATEGORIES.map((cat) => (
                <li key={cat.slug} className="group relative">
@@ -88,11 +124,9 @@ export default function HomePage() {
                       <ChevronDown className="w-3 h-3 transition-transform duration-200 group-hover:-rotate-180" />
                     )}
                   </Link>
-
-                  {/* Nested Dropdown */}
                   {cat.subcategories && cat.subcategories.length > 0 && (
                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-56 bg-white border border-gray-100 shadow-xl rounded-b-lg opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50 overflow-hidden">
-                        <div className="h-0.5 w-full bg-pink-600"></div> {/* Accent Line */}
+                        <div className="h-0.5 w-full bg-pink-600"></div>
                         <ul className="py-2">
                            {cat.subcategories.map((sub) => (
                               <li key={sub.slug}>
@@ -109,171 +143,105 @@ export default function HomePage() {
                   )}
                </li>
             ))}
-            {/* View All Link */}
              <li>
                 <Link href="/search" className="py-4 text-xs font-bold text-gray-400 hover:text-black uppercase tracking-widest transition-colors">
                   View All
                 </Link>
              </li>
           </ul>
-
-          {/* Mobile: Horizontal Text Scroll */}
-          <div className="lg:hidden flex items-center gap-6 overflow-x-auto no-scrollbar py-4 px-2">
-             {CATEGORIES.map((cat) => (
-               <Link 
-                 key={cat.slug}
-                 href={`/search?category=${cat.slug}`}
-                 className="text-sm font-bold text-gray-700 whitespace-nowrap active:text-pink-600"
-               >
-                 {cat.label}
-               </Link>
-             ))}
-             <Link href="/search" className="text-sm font-bold text-gray-400 whitespace-nowrap">View All</Link>
-          </div>
         </div>
       </nav>
 
-      {/* 3. Hero Section (Bento Grid) */}
+      {/* 3. Hero Section */}
       <section className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-auto md:h-[550px]">
-          
-          {/* Main Hero */}
           <Link href="/search?category=silk-sarees" className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl shadow-sm">
-            <img
-              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1200"
-              alt="Festive Collection"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+            <img src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=1200" alt="Hero" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
             <div className="absolute bottom-0 left-0 p-8 text-white">
-              <span className="bg-white text-black text-xs font-bold px-3 py-1 uppercase tracking-wider mb-4 inline-block shadow-sm">
-                New Arrival
-              </span>
+              <span className="bg-white text-black text-xs font-bold px-3 py-1 uppercase tracking-wider mb-4 inline-block shadow-sm">New Arrival</span>
               <h2 className="text-3xl md:text-5xl font-serif mb-4 leading-tight">The Royal <br/>Kanjivaram</h2>
-              <p className="mb-8 text-gray-200 max-w-sm text-sm md:text-base">Handwoven masterpieces directly from the weavers of Tamil Nadu, featuring pure zari work.</p>
-              <button className="bg-pink-600 text-white px-8 py-3 rounded-sm font-bold tracking-wide hover:bg-pink-700 transition shadow-lg">
-                SHOP COLLECTION
-              </button>
+              <button className="bg-pink-600 text-white px-8 py-3 rounded-sm font-bold tracking-wide hover:bg-pink-700 transition shadow-lg">SHOP COLLECTION</button>
             </div>
           </Link>
-
-          {/* Secondary Hero 1 */}
           <Link href="/search?occasion=wedding" className="relative group overflow-hidden rounded-2xl md:col-span-1 md:row-span-2 shadow-sm">
-             <img
-              src="https://images.unsplash.com/photo-1705351509028-7dac9460039f?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="Wedding"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
+             <img src="https://images.unsplash.com/photo-1705351509028-7dac9460039f?q=80&w=1171&auto=format&fit=crop" alt="Wedding" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition" />
              <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6">
-                <h3 className="text-3xl font-serif mb-2 drop-shadow-md">Bridal Trousseau</h3>
-                <p className="text-sm font-medium mb-6 drop-shadow-md bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">Starting @ ₹4,999</p>
-                <span className="border-b-2 border-white pb-1 font-bold uppercase text-xs tracking-widest hover:text-pink-200 hover:border-pink-200 transition">Explore Now</span>
+                <h3 className="text-3xl font-serif mb-2">Bridal Trousseau</h3>
+                <span className="border-b-2 border-white pb-1 font-bold uppercase text-xs tracking-widest">Explore Now</span>
              </div>
           </Link>
-
-          {/* Secondary Hero 2 (Split) */}
           <div className="md:col-span-1 md:row-span-2 flex flex-col gap-4">
              <Link href="/search?category=cotton-sarees" className="flex-1 relative group overflow-hidden rounded-2xl shadow-sm">
-                <img
-                  src="https://images.unsplash.com/photo-1580250569064-b2ac463aa820?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  alt="Cotton"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                <img src="https://images.unsplash.com/photo-1580250569064-b2ac463aa820?q=80&w=2072&auto=format&fit=crop" alt="Cotton" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
-                   <h4 className="font-bold text-xl mb-1">Summer Cottons</h4>
-                   <span className="text-xs bg-white/20 backdrop-blur-md px-2 py-1 rounded">Under ₹1,499</span>
-                </div>
+                <div className="absolute bottom-6 left-6 text-white"><h4 className="font-bold text-xl">Summer Cottons</h4></div>
              </Link>
-             <Link href="/search?sort=price_asc" className="flex-1 relative group overflow-hidden rounded-2xl bg-[#2a2a72] flex items-center justify-center shadow-sm">
-                <div className="text-center text-white p-6 relative z-10">
-                   <p className="text-[10px] uppercase tracking-[0.2em] text-yellow-300 mb-2 font-bold">Flash Sale</p>
-                   <h3 className="text-4xl font-black mb-1 italic">FLAT 50%</h3>
-                   <p className="text-sm text-indigo-100">On Banarasi Silk</p>
-                </div>
-                {/* Decorative Circle */}
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-pink-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition duration-700"></div>
+             <Link href="/search?sort=price_asc" className="flex-1 relative group overflow-hidden rounded-2xl bg-[#2a2a72] flex items-center justify-center shadow-sm text-center text-white p-6">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-yellow-300 mb-2 font-bold">Flash Sale</p>
+                <h3 className="text-4xl font-black italic">FLAT 50%</h3>
              </Link>
           </div>
         </div>
       </section>
 
-      {/* 4. Trust Signals */}
-      <section className="bg-white py-10 border-y border-gray-100 mb-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { icon: Truck, title: "Free Shipping", desc: "On all orders > ₹1999" },
-              { icon: Shield, title: "Secure Payment", desc: "100% secure transactions" },
-              { icon: Award, title: "Authentic Products", desc: "Sourced directly from weavers" },
-              { icon: Zap, title: "Fast Delivery", desc: "Dispatched within 24 hours" },
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition cursor-default">
-                <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center text-pink-600 shrink-0">
-                  <item.icon className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-gray-900 mb-0.5">{item.title}</h4>
-                  <p className="text-xs text-gray-500">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Trending / Deal of the Day */}
+      {/* 5. Deal of the Day (Fixed 0 Stock Logic) */}
       <section className="container mx-auto px-4 py-8">
         <div className="flex items-end justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-1 h-6 bg-pink-600 rounded-sm"></span>
-              <h3 className="text-pink-600 font-bold uppercase tracking-wider text-sm">Don&apos;t Miss Out</h3>
-            </div>
-            <h2 className="text-3xl font-serif text-gray-900">Deal of the Day</h2>
-          </div>
-          <Link href="/search" className="group flex items-center gap-1 text-sm font-semibold text-gray-900 hover:text-pink-600 transition">
-            View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
+          <h2 className="text-3xl font-serif text-gray-900">Deal of the Day</h2>
+          <Link href="/search" className="text-sm font-semibold text-gray-900 hover:text-pink-600 transition">View All <ArrowRight className="inline w-4 h-4 ml-1" /></Link>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {products.slice(0, 6).map((product) => (
-            <Link key={product.id} href={`/product/${product.slug}`} className="group block h-full">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-3 shadow-sm group-hover:shadow-md transition">
-                <img
-                  src={product.image_url || "/placeholder.svg"}
-                  alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Discount Badge */}
-                <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wide rounded-sm shadow-sm">
-                   {Math.round(((product.price * 1.2 - product.price) / (product.price * 1.2)) * 100)}% OFF
+          {products.slice(0, 6).map((product) => {
+            const meta = getProductMeta(product)
+            return (
+              <Link key={product.id} href={`/product/${product.slug}`} className="group block h-full">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-3 shadow-sm group-hover:shadow-md transition">
+                  <img src={product.image_url || "/placeholder.svg"} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  
+                  {/* Stock Label Overlay */}
+                  {meta.isOutOfStock && (
+                    <div className="absolute inset-0 bg-white/40 flex items-center justify-center">
+                        <span className="bg-black text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest rounded-full">Sold Out</span>
+                    </div>
+                  )}
+
+                  {meta.discountPercent > 0 && (
+                    <div className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 uppercase rounded-sm">
+                      {meta.discountPercent}% OFF
+                    </div>
+                  )}
                 </div>
-                {/* Wishlist Button */}
-                <button className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-600 hover:text-red-500 hover:bg-white transition opacity-0 group-hover:opacity-100">
-                  <Heart className="w-4 h-4" />
-                </button>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-900 truncate group-hover:text-pink-600 transition">{product.title}</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-base font-bold text-gray-900">₹{product.price.toLocaleString("en-IN")}</span>
-                  <span className="text-xs text-gray-500 line-through">₹{Math.round(product.price * 1.2).toLocaleString("en-IN")}</span>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-900 truncate group-hover:text-pink-600 transition">{product.title}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-base font-bold text-gray-900">{formatCurrency(product.price)}</span>
+                    <span className="text-xs text-gray-500 line-through">{formatCurrency(meta.mrp)}</span>
+                  </div>
+                  
+                  {!meta.isOutOfStock && (
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3 overflow-hidden">
+                       <div className={`h-full rounded-full ${meta.isLowStock ? 'bg-red-500' : 'bg-orange-500'}`} style={{ width: `${meta.stockProgress}%` }}></div>
+                    </div>
+                  )}
+
+                  <p className={`text-[10px] mt-1 font-medium ${meta.isOutOfStock ? 'text-gray-400' : meta.isLowStock ? 'text-red-600 animate-pulse' : 'text-gray-500'}`}>
+                    {meta.isOutOfStock 
+                        ? 'Back in stock soon' 
+                        : meta.isLowStock 
+                            ? `Hurry! Only ${meta.stock} left` 
+                            : `Selling Fast! ${meta.stock} items left`}
+                  </p>
                 </div>
-                {/* Stock Bar */}
-                <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3 overflow-hidden">
-                   <div className="bg-orange-500 h-full w-[70%] rounded-full"></div>
-                </div>
-                <p className="text-[10px] text-gray-500 mt-1 font-medium">Selling Fast! 12 left</p>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            )
+          })}
         </div>
       </section>
 
-      {/* 6. Shop By Occasion (Grid) */}
+      {/* 6. Shop By Occasion */}
       <section className="bg-[#fff5f5] py-16 my-12">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -302,113 +270,123 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. New Arrivals / Top Picks */}
-      <section className="container mx-auto px-4 py-8 mb-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-serif text-gray-900">Curated For You</h2>
-            <p className="text-gray-500 mt-2">Handpicked selections based on latest trends.</p>
-          </div>
-          <Link href="/search" className="group flex items-center gap-1 text-sm font-semibold text-gray-900 hover:text-pink-600 transition">
-            View All Products <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </Link>
-        </div>
+   
 
+      {/* 7. Curated For You */}
+      <section className="container mx-auto px-4 py-8 mb-16">
+        <h2 className="text-3xl font-serif text-gray-900 mb-8">Curated For You</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
-          {products.slice(6, 14).map((product) => (
-            <Link key={product.id} href={`/product/${product.slug}`} className="group block">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm group-hover:shadow-md transition">
-                <img
-                  src={product.image_url || "/placeholder.svg"}
-                  alt={product.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                {/* Quick Action Overlay */}
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition duration-300">
-                    <button className="w-full bg-white text-gray-900 py-3 text-xs font-bold shadow-lg rounded hover:bg-gray-50 flex items-center justify-center gap-2 uppercase tracking-wide">
-                      <ShoppingBag className="w-4 h-4" /> Add to Cart
-                    </button>
+          {products.slice(6, 14).map((product) => {
+             const meta = getProductMeta(product)
+             const prod = product as any
+             
+             return (
+              <Link key={product.id} href={`/product/${product.slug}`} className="group block">
+                <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-gray-100 mb-4 shadow-sm group-hover:shadow-md transition">
+                  <img src={product.image_url || "/placeholder.svg"} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  
+                  {/* Action Button - Shows "Sold Out" if stock is 0 */}
+                  <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition duration-300">
+                      {meta.isOutOfStock ? (
+                        <div className="w-full bg-gray-200 text-gray-400 py-3 text-xs font-bold shadow-lg rounded flex items-center justify-center gap-2 uppercase tracking-wide cursor-not-allowed">
+                          Sold Out
+                        </div>
+                      ) : (
+                        <button className="w-full bg-white text-gray-900 py-3 text-xs font-bold shadow-lg rounded hover:bg-gray-50 flex items-center justify-center gap-2 uppercase tracking-wide">
+                          <ShoppingBag className="w-4 h-4" /> Add to Cart
+                        </button>
+                      )}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="space-y-1 px-1">
-                 <h3 className="text-base font-medium text-gray-900 line-clamp-1 group-hover:text-pink-600 transition">{product.title}</h3>
-                 <p className="text-xs text-gray-500">{product.attributes?.fabric || "Premium Fabric"} • {product.attributes?.weave || "Handloom"}</p>
-                 <div className="flex items-center gap-3 pt-1">
-                    <span className="text-lg font-bold text-gray-900">₹{product.price.toLocaleString("en-IN")}</span>
-                    {product.price > 1000 && (
-                      <span className="text-sm text-gray-400 line-through">₹{(product.price + 1500).toLocaleString("en-IN")}</span>
-                    )}
-                 </div>
-              </div>
-            </Link>
-          ))}
+                
+                <div className="space-y-1 px-1">
+                   <h3 className="text-base font-medium text-gray-900 line-clamp-1 group-hover:text-pink-600 transition">{product.title}</h3>
+                   <p className="text-xs text-gray-500">{prod.attributes?.fabric || "Premium Fabric"} • {prod.attributes?.weave || "Handloom"}</p>
+                   <div className="flex items-center gap-3 pt-1">
+                      <span className="text-lg font-bold text-gray-900">{formatCurrency(product.price)}</span>
+                      <span className="text-sm text-gray-400 line-through">{formatCurrency(meta.mrp)}</span>
+                   </div>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </section>
-
-      {/* 9. Brand Story / Footer */}
-      <footer className="bg-[#1a1a1a] text-gray-400 pt-20 pb-10">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            
-            {/* About */}
-            <div className="col-span-1 md:col-span-1">
-               <h3 className="text-white text-3xl font-serif mb-6 tracking-tight">Sabhyatam</h3>
-               <p className="text-sm leading-relaxed mb-8 text-gray-400">
-                 We are on a mission to revive the golden era of Indian Handlooms. Every saree in our collection tells a story of heritage, craftsmanship, and timeless beauty.
-               </p>
-               <div className="flex gap-4">
-                  {["facebook", "instagram", "twitter"].map(social => (
-                     <div key={social} className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition cursor-pointer">
-                        <span className="sr-only">{social}</span>
-                        <div className="w-4 h-4 bg-current rounded-full" />
-                     </div>
-                  ))}
-               </div>
-            </div>
-
-            {/* Links */}
-            <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Shop</h4>
-               <ul className="space-y-4 text-sm">
-                  <li><Link href="/search?category=silk-sarees" className="hover:text-white transition">Silk Sarees</Link></li>
-                  <li><Link href="/search?category=cotton-sarees" className="hover:text-white transition">Cotton Collection</Link></li>
-                  <li><Link href="/search?occasion=wedding" className="hover:text-white transition">Wedding Special</Link></li>
-                  <li><Link href="/search?sort=latest" className="hover:text-white transition">New Arrivals</Link></li>
-               </ul>
-            </div>
-
-            <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Support</h4>
-               <ul className="space-y-4 text-sm">
-                  <li><Link href="/track" className="hover:text-white transition">Track Order</Link></li>
-                  <li><Link href="/returns" className="hover:text-white transition">Returns & Exchange</Link></li>
-                  <li><Link href="/shipping" className="hover:text-white transition">Shipping Policy</Link></li>
-                  <li><Link href="/contact" className="hover:text-white transition">Contact Us</Link></li>
-               </ul>
-            </div>
-
-            {/* Newsletter */}
-            <div>
-               <h4 className="text-white font-bold uppercase tracking-wider text-xs mb-8">Stay Updated</h4>
-               <p className="text-sm mb-6 text-gray-400">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
-               <div className="flex">
-                  <input type="email" placeholder="Enter your email" className="bg-gray-800 border-none text-white px-4 py-3 w-full rounded-l-md focus:ring-1 focus:ring-pink-600 outline-none text-sm" />
-                  <button className="bg-pink-600 text-white px-6 rounded-r-md font-bold hover:bg-pink-700 transition text-sm tracking-wide">JOIN</button>
-               </div>
-            </div>
-
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-             <p>&copy; 2025 Sabhyatam Retail Pvt Ltd. All rights reserved.</p>
-             <div className="flex gap-6">
-                <span className="hover:text-gray-300 cursor-pointer transition">Privacy Policy</span>
-                <span className="hover:text-gray-300 cursor-pointer transition">Terms of Service</span>
-                <span className="hover:text-gray-300 cursor-pointer transition">Sitemap</span>
-             </div>
-          </div>
+   {/* --- NEW: THE SABHYATAM BENTO GRID --- */}
+      <section className="container mx-auto px-4 py-12 mb-16">
+        <div className="mb-10 text-center">
+            <span className="text-pink-600 font-bold tracking-widest text-xs uppercase flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4" /> Experience Luxury
+            </span>
+            <h2 className="text-3xl md:text-4xl font-serif text-gray-900 mt-2">The World of Sabhyatam</h2>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
+            {/* 1. Large Feature - Banarasi Edit */}
+            <Link href="/search?category=banarasi" className="md:col-span-2 md:row-span-2 relative group rounded-2xl overflow-hidden cursor-pointer shadow-sm">
+                <img 
+                    src="https://images.unsplash.com/photo-1545206085-d0e519bdcecd?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                    alt="Banarasi Weaves" 
+                    className="object-cover w-full h-full transition duration-700 group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
+                <div className="absolute bottom-0 left-0 p-8 text-white">
+                    <span className="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 uppercase tracking-wider mb-3 inline-block rounded-full">
+                        Signature Collection
+                    </span>
+                    <h3 className="text-3xl font-serif mb-2">The Banarasi Edit</h3>
+                    <p className="text-gray-300 text-sm max-w-sm leading-relaxed">
+                        Timeless weaves from the holy city of Varanasi. Pure silk meets intricate zari work in our most premium collection.
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-sm font-bold uppercase tracking-widest group-hover:gap-4 transition-all">
+                        Shop Now <ArrowRight className="w-4 h-4" />
+                    </div>
+                </div>
+            </Link>
+
+            {/* 2. Video Shopping Service */}
+            <div className="md:col-span-1 md:row-span-1 bg-[#2a2a2a] relative group rounded-2xl overflow-hidden p-6 flex flex-col justify-between text-white hover:bg-pink-900 transition duration-500 shadow-sm cursor-pointer">
+               <div className="flex justify-between items-start">
+                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                       <Video className="w-5 h-5 text-pink-400" />
+                   </div>
+                   <span className="text-[10px] font-bold bg-green-500 text-white px-2 py-0.5 rounded-full animate-pulse">LIVE</span>
+               </div>
+               <div>
+                   <h3 className="font-bold text-lg leading-tight mb-1">Video Shopping</h3>
+                   <p className="text-xs text-gray-400 mb-4">Book a slot with our stylists to view sarees in real-time.</p>
+                   <button className="text-xs font-bold uppercase border-b border-gray-600 pb-1 group-hover:border-white transition">Book Appointment</button>
+               </div>
+            </div>
+
+            {/* 3. Pure Zari / Texture Highlight */}
+             <div className="md:col-span-1 md:row-span-2 relative group rounded-2xl overflow-hidden shadow-sm cursor-default">
+                <img 
+                    src="https://images.unsplash.com/photo-1710440189404-e95fabead2a3?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                    alt="Zari Texture"
+                    className="object-cover w-full h-full transition duration-700 group-hover:scale-110" 
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition" />
+                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                    <div className="w-16 h-16 border border-white/50 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                        <PlayCircle className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-white font-serif text-xl">The Art of Zari</h3>
+                    <p className="text-white/80 text-xs mt-2">Watch how we weave magic</p>
+                 </div>
+             </div>
+
+            {/* 4. Trust/Certification */}
+            <div className="md:col-span-1 md:row-span-1 bg-pink-50 rounded-2xl p-6 flex flex-col justify-center items-center text-center group hover:bg-pink-100 transition shadow-sm cursor-pointer">
+                <Award className="w-12 h-12 text-pink-600 mb-3 group-hover:scale-110 transition" />
+                <h3 className="font-bold text-gray-900 text-lg">Silk Mark Certified</h3>
+                <p className="text-xs text-gray-600 mt-1 px-4">100% Authentic Handloom products sourced directly from weavers.</p>
+            </div>
+        </div>
+      </section>
+      <footer className="bg-[#1a1a1a] text-gray-400 pt-20 pb-10 text-center">
+         <p className="text-white text-2xl font-serif mb-4">Sabhyatam</p>
+         <p className="text-xs">&copy; 2025 Sabhyatam Retail Pvt Ltd. All rights reserved.</p>
       </footer>
     </div>
   )

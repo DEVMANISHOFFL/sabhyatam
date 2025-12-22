@@ -10,7 +10,10 @@ import {
   Menu, 
   Heart, 
   MapPin, 
-  LogOut 
+  LogOut,
+  Smartphone,
+  HelpCircle,
+  Package
 } from "lucide-react";
 
 import { useCartCount } from "@/lib/use-cart-count";
@@ -21,10 +24,8 @@ export default function Header() {
   const [showSearch, setShowSearch] = useState(false);
   const cartCount = useCartCount();
   
-  // Access auth state
   const { user, signOut } = useAuth();
 
-  // Determine if user is admin (matches logic in AdminLayout)
   const isAdmin = 
     user?.app_metadata?.role === "admin" || 
     user?.user_metadata?.role === "admin" || 
@@ -32,134 +33,132 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-        
-        {/* 1. Top Utility Bar */}
-        <div className="bg-[#0f172a] text-white transition-colors">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between py-2 text-[11px] md:text-xs tracking-wide font-medium">
-              <div className="flex items-center gap-4">
-                <Link href="/download" className="hover:text-pink-400 transition-colors flex items-center gap-1">
-                  <span>📱</span> <span className="hidden sm:inline">Download App</span>
-                </Link>
-                <span className="text-gray-600">|</span>
-                <div className="flex items-center gap-1 cursor-pointer hover:text-pink-400 transition-colors">
-                  <MapPin className="w-3 h-3" />
-                  <span>Deliver to: <span className="font-bold text-gray-200">492013</span></span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <Link href="/offers" className="hover:text-pink-400 transition-colors hidden md:block">Offers</Link>
-                <Link href="/track" className="hover:text-pink-400 transition-colors hidden md:block">Track Order</Link>
-                <Link href="/help" className="hover:text-pink-400 transition-colors">Help</Link>
-              </div>
+      {/* 1. Top Utility Bar - Sleek & Dark */}
+      <div className="bg-slate-950 text-slate-300 text-[10px] md:text-xs font-medium tracking-wide border-b border-slate-800">
+        <div className="container mx-auto px-4 py-2.5 flex justify-between items-center">
+          <div className="flex items-center gap-5">
+            <Link href="/download" className="group flex items-center gap-1.5 hover:text-white transition-colors">
+              <Smartphone className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-300" /> 
+              <span className="hidden sm:inline">Get App</span>
+            </Link>
+            <div className="hidden sm:block h-3 w-px bg-slate-700"></div>
+            <div className="hidden sm:flex items-center gap-1.5 hover:text-white cursor-pointer transition-colors group">
+              <MapPin className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-300" />
+              <span>Delivering to <span className="text-white font-semibold group-hover:underline decoration-rose-400/50 underline-offset-2">492013</span></span>
             </div>
           </div>
+          <div className="flex items-center gap-6">
+            <Link href="/track" className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <Package className="w-3.5 h-3.5" /> Track Order
+            </Link>
+            <Link href="/help" className="flex items-center gap-1.5 hover:text-white transition-colors">
+              <HelpCircle className="w-3.5 h-3.5" /> Help
+            </Link>
+          </div>
         </div>
+      </div>
 
-        {/* 2. Main Header */}
+      {/* 2. Main Header - Glassmorphism & Modern */}
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all">
         <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex items-center justify-between gap-4 md:gap-8">
+          <div className="flex items-center justify-between gap-4 lg:gap-8">
             
-            {/* Left: Logo + Menu */}
-            <div className="flex items-center gap-3 md:gap-6">
-              <button className="rounded p-2 hover:bg-gray-50 md:hidden" aria-label="Open menu">
-                <Menu className="h-6 w-6 text-gray-800" />
+            {/* LEFT: Menu & Branding */}
+            <div className="flex items-center gap-4">
+              <button className="p-2 -ml-2 rounded-full hover:bg-gray-100 md:hidden transition-colors" aria-label="Open menu">
+                <Menu className="h-6 w-6 text-gray-900" />
               </button>
 
-              <Link href="/" className="flex items-center gap-2 group">
-                <span className="text-2xl md:text-3xl font-serif font-bold text-gray-900 tracking-tight group-hover:text-pink-700 transition-colors">
+              <Link href="/" className="group flex flex-col justify-center">
+                {/* Modern "Cursive-like" Logo using Serif Italic */}
+                <h1 className="text-3xl md:text-4xl font-serif italic font-bold text-gray-900 tracking-tight leading-none group-hover:text-rose-700 transition-colors">
                   Sabhyatam
+                </h1>
+                <span className="text-[9px] uppercase tracking-[0.3em] text-gray-400 font-medium pl-1 group-hover:text-rose-900/60 transition-colors">
+                  The Saree Store
                 </span>
               </Link>
             </div>
 
-            {/* Center: Search Bar (Desktop Trigger) */}
-            <div className="hidden flex-1 max-w-xl md:block">
+            {/* CENTER: Refined Search Bar */}
+            <div className="hidden flex-1 max-w-lg lg:max-w-xl md:block">
               <div 
                 onClick={() => setShowSearch(true)} 
-                className="relative group cursor-text"
+                className="group relative w-full cursor-text"
               >
-                <div className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-4 text-sm text-gray-500 hover:border-pink-300 transition-colors">
-                  Search for sarees, weaves, brands...
+                <div className="flex items-center gap-3 w-full bg-gray-50 border border-gray-200 hover:border-rose-200 hover:bg-white rounded-full py-2.5 px-5 transition-all duration-200 shadow-sm hover:shadow-md">
+                  <Search className="h-4 w-4 text-gray-400 group-hover:text-rose-500 transition-colors" />
+                  <span className="text-sm text-gray-400 group-hover:text-gray-600 truncate font-medium">
+                    Search for Kanjivaram, Banarasi, Cotton...
+                  </span>
                 </div>
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 group-hover:text-pink-500 transition-colors" />
               </div>
             </div>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-1 md:gap-2">
+            {/* RIGHT: Modern Icon Actions */}
+            <div className="flex items-center gap-1 sm:gap-2">
               
-              {/* Mobile Search Trigger */}
+              {/* Mobile Search */}
               <button 
-                className="rounded-full p-2 text-gray-700 hover:bg-gray-100 md:hidden" 
+                className="p-2.5 rounded-full text-gray-700 hover:bg-gray-100 hover:text-rose-600 md:hidden transition-all" 
                 onClick={() => setShowSearch(true)}
               >
                 <Search className="h-5 w-5" />
               </button>
 
-              {/* DYNAMIC: Show Admin only if authorized */}
-              {isAdmin && (
-                <Link href="/admin/products" className="hidden md:block">
-                  <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span className="text-[10px] font-medium uppercase tracking-wide">Admin</span>
-                  </button>
-                </Link>
-              )}
-
-              {/* DYNAMIC: Profile & Logout vs Login */}
-              {user ? (
-                <>
-                  {/* Profile Link */}
-                  <Link href="/profile" className="hidden md:block">
-                    <button className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                      <User className="h-5 w-5" />
-                      <span className="text-[10px] font-medium uppercase tracking-wide">Profile</span>
-                    </button>
-                  </Link>
-
-                  {/* Logout Button */}
-                  <button 
-                    onClick={() => signOut()} 
-                    className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-red-600 transition"
-                  >
-                    <LogOut className="h-5 w-5" />
-                    <span className="text-[10px] font-medium uppercase tracking-wide">Logout</span>
-                  </button>
-                </>
-              ) : (
-                /* Login Link */
-                <Link href="/login">
-                  <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
-                    <User className="h-5 w-5" />
-                    <span className="text-[10px] font-medium uppercase tracking-wide">Login</span>
-                  </button>
-                </Link>
-              )}
-
-              <button className="hidden md:flex flex-col items-center gap-0.5 rounded-lg px-3 py-1 text-gray-700 hover:bg-gray-50 hover:text-pink-700 transition">
+              {/* Wishlist */}
+              <button className="hidden md:flex items-center justify-center p-2.5 rounded-full text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-all" title="Wishlist">
                 <Heart className="h-5 w-5" />
-                <span className="text-[10px] font-medium uppercase tracking-wide">Wishlist</span>
               </button>
 
-              <Link href="/cart" className="relative group ml-1 md:ml-2">
-                <button className="flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-white hover:bg-pink-700 transition-all shadow-md">
-                  <ShoppingCart className="h-4 w-4" />
-                  <span className="hidden md:inline text-sm font-bold">Cart</span>
-                  {cartCount > 0 && (
-                    <span className="absolute -right-1 -top-1 md:relative md:top-auto md:right-auto md:ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 md:bg-white md:text-pink-700 text-[10px] font-bold text-white shadow-sm">
-                      {cartCount}
-                    </span>
-                  )}
+              {/* User Account Dropdown */}
+              <div className="flex items-center">
+                {user ? (
+                  <div className="group relative">
+                    <button className="flex items-center justify-center p-2.5 rounded-full text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-all">
+                       <User className="h-5 w-5" />
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 top-full mt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                        <div className="bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden py-1">
+                           {isAdmin && (
+                              <Link href="/admin/products" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-rose-600">
+                                <LayoutDashboard className="h-4 w-4" /> Admin Panel
+                              </Link>
+                           )}
+                           <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-rose-600">
+                              <User className="h-4 w-4" /> Profile
+                           </Link>
+                           <button onClick={() => signOut()} className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                              <LogOut className="h-4 w-4" /> Logout
+                           </button>
+                        </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Link href="/login" className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-900 hover:text-rose-700 transition-colors">
+                    Login
+                  </Link>
+                )}
+              </div>
+
+              {/* Cart Button - Pill Style */}
+              <Link href="/cart" className="ml-2">
+                <button className="group relative flex items-center gap-2.5 bg-gray-900 hover:bg-rose-700 text-white pl-4 pr-5 py-2.5 rounded-full transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                  <ShoppingCart className="h-4 w-4 text-gray-200 group-hover:text-white" />
+                  <span className="hidden md:inline text-sm font-bold tracking-wide">Cart</span>
+                  <span className="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-white text-gray-900 text-[10px] font-bold px-1 group-hover:text-rose-700 transition-colors">
+                    {cartCount}
+                  </span>
                 </button>
               </Link>
+
             </div>
           </div>
         </div>
       </header>
       
-      {/* Search Overlay */}
       {showSearch && <SearchOverlay onClose={() => setShowSearch(false)} />}
     </>
   );

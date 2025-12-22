@@ -424,5 +424,3 @@ func (h *Handler) getProductBySlugHandler(w http.ResponseWriter, r *http.Request
 		"media":   media,
 	})
 }
-
-

@@ -3,9 +3,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase/client"; 
+
 
 interface AuthContextType {
   user: User | null;
+  // session: ""
   token: string | null;
   isLoading: boolean;
   signOut: () => Promise<void>;

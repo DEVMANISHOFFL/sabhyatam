@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation" // Added for redirection
+import ReviewsSection from "./reviews/ReviewSection"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { 
   Heart, 
@@ -15,15 +16,16 @@ import {
   MapPin,
   Tag,
   AlertCircle,
-  Zap
+  Zap,
 } from "lucide-react"
 
 // --- Auth & Cart Integration ---
-import { useAuth } from "@/app/context/auth-context" // Added
+import { useAuth } from "@/app/context/auth-context"
 import { addToCart } from "@/lib/cart"
 import { emitCartUpdated } from "@/lib/cart-events"
-import { fetchProducts } from "@/lib/api"
 import type { ProductCard } from "@/lib/types"
+import SimilarProducts from "./products/SimilarProducts"
+import { fetchRatingSummary, type RatingSummary } from "@/lib/api-reviews" // ✅ Import API
 
 // --- Types ---
 type MediaItem = {
@@ -55,20 +57,22 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
   if (!product) return null
 
   // --- Auth & Navigation ---
-  const { user } = useAuth() //
+  const { user } = useAuth()
   const router = useRouter()
 
   // --- State ---
   const [adding, setAdding] = useState(false)
   const [buyNowLoading, setBuyNowLoading] = useState(false)
   const [openSection, setOpenSection] = useState<string | null>("details")
-  const [similarProducts, setSimilarProducts] = useState<ProductCard[]>([])
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const [pincode, setPincode] = useState("")
   const [deliveryDate, setDeliveryDate] = useState<string | null>(null)
   
+  // ✅ New State for Real Ratings
+  const [stats, setStats] = useState<RatingSummary>({ average: 0, count: 0 })
+
   const imageContainerRef = useRef<HTMLDivElement>(null)
 
   // --- Data Normalization ---
@@ -95,6 +99,13 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
 
   const activeImage = sortedImages[activeImageIndex] || sortedImages[0]
 
+  // ✅ Fetch Real Rating Summary on Mount
+  useEffect(() => {
+    if (product.id) {
+      fetchRatingSummary(product.id).then(setStats)
+    }
+  }, [product.id])
+
   const formatINR = (amount: number) =>
     new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -102,28 +113,13 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
       maximumFractionDigits: 0,
     }).format(amount)
 
-  useEffect(() => {
-    if (!product?.id) return
-    const loadSimilar = async () => {
-      try {
-        const category = product.category || product.attributes?.category || "saree"
-        const res = await fetchProducts({ page: 1, limit: 5, category, sort: "latest" })
-        setSimilarProducts((res.items || []).filter(p => p.id !== product.id).slice(0, 4))
-      } catch (err) {
-        console.error("Failed to load similar products", err)
-      }
-    }
-    loadSimilar()
-  }, [product])
-
   // --- Authenticated Cart Handler ---
   async function handleAddToCart(isBuyNow = false) {
     if (!isInStock) return
 
-    // BUG FIX: Prevent non-logged in users from adding to cart
     if (!user) {
-      alert("Please log in to add items to your cart.")
-      router.push("/login") //
+      const confirmLogin = confirm("Please log in to add items to your cart.")
+      if(confirmLogin) router.push("/login")
       return
     }
 
@@ -168,7 +164,9 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
 
   return (
     <div className="min-h-screen bg-white text-gray-900 pb-20 lg:pb-0">
-      <div className="border-b border-gray-100">
+      
+      {/* 1. Breadcrumb Header */}
+      <div className="border-b border-gray-100 sticky top-0 bg-white/95 backdrop-blur z-30">
         <div className="mx-auto max-w-[1400px] px-4 md:px-6 py-3 text-xs text-gray-500 flex items-center gap-2">
            <Link href="/" className="hover:text-black">Home</Link>
            <span>/</span>
@@ -182,7 +180,10 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
 
       <div className="mx-auto max-w-[1400px] px-0 lg:px-6 py-0 lg:py-8">
         <div className="flex flex-col lg:flex-row gap-0 lg:gap-12 xl:gap-16">
+          
+          {/* 2. IMAGE GALLERY SECTION */}
           <div className="w-full lg:w-[55%] xl:w-[60%] flex flex-col-reverse lg:flex-row gap-4 select-none bg-white">
+            {/* Desktop Thumbnails */}
             <div className="hidden lg:flex flex-col gap-3 w-20 shrink-0 h-[600px] overflow-y-auto no-scrollbar py-1">
               {sortedImages.map((img, idx) => (
                 <button
@@ -200,6 +201,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
               ))}
             </div>
 
+            {/* Main Image with Zoom */}
             <div className="flex-1 relative bg-gray-50 lg:rounded-lg overflow-hidden aspect-[3/4] lg:h-[700px] group cursor-crosshair z-10">
                <div className="lg:hidden absolute bottom-4 right-4 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full z-20">
                   {activeImageIndex + 1} / {sortedImages.length}
@@ -241,6 +243,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
                </button>
             </div>
 
+            {/* Mobile Thumbnails */}
             <div className="lg:hidden flex gap-2 overflow-x-auto px-4 pb-4 snap-x">
                {sortedImages.map((img, idx) => (
                   <button
@@ -256,6 +259,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
             </div>
           </div>
 
+          {/* 3. PRODUCT DETAILS SECTION */}
           <div className="w-full lg:w-[45%] xl:w-[40%] px-4 lg:px-0 flex flex-col gap-6 lg:sticky lg:top-24 h-fit">
             <div>
               <p className="text-gray-500 text-xs font-bold tracking-widest uppercase mb-2">
@@ -265,11 +269,22 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
                 {product.title}
               </h1>
 
+              {/* ✅ UPDATED: Real Rating Stats */}
               <div className="flex items-center gap-2 mb-4">
-                 <div className="flex bg-green-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded items-center gap-1">
-                    4.2 <Star className="w-3 h-3 fill-current" />
-                 </div>
-                 <span className="text-xs text-gray-500 font-medium">1,240 Ratings & 85 Reviews</span>
+                 {stats.count > 0 ? (
+                    <>
+                        <div className="flex bg-green-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded items-center gap-1">
+                            {stats.average.toFixed(1)} <Star className="w-3 h-3 fill-current" />
+                        </div>
+                        <span className="text-xs text-gray-500 font-medium">
+                            {stats.count} Ratings
+                        </span>
+                    </>
+                 ) : (
+                    <span className="text-xs text-gray-400 font-medium bg-gray-100 px-2 py-1 rounded">
+                        No reviews yet
+                    </span>
+                 )}
               </div>
 
               <div className="flex items-center gap-3">
@@ -306,6 +321,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
                )}
             </div>
 
+            {/* Delivery Checker */}
             <div className="py-4 border-y border-gray-100">
                <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">Delivery</span>
@@ -334,7 +350,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
                )}
             </div>
 
-            {/* Actions: Re-routed to handleAddToCart with user check */}
+            {/* Desktop Actions */}
             <div className="hidden lg:grid grid-cols-2 gap-4">
               <button
                 onClick={() => handleAddToCart(false)}
@@ -367,6 +383,7 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
               </button>
             </div>
 
+            {/* Accordion Info */}
             <div className="space-y-4">
                <div className="border border-gray-200 rounded-lg p-4">
                   <p className="text-sm text-gray-700 leading-relaxed mb-4">
@@ -412,30 +429,22 @@ export default function ProductDetailPage({ product, media }: ProductDetailPageP
           </div>
         </div>
 
-        {similarProducts.length > 0 && (
-          <div className="mt-16 px-4 lg:px-0">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Similar Products</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-              {similarProducts.map((p) => (
-                <Link key={p.id} href={`/product/${p.slug}`} className="group block border border-transparent hover:border-gray-200 hover:shadow-lg rounded-lg p-2 transition">
-                  <div className="aspect-[3/4] overflow-hidden rounded bg-gray-100 mb-3 relative">
-                    <img
-                      src={p.image_url || "/placeholder.svg"}
-                      alt={p.title}
-                      className="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-                    />
-                  </div>
-                  <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{p.title}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                     <span className="text-sm font-bold text-gray-900">{formatINR(p.price)}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* 4. REVIEWS SECTION (Uses Real Data) */}
+        <ReviewsSection 
+               productId={product.id}
+        />
+
+        {/* 5. SIMILAR PRODUCTS SECTION */}
+        <div className="mt-16 px-4 lg:px-0">
+           <SimilarProducts 
+               currentProductId={product.id}
+               currentCategory={product.category || 'saree'}
+               currentPrice={product.price}
+           />
+        </div>
       </div>
 
+      {/* Mobile Sticky Bottom Bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 z-50 flex gap-2 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
          <button
             onClick={() => handleAddToCart(false)}
